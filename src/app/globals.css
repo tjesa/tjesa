@@ -1,0 +1,297 @@
+:root {
+  /* Tjesa Pharaonic Theme Colors */
+  --obsidian: #0D0D0B;
+  --obsidian-mid: #141311;
+  --obsidian-light: #1E1D19;
+  --obsidian-card: rgba(20, 19, 17, 0.75);
+  
+  --gold: #D4AF37;
+  --gold-glow: rgba(212, 175, 55, 0.45);
+  --gold-dim: #AA8928;
+  --gold-bright: #FFDF73;
+  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #AA8928 50%, #FFDF73 100%);
+  
+  --lapis: #0D2040;
+  --lapis-light: #1E468A;
+  --lapis-glow: rgba(30, 70, 138, 0.3);
+  
+  --sand: #E6C594;
+  --sand-dim: #C2A67D;
+  --sand-dark: #4A3E2D;
+  --sand-light: #F2E3C9;
+  
+  --scarab-red: #A82424;
+  --scarab-green: #2B7A4B;
+  
+  /* Layout and Typography */
+  --font-headings: var(--font-cinzel), 'Cinzel', 'Times New Roman', serif;
+  --font-body: var(--font-outfit), 'Outfit', 'Arial', sans-serif;
+  
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --glow-box: 0 0 15px var(--gold-glow);
+  --glow-box-intense: 0 0 25px rgba(212, 175, 55, 0.6);
+  --border-gold: 1px solid rgba(212, 175, 55, 0.2);
+  --border-gold-active: 1px solid rgba(212, 175, 55, 0.6);
+}
+
+/* Reset & Base Styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--obsidian);
+  color: var(--sand-light);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(30, 70, 138, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(20, 19, 17, 0.95) 0%, var(--obsidian) 100%);
+  background-attachment: fixed;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--obsidian);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sand-dark);
+  border-radius: 4px;
+  border: 2px solid var(--obsidian);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dim);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+p {
+  line-height: 1.6;
+  color: var(--sand-dim);
+  font-weight: 300;
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+a:hover {
+  color: var(--gold-bright);
+  text-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* Shared Premium Layout Styles */
+.hieroglyph-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.02;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 L60 30 L55 30 L55 70 L65 70 L65 75 L35 75 L35 70 L45 70 L45 30 L40 30 Z M50 15 A 10 10 0 0 1 50 35 A 10 10 0 0 1 50 15 Z' fill='%23D4AF37'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Ankh symbol watermarks & Egyptian Details */
+.ankh-symbol {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.kemet-card {
+  background: var(--obsidian-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--border-gold);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: var(--transition-smooth);
+}
+
+.kemet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--gold-gradient);
+  opacity: 0.8;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.kemet-card:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(212, 175, 55, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Golden buttons */
+.kemet-btn {
+  background: var(--gold-gradient);
+  color: var(--obsidian);
+  font-family: var(--font-headings);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  transition: var(--transition-smooth);
+}
+
+.kemet-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(212, 175, 55, 0.5),
+    0 0 15px var(--gold-bright);
+}
+
+.kemet-btn:active {
+  transform: translateY(1px);
+}
+
+.kemet-btn-secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  font-family: var(--font-headings);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 11px 27px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition-smooth);
+}
+
+.kemet-btn-secondary:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--gold-bright);
+  color: var(--gold-bright);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+}
+
+/* Form Elements */
+.kemet-input, .kemet-select {
+  width: 100%;
+  background: rgba(13, 13, 11, 0.7);
+  border: var(--border-gold);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--sand-light);
+  font-family: var(--font-body);
+  font-size: 16px;
+  transition: var(--transition-smooth);
+}
+
+.kemet-input:focus, .kemet-select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  background: var(--obsidian-mid);
+}
+
+.kemet-label {
+  display: block;
+  font-family: var(--font-headings);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--sand);
+  margin-bottom: 8px;
+}
+
+/* Animations */
+@keyframes goldenGlow {
+  0% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.2); }
+  50% { text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+  100% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.2); }
+}
+
+@keyframes eyePulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.3)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.7)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.3)); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-glow {
+  animation: goldenGlow 3s infinite ease-in-out;
+}
+
+.animate-eye {
+  animation: eyePulse 2.5s infinite ease-in-out;
+}
+
+/* Grid Layouts */
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
