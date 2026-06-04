@@ -1,0 +1,11 @@
+<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract knot/tie made of interlocking notion-style blocks -->
+  <rect x="4" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" stroke-width="1.5"/>
+  <rect x="28" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" stroke-width="1.5"/>
+  <rect x="4" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" stroke-width="1.5"/>
+  <rect x="28" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" stroke-width="1.5"/>
+  <!-- Center binding tie -->
+  <path d="M24 14 L28 14 M24 38 L28 38 M14 24 L14 28 M38 24 L38 28" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="26" cy="26" r="3" fill="#C9A84C"/>
+  <circle cx="26" cy="26" r="1.5" fill="#0A0A0B"/>
+</svg>

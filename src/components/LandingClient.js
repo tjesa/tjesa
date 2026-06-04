@@ -126,13 +126,15 @@ export default function LandingClient({ oauthUrl }) {
           onClick={handleLogoClick}
           style={{ display: 'inline-block', marginBottom: '16px', cursor: 'default' }}
         >
-          <svg width="64" height="64" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 0 12px var(--gold-glow))' }}>
-            <path 
-              d="M16 2 A 6 6 0 0 0 16 14 C 18 14 19 13 20 12 C 21 11 22 9 22 8 A 6 6 0 0 0 16 2 Z M16 4 A 4 4 0 0 1 16 12 A 4 4 0 0 1 16 4 Z" 
-              fill="var(--gold)" 
-            />
-            <path d="M16 14 L16 30 M8 20 L24 20" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
-            <circle cx="16" cy="20" r="2" fill="var(--obsidian)" />
+          {/* Logo SVG: Interlocking Notion-style blocks forming a tie/knot */}
+          <svg width="64" height="64" viewBox="0 0 52 52" fill="none" style={{ filter: 'drop-shadow(0 0 12px var(--gold-glow))' }}>
+            <rect x="4" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" strokeWidth="1.5" />
+            <rect x="28" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" strokeWidth="1.5" />
+            <rect x="4" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" strokeWidth="1.5" />
+            <rect x="28" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" strokeWidth="1.5" />
+            <path d="M24 14 L28 14 M24 38 L28 38 M14 24 L14 28 M38 24 L38 28" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="26" cy="26" r="3" fill="#C9A84C" />
+            <circle cx="26" cy="26" r="1.5" fill="#0A0A0B" />
           </svg>
         </div>
         

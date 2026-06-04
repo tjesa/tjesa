@@ -20,14 +20,15 @@ export default function Header({ account, onDisconnect }) {
       }}>
         {/* Logo */}
         <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-          {/* Logo SVG: Elegant Golden Pyramid + Ankh */}
-          <svg width="36" height="36" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 0 8px var(--gold-glow))' }}>
-            {/* Pyramid outline */}
-            <path d="M16 3 L29 25 L3 25 Z" stroke="var(--gold)" strokeWidth="2.5" strokeLinejoin="round" />
-            {/* Horizon sand line */}
-            <path d="M1 28 L31 28" stroke="var(--sand-dim)" strokeWidth="1" strokeLinecap="round" />
-            {/* Inner Ankh */}
-            <path d="M16 11 A 2.5 2.5 0 0 0 16 16 L16 21 M13 18 L19 18" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" />
+          {/* Logo SVG: Interlocking Notion-style blocks forming a tie/knot */}
+          <svg width="36" height="36" viewBox="0 0 52 52" fill="none" style={{ filter: 'drop-shadow(0 0 8px var(--gold-glow))' }}>
+            <rect x="4" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" strokeWidth="1.5" />
+            <rect x="28" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" strokeWidth="1.5" />
+            <rect x="4" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" strokeWidth="1.5" />
+            <rect x="28" y="28" width="20" height="20" rx="3" fill="none" stroke="#8C6E2E" strokeWidth="1.5" />
+            <path d="M24 14 L28 14 M24 38 L28 38 M14 24 L14 28 M38 24 L38 28" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="26" cy="26" r="3" fill="#C9A84C" />
+            <circle cx="26" cy="26" r="1.5" fill="#0A0A0B" />
           </svg>
           <div>
             <h1 style={{ fontSize: '20px', margin: 0, lineHeight: 1, letterSpacing: '0.15em' }}>TJESA</h1>

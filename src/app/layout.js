@@ -18,6 +18,9 @@ const outfit = Outfit({
 export const metadata = {
   title: "Tjesa | Notion-Integrated Suite",
   description: "Premium Notion productivity tools inspired by the golden era of Egypt, carved to perfection.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
