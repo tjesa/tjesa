@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { saveAccount } from '@/lib/db';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export async function GET(request, { params }) {
   const { tool } = await params;
@@ -87,6 +88,8 @@ export async function GET(request, { params }) {
       return NextResponse.redirect(new URL('/?error=token_exchange_failed', request.url));
     }
 
+    const user = await getCurrentUser();
+
     // Extract connected workspace details
     // We store with a tool-specific suffix so each integration has its own isolated token
     const account = {
@@ -97,6 +100,7 @@ export async function GET(request, { params }) {
       bot_id: tokenData.bot_id,
       owner: tokenData.owner,
       tool: tool,
+      user_id: user?.id || null,
       connected_at: new Date().toISOString(),
     };
 

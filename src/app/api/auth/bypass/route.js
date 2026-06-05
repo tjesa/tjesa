@@ -9,17 +9,25 @@ export async function POST(request) {
       message: 'Bypass login successful.'
     });
 
+    // Set the bypass active cookie
+    response.cookies.set('tjesa_bypass_active', 'true', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/'
+    });
+
     if (accounts && accounts.length > 0) {
-      // If there's an existing real account, bypass-login with it
+      // Find the first workspace account and associate it (normalize workspace_id)
       const account = accounts[0];
-      response.cookies.set('tjesa_workspace_id', account.workspace_id, {
+      const workspaceId = account.workspace_id.split('_')[0];
+      response.cookies.set('tjesa_workspace_id', workspaceId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: '/'
       });
     } else {
-      // If the database is empty, clear the session cookie
       response.cookies.delete('tjesa_workspace_id');
     }
 

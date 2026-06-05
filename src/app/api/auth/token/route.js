@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Client } from '@notionhq/client';
 import { saveAccount } from '@/lib/db';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export async function POST(request) {
   try {
@@ -20,6 +21,8 @@ export async function POST(request) {
     const workspaceName = botUser.bot?.workspace_name || botUser.name || 'Sacred Workspace';
     const workspaceId = botUser.id || 'token_' + Math.random().toString(36).substring(2, 9);
 
+    const user = await getCurrentUser();
+
     const account = {
       workspace_id: workspaceId,
       workspace_name: workspaceName,
@@ -27,6 +30,7 @@ export async function POST(request) {
       access_token: token,
       bot_id: botUser.id,
       owner: botUser.bot?.owner || { type: 'workspace', workspace: true },
+      user_id: user?.id || null,
       connected_at: new Date().toISOString(),
     };
 

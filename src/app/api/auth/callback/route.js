@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { saveAccount } from '@/lib/db';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -41,6 +42,8 @@ export async function GET(request) {
       return NextResponse.redirect(new URL('/?error=token_exchange_failed', request.url));
     }
 
+    const user = await getCurrentUser();
+
     // Extract connected workspace details
     const account = {
       workspace_id: tokenData.workspace_id,
@@ -49,6 +52,7 @@ export async function GET(request) {
       access_token: tokenData.access_token,
       bot_id: tokenData.bot_id,
       owner: tokenData.owner,
+      user_id: user?.id || null,
       connected_at: new Date().toISOString(),
     };
 

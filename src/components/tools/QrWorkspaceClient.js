@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from './Header';
-import GlowingCard from './GlowingCard';
-import EyeOfHorusLoader from './EyeOfHorusLoader';
-import CustomSelect from './CustomSelect';
+import Header from '../Header';
+import GlowingCard from '../GlowingCard';
+import EyeOfHorusLoader from '../EyeOfHorusLoader';
+import CustomSelect from '../CustomSelect';
+import { useToast } from '@/hooks/useToast';
 
-export default function DashboardClient({ account, initialConfigs, oauthUrl }) {
+export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [databases, setDatabases] = useState([]);
   const [configs, setConfigs] = useState(initialConfigs || []);
   const [editingDbId, setEditingDbId] = useState(null); // Database ID currently being edited/configured
@@ -195,15 +197,19 @@ export default function DashboardClient({ account, initialConfigs, oauthUrl }) {
           return [data.config, ...prev];
         });
 
+        showToast(`Carved ${data.stats.synced} QR glyph${data.stats.synced !== 1 ? 's' : ''} successfully`, 'success');
+
         // Close inline edit panel
         setEditingDbId(null);
       } else {
         setError(data.error || 'Failed to synchronize.');
         setLogs(prev => [...prev, `❌ Error: ${data.error}`]);
+        showToast(data.error || 'Sync failed. Check your configuration.', 'error');
       }
     } catch (err) {
       setError('A cosmic alignment error occurred while carving. Try again.');
       setLogs(prev => [...prev, `❌ Exception: Connection disrupted.`]);
+      showToast('Connection disrupted. Please try again.', 'error');
       console.error(err);
     } finally {
       setIsSyncing(false);
@@ -213,13 +219,26 @@ export default function DashboardClient({ account, initialConfigs, oauthUrl }) {
   // 4. Handle Disconnect / Logout
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=qr', { method: 'POST' });
       if (response.ok) {
+        showToast('Notion connection severed', 'info');
         router.push('/');
+      } else {
+        showToast('Failed to disconnect. Try again.', 'error');
       }
     } catch (err) {
+      showToast('Network error during disconnect.', 'error');
       console.error(err);
     }
+  };
+
+  // 5. Copy public link to clipboard
+  const handleCopyLink = (url) => {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied to clipboard', 'success', 2500);
+    }).catch(() => {
+      showToast('Failed to copy link', 'error');
+    });
   };
 
   return (

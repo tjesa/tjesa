@@ -1,31 +1,68 @@
 import { NextResponse } from 'next/server';
-import { getAccount } from '@/lib/db';
+import { getAccount, getAccountsForUser } from '@/lib/db';
 import { pollAndSync } from '@/lib/poller';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export async function GET(request) {
   // Fire background poll & sync loop (non-blocking)
   pollAndSync().catch(err => console.error('[Tjesa Poller Trigger Error]:', err));
 
-  const workspaceId = request.cookies.get('tjesa_workspace_id')?.value;
+  const user = await getCurrentUser();
 
+  if (!user) {
+    return NextResponse.json({ authenticated: false, connected: false });
+  }
+
+  // Get workspace cookie
+  let workspaceId = request.cookies.get('tjesa_workspace_id')?.value;
+
+  const userAccounts = await getAccountsForUser(user.id);
+
+  // If cookie not set, try to get the first account connected for this user
   if (!workspaceId) {
-    return NextResponse.json({ connected: false });
+    if (userAccounts && userAccounts.length > 0) {
+      // Find one that doesn't have a tool suffix (the main connection)
+      const mainAccount = userAccounts.find(a => !a.tool) || userAccounts[0];
+      // Normalize workspace ID (remove tool suffix if present)
+      workspaceId = mainAccount.workspace_id.split('_')[0];
+    }
   }
 
-  const account = await getAccount(workspaceId);
-
-  if (!account) {
-    return NextResponse.json({ connected: false });
+  let account = null;
+  if (workspaceId) {
+    account = await getAccount(workspaceId);
   }
 
-  // Send public details to client (omit secret access token)
-  const clientAccount = {
-    workspace_id: account.workspace_id,
-    workspace_name: account.workspace_name,
-    workspace_icon: account.workspace_icon,
-    connected_at: account.connected_at,
-    connected: true
+  const responseData = {
+    authenticated: true,
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+    connected: !!account,
+    accounts: userAccounts || [],
   };
 
-  return NextResponse.json(clientAccount);
+  if (account) {
+    responseData.account = {
+      workspace_id: account.workspace_id,
+      workspace_name: account.workspace_name,
+      workspace_icon: account.workspace_icon,
+      connected_at: account.connected_at,
+    };
+  }
+
+  const response = NextResponse.json(responseData);
+
+  // Auto-set workspace cookie if we resolved a workspace but the cookie was missing
+  if (workspaceId && !request.cookies.get('tjesa_workspace_id')?.value) {
+    response.cookies.set('tjesa_workspace_id', workspaceId, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+  }
+
+  return response;
 }

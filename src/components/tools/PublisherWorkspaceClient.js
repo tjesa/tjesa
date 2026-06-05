@@ -282,7 +282,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=publisher', { method: 'POST' });
       if (response.ok) {
         router.push('/');
       }

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getWaitlist } from '@/lib/db';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export async function GET(request) {
-  // Verify active dashboard workspace session
-  const workspaceId = request.cookies.get('tjesa_workspace_id')?.value;
+  const user = await getCurrentUser();
 
-  if (!workspaceId) {
-    return NextResponse.json({ error: 'Unauthorized: Admin portal closed' }, { status: 401 });
+  if (!user || !(user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com'))) {
+    return NextResponse.json({ error: 'Unauthorized: Admin portal closed' }, { status: 403 });
   }
 
   try {

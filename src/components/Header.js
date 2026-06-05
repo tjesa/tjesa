@@ -1,7 +1,36 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Header({ account, onDisconnect }) {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => console.error('[Header] Fetch user error:', err));
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('/api/auth/signout', { method: 'POST' });
+      if (response.ok) {
+        router.push('/login');
+        router.refresh();
+      }
+    } catch (err) {
+      console.error('[Header] SignOut error:', err);
+    }
+  };
+
   return (
     <header style={{
       borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
@@ -19,7 +48,7 @@ export default function Header({ account, onDisconnect }) {
         alignItems: 'center'
       }}>
         {/* Logo */}
-        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+        <Link href="/dashboard" className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
           {/* Logo SVG: Interlocking Notion-style blocks forming a tie/knot */}
           <svg width="36" height="36" viewBox="0 0 52 52" fill="none" style={{ filter: 'drop-shadow(0 0 8px var(--gold-glow))' }}>
             <rect x="4" y="4" width="20" height="20" rx="3" fill="none" stroke="#C9A84C" strokeWidth="1.5" />
@@ -40,6 +69,37 @@ export default function Header({ account, onDisconnect }) {
 
         {/* Navigation & Connection Info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {/* User Session Details */}
+          {user && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              borderRight: '1px solid rgba(212, 175, 55, 0.15)',
+              paddingRight: '16px'
+            }}>
+              <span style={{ fontSize: '12px', color: 'var(--sand-dim)' }}>
+                {user.email}
+              </span>
+              {user && (user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com')) && (
+                <Link
+                  href="/dashboard/admin"
+                  className="kemet-btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: '10px', textDecoration: 'none', color: 'var(--gold)', borderColor: 'rgba(212, 175, 55, 0.3)', height: 'auto', minHeight: 'unset', display: 'inline-flex', alignItems: 'center' }}
+                >
+                  Waitlist Ledger
+                </Link>
+              )}
+              <button 
+                onClick={handleSignOut}
+                className="kemet-btn-secondary" 
+                style={{ padding: '4px 10px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', height: 'auto', minHeight: 'unset' }}
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+
           {account ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{ textAlign: 'right' }}>
@@ -59,20 +119,6 @@ export default function Header({ account, onDisconnect }) {
                   {account.workspace_name || 'Notion Workspace'}
                 </span>
               </div>
-              <Link
-                href="/dashboard/admin"
-                className="kemet-btn-secondary"
-                style={{ padding: '6px 14px', fontSize: '11px', textDecoration: 'none', color: 'var(--gold)', borderColor: 'rgba(212, 175, 55, 0.3)' }}
-              >
-                Waitlist Ledger
-              </Link>
-              <button 
-                onClick={onDisconnect}
-                className="kemet-btn-secondary" 
-                style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
-              >
-                Sever Connection
-              </button>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

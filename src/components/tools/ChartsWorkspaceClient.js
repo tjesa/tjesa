@@ -7,9 +7,11 @@ import GlowingCard from '../GlowingCard';
 import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
 import EgyptChart from './EgyptChart';
+import { useToast } from '@/hooks/useToast';
 
 export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [databases, setDatabases] = useState([]);
   const [configs, setConfigs] = useState(initialConfigs || []);
   
@@ -208,7 +210,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMsg('✨ Chart configuration saved successfully!');
+        showToast('Chart configuration saved successfully', 'success');
         
         // Refresh configs list
         setConfigs(prev => {
@@ -221,15 +223,15 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
           return [data.config, ...prev];
         });
 
-        // Close config panel after 1.2s
-        setTimeout(() => {
-          setEditingDbId(null);
-        }, 1200);
+        // Close config panel
+        setEditingDbId(null);
       } else {
         setError(data.error || 'Failed to save chart configuration.');
+        showToast(data.error || 'Failed to save chart configuration.', 'error');
       }
     } catch (err) {
       setError('Connection error. Failed to save chart settings.');
+      showToast('Connection error. Failed to save chart settings.', 'error');
       console.error(err);
     } finally {
       setIsSaving(false);
@@ -241,19 +243,20 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
     if (!configToDelete) return;
     
     setError('');
-    setSuccessMsg('');
     
     try {
       const res = await fetch(`/api/configs?id=${configToDelete.id}`, { method: 'DELETE' });
       if (res.ok) {
         setConfigs(prev => prev.filter(c => c.id !== configToDelete.id));
-        setSuccessMsg('✨ Observatory configurations dissolved successfully.');
+        showToast('Observatory configuration dissolved', 'success');
       } else {
         const data = await res.json();
         setError(data.error || 'Failed to delete configuration.');
+        showToast(data.error || 'Failed to delete configuration.', 'error');
       }
     } catch (err) {
       setError('Connection disrupted. Failed to sever configuration.');
+      showToast('Connection disrupted. Failed to sever configuration.', 'error');
       console.error(err);
     } finally {
       setDeleteConfirmOpen(false);
@@ -263,13 +266,25 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=charts', { method: 'POST' });
       if (response.ok) {
+        showToast('Notion connection severed', 'info');
         router.push('/');
+      } else {
+        showToast('Failed to disconnect. Try again.', 'error');
       }
     } catch (err) {
+      showToast('Network error during disconnect.', 'error');
       console.error(err);
     }
+  };
+
+  const handleCopyLink = (url) => {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Chart link copied to clipboard', 'success', 2500);
+    }).catch(() => {
+      showToast('Failed to copy link', 'error');
+    });
   };
 
   const getPublicUrl = (id) => {

@@ -1,7 +1,7 @@
 import { Cinzel, Outfit } from "next/font/google";
 import "./globals.css";
 import "../lib/poller";
-
+import { ToastProvider } from "@/components/ToastProvider";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -26,7 +26,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${cinzel.variable} ${outfit.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </body>
     </html>
   );
 }

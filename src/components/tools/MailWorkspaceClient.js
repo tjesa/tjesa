@@ -331,7 +331,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=mail', { method: 'POST' });
       if (response.ok) {
         router.push('/');
       }

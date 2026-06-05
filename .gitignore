@@ -43,3 +43,5 @@ next-env.d.ts
 # local database
 db.json
 
+# scratch scripts
+scratch/

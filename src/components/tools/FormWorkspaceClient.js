@@ -6,9 +6,11 @@ import Header from '../Header';
 import GlowingCard from '../GlowingCard';
 import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
+import { useToast } from '@/hooks/useToast';
 
 export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [databases, setDatabases] = useState([]);
   const [configs, setConfigs] = useState(initialConfigs || []);
   
@@ -174,7 +176,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMsg('✨ Form configuration saved successfully!');
+        showToast('Form configuration saved successfully', 'success');
         
         // Refresh configs list
         setConfigs(prev => {
@@ -187,15 +189,14 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
           return [data.config, ...prev];
         });
 
-        // Close config panel after 1 second
-        setTimeout(() => {
-          setEditingDbId(null);
-        }, 1200);
+        setEditingDbId(null);
       } else {
         setError(data.error || 'Failed to save form configuration.');
+        showToast(data.error || 'Failed to save form configuration.', 'error');
       }
     } catch (err) {
       setError('Connection error. Failed to save form settings.');
+      showToast('Connection error. Failed to save form settings.', 'error');
       console.error(err);
     } finally {
       setIsSaving(false);
@@ -204,13 +205,25 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=forms', { method: 'POST' });
       if (response.ok) {
+        showToast('Notion connection severed', 'info');
         router.push('/');
+      } else {
+        showToast('Failed to disconnect. Try again.', 'error');
       }
     } catch (err) {
+      showToast('Network error during disconnect.', 'error');
       console.error(err);
     }
+  };
+
+  const handleCopyLink = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied to clipboard', 'success', 2500);
+    }).catch(() => {
+      showToast('Failed to copy. Please copy manually.', 'error');
+    });
   };
 
   const getPublicUrl = (id) => {

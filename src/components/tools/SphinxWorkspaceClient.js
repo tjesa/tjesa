@@ -113,7 +113,7 @@ export default function SphinxWorkspaceClient({ account, initialConfigs, oauthUr
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=sphinx', { method: 'POST' });
       if (response.ok) {
         router.push('/');
       }

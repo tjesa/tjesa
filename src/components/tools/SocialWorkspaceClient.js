@@ -308,7 +308,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=social', { method: 'POST' });
       if (response.ok) {
         router.push('/');
       }

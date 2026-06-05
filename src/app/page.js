@@ -1,17 +1,12 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import LandingClient from '@/components/LandingClient';
-import { getAccount } from '@/lib/db';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 export default async function LandingPage() {
-  const cookieStore = await cookies();
-  const workspaceId = cookieStore.get('tjesa_workspace_id')?.value;
+  const user = await getCurrentUser();
 
-  if (workspaceId) {
-    const account = await getAccount(workspaceId);
-    if (account) {
-      redirect('/dashboard');
-    }
+  if (user) {
+    redirect('/dashboard');
   }
 
   const clientId = process.env.NOTION_CLIENT_ID;

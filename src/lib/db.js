@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
+import fs from 'fs';
+import path from 'path';
 
 // ---------------------------------------------------------------------------
 // Supabase client (server-side only)
@@ -9,6 +12,36 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 );
+
+const DB_FILE = path.join(process.cwd(), 'db.json');
+
+function readLocalDb() {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    }
+  } catch (err) {
+    console.error('[db] Error reading local db:', err);
+  }
+  return { accounts: [], configs: [], waitlist: [] };
+}
+
+function writeLocalDb(data) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('[db] Error writing local db:', err);
+  }
+}
+
+async function isBypassActive() {
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get('tjesa_bypass_active')?.value === 'true';
+  } catch {
+    return false;
+  }
+}
 
 function migrateConfig(cfg) {
   if (cfg && !cfg.tool) {
@@ -36,28 +69,97 @@ function migrateConfig(cfg) {
  * Get all accounts
  */
 export async function getAccounts() {
+  const local = readLocalDb().accounts || [];
   const { data, error } = await supabase.from('accounts').select('*');
-  if (error) { console.error('[db] getAccounts error:', error); return []; }
-  return data || [];
+  if (error) { 
+    console.error('[db] getAccounts error:', error); 
+    return local; 
+  }
+  
+  // Merge by workspace_id
+  const merged = [...local];
+  (data || []).forEach(row => {
+    if (!merged.some(m => m.workspace_id === row.workspace_id)) {
+      merged.push(row);
+    }
+  });
+  return merged;
+}
+
+export async function getAccountsForUser(userId) {
+  const db = readLocalDb();
+  const local = (db.accounts || []).filter(a => a.user_id === userId);
+
+  if (userId === '00000000-0000-0000-0000-000000000000') {
+    return local;
+  }
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('user_id', userId);
+  if (error) { 
+    console.error('[db] getAccountsForUser error:', error); 
+    return local; 
+  }
+  
+  const merged = [...local];
+  (data || []).forEach(row => {
+    if (!merged.some(m => m.workspace_id === row.workspace_id)) {
+      merged.push(row);
+    }
+  });
+  return merged;
 }
 
 /**
  * Save or update an account (identified by workspace_id)
  */
 export async function saveAccount(account) {
-  const { data, error } = await supabase
-    .from('accounts')
-    .upsert(account, { onConflict: 'workspace_id' })
-    .select()
-    .single();
-  if (error) throw new Error('[db] saveAccount error: ' + error.message);
-  return data;
+  const bypass = account.user_id === '00000000-0000-0000-0000-000000000000' || await isBypassActive();
+  if (bypass) {
+    const db = readLocalDb();
+    db.accounts = db.accounts || [];
+    const index = db.accounts.findIndex(a => a.workspace_id === account.workspace_id);
+    if (index >= 0) {
+      db.accounts[index] = { ...db.accounts[index], ...account };
+    } else {
+      db.accounts.push(account);
+    }
+    writeLocalDb(db);
+    return account;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('accounts')
+      .upsert(account, { onConflict: 'workspace_id' })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('[db] saveAccount to Supabase failed, falling back to local db.json. Error:', err.message || err);
+    const db = readLocalDb();
+    db.accounts = db.accounts || [];
+    const index = db.accounts.findIndex(a => a.workspace_id === account.workspace_id);
+    if (index >= 0) {
+      db.accounts[index] = { ...db.accounts[index], ...account };
+    } else {
+      db.accounts.push(account);
+    }
+    writeLocalDb(db);
+    return account;
+  }
 }
 
 /**
  * Retrieve a specific account by workspace ID
  */
 export async function getAccount(workspaceId) {
+  // Check local db first (for bypass/dev accounts)
+  const local = (readLocalDb().accounts || []).find(a => a.workspace_id === workspaceId);
+  if (local) return local;
+
   const { data, error } = await supabase
     .from('accounts')
     .select('*')
@@ -71,12 +173,50 @@ export async function getAccount(workspaceId) {
  * Retrieve any account that matches or starts with the workspace ID
  */
 export async function getAnyAccountForWorkspace(workspaceId) {
+  const db = readLocalDb();
+  const local = (db.accounts || []).find(a => 
+    a.workspace_id === workspaceId || a.workspace_id.startsWith(workspaceId + '_')
+  );
+  if (local) return local;
+
   const { data, error } = await supabase
     .from('accounts')
     .select('*')
     .or(`workspace_id.eq.${workspaceId},workspace_id.like.${workspaceId}_%`);
   if (error) { console.error('[db] getAnyAccountForWorkspace error:', error); return null; }
   return data?.[0] || null;
+}
+
+/**
+ * Delete a specific account by workspace ID
+ */
+export async function deleteAccount(workspaceId) {
+  const db = readLocalDb();
+  db.accounts = (db.accounts || []).filter(a => a.workspace_id !== workspaceId);
+  writeLocalDb(db);
+
+  const { error } = await supabase
+    .from('accounts')
+    .delete()
+    .eq('workspace_id', workspaceId);
+  if (error) { console.error('[db] deleteAccount error:', error); throw new Error(error.message); }
+}
+
+/**
+ * Delete all accounts for a workspace (global disconnect)
+ */
+export async function deleteWorkspaceAccounts(workspaceId) {
+  const db = readLocalDb();
+  db.accounts = (db.accounts || []).filter(a => 
+    a.workspace_id !== workspaceId && !a.workspace_id.startsWith(workspaceId + '_')
+  );
+  writeLocalDb(db);
+
+  const { error } = await supabase
+    .from('accounts')
+    .delete()
+    .or(`workspace_id.eq.${workspaceId},workspace_id.like.${workspaceId}_%`);
+  if (error) { console.error('[db] deleteWorkspaceAccounts error:', error); throw new Error(error.message); }
 }
 
 // ---------------------------------------------------------------------------
@@ -87,45 +227,104 @@ export async function getAnyAccountForWorkspace(workspaceId) {
  * Get all configurations for a workspace
  */
 export async function getConfigs(workspaceId) {
+  const db = readLocalDb();
+  const local = (db.configs || []).filter(c => c.workspace_id === workspaceId).map(migrateConfig);
+
   const { data, error } = await supabase
     .from('configs')
     .select('*')
     .eq('workspace_id', workspaceId);
-  if (error) { console.error('[db] getConfigs error:', error); return []; }
-  return (data || []).map(migrateConfig);
+  if (error) { 
+    console.error('[db] getConfigs error:', error); 
+    return local; 
+  }
+  
+  const merged = [...local];
+  (data || []).map(migrateConfig).forEach(row => {
+    if (!merged.some(m => m.id === row.id)) {
+      merged.push(row);
+    }
+  });
+  return merged;
 }
 
 /**
  * Save or update a database synchronization config
  */
 export async function saveConfig(config) {
+  const bypass = await isBypassActive() || (readLocalDb().accounts || []).some(a => a.workspace_id.split('_')[0] === config.workspace_id.split('_')[0]);
+
   // Generate ID for new configs
   if (!config.id) {
-    // Check for existing config matching same database + workspace + tool
-    const { data: existing } = await supabase
-      .from('configs')
-      .select('id')
-      .eq('database_id', config.database_id)
-      .eq('workspace_id', config.workspace_id)
-      .eq('tool', config.tool)
-      .maybeSingle();
+    if (bypass) {
+      const db = readLocalDb();
+      const existing = (db.configs || []).find(c => 
+        c.database_id === config.database_id && 
+        c.workspace_id === config.workspace_id && 
+        c.tool === config.tool
+      );
+      config.id = existing?.id || Math.random().toString(36).substring(2, 9);
+    } else {
+      try {
+        const { data: existing } = await supabase
+          .from('configs')
+          .select('id')
+          .eq('database_id', config.database_id)
+          .eq('workspace_id', config.workspace_id)
+          .eq('tool', config.tool)
+          .maybeSingle();
 
-    config.id = existing?.id || Math.random().toString(36).substring(2, 9);
+        config.id = existing?.id || Math.random().toString(36).substring(2, 9);
+      } catch (err) {
+        config.id = Math.random().toString(36).substring(2, 9);
+      }
+    }
   }
 
-  const { data, error } = await supabase
-    .from('configs')
-    .upsert(config, { onConflict: 'id' })
-    .select()
-    .single();
-  if (error) throw new Error('[db] saveConfig error: ' + error.message);
-  return data;
+  if (bypass) {
+    const db = readLocalDb();
+    db.configs = db.configs || [];
+    const index = db.configs.findIndex(c => c.id === config.id);
+    if (index >= 0) {
+      db.configs[index] = { ...db.configs[index], ...config };
+    } else {
+      db.configs.push(config);
+    }
+    writeLocalDb(db);
+    return migrateConfig(config);
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('configs')
+      .upsert(config, { onConflict: 'id' })
+      .select()
+      .single();
+    if (error) throw error;
+    return migrateConfig(data);
+  } catch (err) {
+    console.warn('[db] saveConfig to Supabase failed, falling back to local db.json. Error:', err.message || err);
+    const db = readLocalDb();
+    db.configs = db.configs || [];
+    const index = db.configs.findIndex(c => c.id === config.id);
+    if (index >= 0) {
+      db.configs[index] = { ...db.configs[index], ...config };
+    } else {
+      db.configs.push(config);
+    }
+    writeLocalDb(db);
+    return migrateConfig(config);
+  }
 }
 
 /**
  * Delete a config
  */
 export async function deleteConfig(id) {
+  const db = readLocalDb();
+  db.configs = (db.configs || []).filter(c => c.id !== id);
+  writeLocalDb(db);
+
   const { error } = await supabase.from('configs').delete().eq('id', id);
   if (error) throw new Error('[db] deleteConfig error: ' + error.message);
 }
@@ -134,6 +333,10 @@ export async function deleteConfig(id) {
  * Retrieve a specific configuration by config ID
  */
 export async function getConfig(id) {
+  const db = readLocalDb();
+  const local = (db.configs || []).find(c => c.id === id);
+  if (local) return migrateConfig(local);
+
   const { data, error } = await supabase
     .from('configs')
     .select('*')
@@ -151,7 +354,19 @@ export async function getConfig(id) {
  * Save an email registration to the waitlist
  */
 export async function saveWaitlist(email) {
-  // Check for duplicates first
+  const bypass = await isBypassActive();
+  if (bypass) {
+    const db = readLocalDb();
+    db.waitlist = db.waitlist || [];
+    const existing = db.waitlist.find(w => w.email.toLowerCase() === email.trim().toLowerCase());
+    if (existing) throw new Error('Email already registered');
+    const entry = { id: Date.now(), email: email.trim(), registered_at: new Date().toISOString() };
+    db.waitlist.push(entry);
+    writeLocalDb(db);
+    return entry;
+  }
+
+  // Check for duplicates first in Supabase
   const { data: existing } = await supabase
     .from('waitlist')
     .select('id')
@@ -175,10 +390,18 @@ export async function saveWaitlist(email) {
  * Retrieve all emails registered in the waitlist
  */
 export async function getWaitlist() {
+  const local = readLocalDb().waitlist || [];
   const { data, error } = await supabase
     .from('waitlist')
     .select('*')
     .order('registered_at', { ascending: false });
-  if (error) { console.error('[db] getWaitlist error:', error); return []; }
-  return data || [];
+  if (error) { console.error('[db] getWaitlist error:', error); return local; }
+  
+  const merged = [...local];
+  (data || []).forEach(row => {
+    if (!merged.some(m => m.email.toLowerCase() === row.email.toLowerCase())) {
+      merged.push(row);
+    }
+  });
+  return merged;
 }

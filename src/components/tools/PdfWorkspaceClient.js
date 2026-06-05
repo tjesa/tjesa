@@ -226,7 +226,7 @@ export default function PdfWorkspaceClient({ account, initialConfigs, oauthUrl }
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch('/api/auth/disconnect', { method: 'POST' });
+      const response = await fetch('/api/auth/disconnect?tool=pdf', { method: 'POST' });
       if (response.ok) {
         router.push('/');
       }
