@@ -1,22 +1,21 @@
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import PublicFormClient from '@/components/tools/PublicFormClient';
+import PublicSiteClient from '@/components/tools/PublicSiteClient';
 import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
 import { validateGateSession } from '@/lib/gate';
 
-export default async function PublicFormPage({ params }) {
-  // Wait for dynamic params
+export default async function PublicSitePage({ params }) {
   const { id } = await params;
 
   if (!id) {
     notFound();
   }
 
-  // Retrieve form config
+  // Retrieve publisher config
   const config = await getConfig(id);
 
-  if (!config || !config.active || config.tool !== 'form_builder') {
+  if (!config || !config.active || config.tool !== 'papyrus_publisher') {
     return (
       <main style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D0B', color: '#F2E3C9', padding: '24px' }}>
         <div style={{
@@ -29,10 +28,10 @@ export default async function PublicFormPage({ params }) {
           boxShadow: '0 0 20px rgba(212, 175, 55, 0.1)'
         }}>
           <h1 style={{ fontFamily: 'Cinzel, Times New Roman, serif', color: '#D4AF37', fontSize: '24px', marginBottom: '16px' }}>
-            SCROLL NOT FOUND
+            PUBLICATION RETRACTED
           </h1>
           <p style={{ color: '#C2A67D', fontSize: '14px', lineHeight: 1.6 }}>
-            The Nile Scribe cannot locate this document scroll. It may have been retracted by the scribe or the sanctuary gate has closed.
+            This papyrus scroll is no longer broadcasted. It may have been dissolved by the architect or access permissions have expired.
           </p>
           <a 
             href="/" 
@@ -65,17 +64,15 @@ export default async function PublicFormPage({ params }) {
     if (!validateGateSession(sessionToken, config)) {
       return (
         <main style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D0B' }}>
-          <SphinxGateClient configId={id} gateType={config.settings.gate_type} siteTitle={config.settings.form_title || config.database_name} />
+          <SphinxGateClient configId={id} gateType={config.settings.gate_type} siteTitle={config.settings.site_title || config.database_name} />
         </main>
       );
     }
   }
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      {/* Hieroglyphic background watermark */}
-      <div className="hieroglyph-bg" />
-      <PublicFormClient config={config} />
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', backgroundColor: 'transparent' }}>
+      <PublicSiteClient configId={id} />
     </main>
   );
 }

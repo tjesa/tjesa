@@ -44,12 +44,12 @@ export default function DashboardHubClient({ account }) {
       name: 'The Aten Gazer',
       subtitle: 'DATABASE CHARTS & OBSERVATORIES',
       description: 'Visualize database properties, tasks progress, and financial values as sleek, interactive charts and dashboard observatories.',
-      status: 'locked',
-      badge: 'COMING SOON',
+      status: 'active',
+      badge: 'READY',
       actionText: 'Enter Observatory',
-      path: '#',
+      path: '/dashboard/tools/charts',
       icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--sand-dark)" strokeWidth="1.5">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <line x1="18" y1="20" x2="18" y2="10" />
           <line x1="12" y1="20" x2="12" y2="4" />
           <line x1="6" y1="20" x2="6" y2="14" />
@@ -72,6 +72,87 @@ export default function DashboardHubClient({ account }) {
           <line x1="16" y1="13" x2="8" y2="13" />
           <line x1="16" y1="17" x2="8" y2="17" />
           <polyline points="10 9 9 9 8 9" />
+        </svg>
+      )
+    },
+    {
+      id: 'publisher',
+      name: 'The Papyrus Publisher',
+      subtitle: 'NOTION CMS & BLOG GENERATOR',
+      description: 'Generate a public, themed blog or wiki dashboard directly from a Notion database. Write your articles in Notion, publish instantly.',
+      status: 'active',
+      badge: 'READY',
+      actionText: 'Enter Publisher Chambers',
+      path: '/dashboard/tools/publisher',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      )
+    },
+    {
+      id: 'sphinx',
+      name: 'The Sphinx Shield',
+      subtitle: 'PORTAL SECURITY & VAULT GATES',
+      description: 'Safeguard your public scrolls. Protect your generated sites, observatories, or Nile surveys with secure passwords and client gates.',
+      status: 'active',
+      badge: 'READY',
+      actionText: 'Enter Sphinx Chambers',
+      path: '/dashboard/tools/sphinx',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      )
+    },
+    {
+      id: 'pdf',
+      name: 'The Rosetta Press',
+      subtitle: 'PDF & DOCUMENT EXPORTER',
+      description: 'Convert Notion document pages into print-ready PDF scrolls. Choose visual templates, page margins, and download instantly.',
+      status: 'active',
+      badge: 'READY',
+      actionText: 'Enter Press Chambers',
+      path: '/dashboard/tools/pdf',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+      )
+    },
+    {
+      id: 'mail',
+      name: 'The Nile Dispatch',
+      subtitle: 'NOTION MAIL & EMAIL CAMPAIGNS',
+      description: 'Send bulk email newsletters and template campaigns directly to contact lists inside your Notion database scrolls. Map columns to variables and track delivery status.',
+      status: 'active',
+      badge: 'READY',
+      actionText: 'Enter Dispatch Chambers',
+      path: '/dashboard/tools/mail',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+      )
+    },
+    {
+      id: 'social',
+      name: 'The Royal Herald',
+      subtitle: 'AUTOMATIC SOCIAL MEDIA DISPATCHER',
+      description: 'Auto-publish database rows containing drafted captions and images directly to social channels. Configure custom webhooks and track publishing dates.',
+      status: 'active',
+      badge: 'READY',
+      actionText: 'Enter Herald Chambers',
+      path: '/dashboard/tools/social',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
+          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
         </svg>
       )
     }

@@ -59,6 +59,13 @@ export default function Header({ account, onDisconnect }) {
                   {account.workspace_name || 'Notion Workspace'}
                 </span>
               </div>
+              <Link
+                href="/dashboard/admin"
+                className="kemet-btn-secondary"
+                style={{ padding: '6px 14px', fontSize: '11px', textDecoration: 'none', color: 'var(--gold)', borderColor: 'rgba(212, 175, 55, 0.3)' }}
+              >
+                Waitlist Ledger
+              </Link>
               <button 
                 onClick={onDisconnect}
                 className="kemet-btn-secondary" 

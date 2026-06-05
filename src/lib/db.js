@@ -170,3 +170,15 @@ export async function saveWaitlist(email) {
   if (error) throw new Error('[db] saveWaitlist error: ' + error.message);
   return data;
 }
+
+/**
+ * Retrieve all emails registered in the waitlist
+ */
+export async function getWaitlist() {
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select('*')
+    .order('registered_at', { ascending: false });
+  if (error) { console.error('[db] getWaitlist error:', error); return []; }
+  return data || [];
+}

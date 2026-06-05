@@ -16,7 +16,10 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   const tool = searchParams.get('tool') || 'qr';
-  const account = await getAccount(`${workspaceId}_${tool}`);
+  let account = await getAccount(`${workspaceId}_${tool}`);
+  if (!account) {
+    account = await getAccount(workspaceId);
+  }
 
   if (!account || !account.access_token) {
     return NextResponse.json({ error: `Notion connection for ${tool} not found` }, { status: 404 });
@@ -35,6 +38,9 @@ export async function GET(request) {
       const fileColumns = [];
       const checkboxColumns = [];
       const selectColumns = [];
+
+      const numberColumns = [];
+      const dateColumns = [];
 
       // Categorize columns by their data types
       Object.keys(properties).forEach(key => {
@@ -55,6 +61,14 @@ export async function GET(request) {
         if (['select', 'status', 'multi_select'].includes(prop.type)) {
           selectColumns.push({ name: key, type: prop.type });
         }
+        // Numbers for aggregation
+        if (prop.type === 'number') {
+          numberColumns.push({ name: key, type: prop.type });
+        }
+        // Dates for groupings
+        if (prop.type === 'date') {
+          dateColumns.push({ name: key, type: prop.type });
+        }
       });
 
       return NextResponse.json({
@@ -63,7 +77,9 @@ export async function GET(request) {
         urlColumns,
         fileColumns,
         checkboxColumns,
-        selectColumns
+        selectColumns,
+        numberColumns,
+        dateColumns
       });
     } else {
       // Search all databases shared with the integration

@@ -29,6 +29,30 @@ export async function GET(request, { params }) {
     clientId = process.env.NOTION_FORMS_CLIENT_ID;
     clientSecret = process.env.NOTION_FORMS_CLIENT_SECRET;
     redirectUri = process.env.NOTION_FORMS_REDIRECT_URI;
+  } else if (tool === 'charts') {
+    clientId = process.env.NOTION_CHARTS_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_CHARTS_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_CHARTS_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/charts`;
+  } else if (tool === 'publisher') {
+    clientId = process.env.NOTION_PUBLISHER_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_PUBLISHER_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_PUBLISHER_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/publisher`;
+  } else if (tool === 'sphinx') {
+    clientId = process.env.NOTION_SPHINX_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_SPHINX_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_SPHINX_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/sphinx`;
+  } else if (tool === 'pdf') {
+    clientId = process.env.NOTION_PDF_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_PDF_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_PDF_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/pdf`;
+  } else if (tool === 'mail') {
+    clientId = process.env.NOTION_MAIL_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_MAIL_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_MAIL_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/mail`;
+  } else if (tool === 'social') {
+    clientId = process.env.NOTION_SOCIAL_CLIENT_ID || process.env.NOTION_CLIENT_ID;
+    clientSecret = process.env.NOTION_SOCIAL_CLIENT_SECRET || process.env.NOTION_CLIENT_SECRET;
+    redirectUri = process.env.NOTION_SOCIAL_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/social`;
   } else {
     // Fallback to general keys
     clientId = process.env.NOTION_CLIENT_ID;
@@ -80,11 +104,11 @@ export async function GET(request, { params }) {
     await saveAccount(account);
 
     // Redirect to the specific tool page after connection
-    const toolPath = tool === 'qr' ? '/dashboard/tools/qr' : tool === 'forms' ? '/dashboard/tools/forms' : '/dashboard';
+    const toolPath = tool === 'qr' ? '/dashboard/tools/qr' : tool === 'forms' ? '/dashboard/tools/forms' : tool === 'charts' ? '/dashboard/tools/charts' : tool === 'publisher' ? '/dashboard/tools/publisher' : tool === 'sphinx' ? '/dashboard/tools/sphinx' : tool === 'pdf' ? '/dashboard/tools/pdf' : tool === 'mail' ? '/dashboard/tools/mail' : tool === 'social' ? '/dashboard/tools/social' : '/dashboard';
     const response = NextResponse.redirect(new URL(toolPath, request.url));
     
     // Set secure cookie with the RAW Notion workspace ID (no tool suffix)
-    // The tool pages use: getAccount(`${workspaceId}_qr`) and getAccount(`${workspaceId}_forms`)
+    // The tool pages use: getAccount(`${workspaceId}_qr`), getAccount(`${workspaceId}_forms`), getAccount(`${workspaceId}_charts`), getAccount(`${workspaceId}_publisher`)
     response.cookies.set('tjesa_workspace_id', tokenData.workspace_id, {
       path: '/',
       httpOnly: true,
