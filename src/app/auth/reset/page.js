@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/useToast';
+import { Shield, AlertTriangle } from 'lucide-react';
 
 function TjesaLogo({ size = 48 }) {
   return (
@@ -264,7 +265,7 @@ export default function ResetPasswordPage() {
                 border: '1px solid rgba(212,175,55,0.08)',
                 borderRadius: '8px',
               }}>
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>🛡️</span>
+                <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0, color: 'var(--gold)' }}><Shield size={18} /></span>
                 <div>
                   <div style={{ fontSize: '12px', color: 'var(--sand)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', marginBottom: '2px' }}>Carve New Secret Key</div>
                   <div style={{ fontSize: '11px', color: 'var(--sand-dark)', lineHeight: 1.5 }}>Your identity has been verified by the sacred tokens. You may now overwrite your password below.</div>
@@ -329,7 +330,9 @@ export default function ResetPasswordPage() {
               ) : !hasSession ? (
                 /* ── No Active Recovery Session Error ──────────── */
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#FF7F7F' }}>
+                    <AlertTriangle size={48} />
+                  </div>
                   <h2 style={{
                     fontFamily: 'var(--font-headings)',
                     fontSize: '20px',
@@ -383,7 +386,7 @@ export default function ResetPasswordPage() {
                       alignItems: 'flex-start',
                       gap: '8px',
                     }}>
-                      <span style={{ flexShrink: 0 }}>⚠️</span>
+                      <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><AlertTriangle size={16} /></span>
                       <span>{error}</span>
                     </div>
                   )}

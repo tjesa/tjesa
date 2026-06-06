@@ -5,16 +5,47 @@ import { useRouter } from 'next/navigation';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 
+import { 
+  Scroll, 
+  QrCode, 
+  BarChart3, 
+  BookOpen, 
+  FileDown, 
+  Send, 
+  Megaphone, 
+  Shield, 
+  Zap, 
+  Lock, 
+  Globe, 
+  Palette,
+  Sparkles,
+  AlertCircle
+} from 'lucide-react';
+
+function InstrumentIcon({ id, size = 24 }) {
+  switch (id) {
+    case 'forms': return <Scroll size={size} />;
+    case 'qr': return <QrCode size={size} />;
+    case 'charts': return <BarChart3 size={size} />;
+    case 'publisher': return <BookOpen size={size} />;
+    case 'pdf': return <FileDown size={size} />;
+    case 'mail': return <Send size={size} />;
+    case 'social': return <Megaphone size={size} />;
+    case 'sphinx': return <Shield size={size} />;
+    default: return null;
+  }
+}
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const INSTRUMENTS = [
-  { id: 'forms', name: 'The Nile Scribe', subtitle: 'NOTION FORMS & SURVEYS', emoji: '📜', status: 'live', description: 'Configure public-facing themed survey forms that map directly to Notion columns. Replies instantly create new rows in your database.' },
-  { id: 'qr', name: 'The Glyph Carver', subtitle: 'QR CODE GENERATOR', emoji: '◫', status: 'live', description: 'Translate URLs in Notion columns into custom-colored, brandable QR Code images. Supports instant button triggers and automation.' },
-  { id: 'charts', name: 'The Aten Gazer', subtitle: 'CHARTS OBSERVATORY', emoji: '☀️', status: 'live', description: 'Transform dry Notion data columns into interactive charts — bar, pie, line — to track tasks, finances, or project progress.' },
-  { id: 'publisher', name: 'The Papyrus Publisher', subtitle: 'NOTION CMS & BLOGS', emoji: '📖', status: 'live', description: 'Publish blog posts and public-facing web pages directly from Notion database entries. Your CMS lives inside Notion.' },
-  { id: 'pdf', name: 'The Rosetta Press', subtitle: 'PDF & DOCUMENT EXPORTER', emoji: '🗒️', status: 'live', description: 'Export Notion pages and database records as beautifully formatted PDF documents with custom branding and layout options.' },
-  { id: 'mail', name: 'The Nile Dispatch', subtitle: 'EMAIL CAMPAIGNS', emoji: '✉️', status: 'coming-soon', description: 'Send branded email campaigns driven entirely by your Notion database. Write in Notion, dispatch to your subscribers.' },
-  { id: 'social', name: 'The Royal Herald', subtitle: 'SOCIAL AUTO-DISPATCH', emoji: '📣', status: 'coming-soon', description: 'Schedule and publish social posts automatically from Notion. One database, all your social channels synchronized.' },
-  { id: 'sphinx', name: 'The Sphinx Shield', subtitle: 'PORTAL SECURITY & VAULTS', emoji: '🏛️', status: 'live', description: 'Password-protect any public-facing TJESA output with a secure gate. Control who enters each portal you create.' },
+  { id: 'forms', name: 'The Nile Scribe', subtitle: 'NOTION FORMS & SURVEYS', status: 'live', description: 'Configure public-facing themed survey forms that map directly to Notion columns. Replies instantly create new rows in your database.' },
+  { id: 'qr', name: 'The Glyph Carver', subtitle: 'QR CODE GENERATOR', status: 'live', description: 'Translate URLs in Notion columns into custom-colored, brandable QR Code images. Supports instant button triggers and automation.' },
+  { id: 'charts', name: 'The Aten Gazer', subtitle: 'CHARTS OBSERVATORY', status: 'live', description: 'Transform dry Notion data columns into interactive charts — bar, pie, line — to track tasks, finances, or project progress.' },
+  { id: 'publisher', name: 'The Papyrus Publisher', subtitle: 'NOTION CMS & BLOGS', status: 'live', description: 'Publish blog posts and public-facing web pages directly from Notion database entries. Your CMS lives inside Notion.' },
+  { id: 'pdf', name: 'The Rosetta Press', subtitle: 'PDF & DOCUMENT EXPORTER', status: 'live', description: 'Export Notion pages and database records as beautifully formatted PDF documents with custom branding and layout options.' },
+  { id: 'mail', name: 'The Nile Dispatch', subtitle: 'EMAIL CAMPAIGNS', status: 'coming-soon', description: 'Send branded email campaigns driven entirely by your Notion database. Write in Notion, dispatch to your subscribers.' },
+  { id: 'social', name: 'The Royal Herald', subtitle: 'SOCIAL AUTO-DISPATCH', status: 'coming-soon', description: 'Schedule and publish social posts automatically from Notion. One database, all your social channels synchronized.' },
+  { id: 'sphinx', name: 'The Sphinx Shield', subtitle: 'PORTAL SECURITY & VAULTS', status: 'live', description: 'Password-protect any public-facing TJESA output with a secure gate. Control who enters each portal you create.' },
 ];
 
 const STEPS = [
@@ -515,9 +546,19 @@ export default function LandingClient({ oauthUrl }) {
           <div className="marquee-track">
             {[...Array(2)].map((_, gi) => (
               <div key={gi} style={{ display: 'flex', gap: '48px', paddingRight: '48px', flexShrink: 0, whiteSpace: 'nowrap', alignItems: 'center' }}>
-                {['📜 Notion Forms', '◫ QR Codes', '☀️ Live Charts', '📖 Blog CMS', '🗒️ PDF Export', '✉️ Email Campaigns', '📣 Social Dispatch', '🏛️ Portal Security'].map(item => (
-                  <span key={item} style={{ fontSize: '12px', fontFamily: 'var(--font-headings)', letterSpacing: '0.12em', color: 'var(--sand-dark)', textTransform: 'uppercase' }}>
-                    {item}
+                {[
+                  { id: 'forms', label: 'Notion Forms' },
+                  { id: 'qr', label: 'QR Codes' },
+                  { id: 'charts', label: 'Live Charts' },
+                  { id: 'publisher', label: 'Blog CMS' },
+                  { id: 'pdf', label: 'PDF Export' },
+                  { id: 'mail', label: 'Email Campaigns' },
+                  { id: 'social', label: 'Social Dispatch' },
+                  { id: 'sphinx', label: 'Portal Security' },
+                ].map(item => (
+                  <span key={item.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontFamily: 'var(--font-headings)', letterSpacing: '0.12em', color: 'var(--sand-dark)', textTransform: 'uppercase' }}>
+                    <span style={{ color: 'var(--gold)', display: 'inline-flex' }}><InstrumentIcon id={item.id} size={14} /></span>
+                    {item.label}
                   </span>
                 ))}
               </div>
@@ -542,7 +583,9 @@ export default function LandingClient({ oauthUrl }) {
               <GlowingCard key={inst.id} className="instrument-card" style={{ animationDelay: `${i * 0.06}s` }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                    <div className="instrument-emoji-wrap">{inst.emoji}</div>
+                    <div className="instrument-emoji-wrap" style={{ color: 'var(--gold)' }}>
+                      <InstrumentIcon id={inst.id} size={22} />
+                    </div>
                     <span className={inst.status === 'live' ? 'status-badge-live' : 'status-badge-coming'}>
                       <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: inst.status === 'live' ? '#34D399' : 'var(--gold-dim)', display: 'inline-block' }} />
                       {inst.status === 'live' ? 'Live' : 'Soon'}
@@ -621,13 +664,13 @@ export default function LandingClient({ oauthUrl }) {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {[
-                  { icon: '⚡', text: 'Real-time sync — no manual exports' },
-                  { icon: '🔒', text: 'Read-only access — your data never leaves Notion' },
-                  { icon: '🌍', text: 'Public URLs generated automatically' },
-                  { icon: '🎨', text: 'Egyptian-themed outputs, fully brandable' },
+                  { icon: <Zap size={18} />, text: 'Real-time sync — no manual exports' },
+                  { icon: <Lock size={18} />, text: 'Read-only access — your data never leaves Notion' },
+                  { icon: <Globe size={18} />, text: 'Public URLs generated automatically' },
+                  { icon: <Palette size={18} />, text: 'Egyptian-themed outputs, fully brandable' },
                 ].map(item => (
                   <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ display: 'inline-flex', color: 'var(--gold)', flexShrink: 0 }}>{item.icon}</span>
                     <span style={{ fontSize: '13px', color: 'var(--sand-dim)', fontFamily: 'var(--font-body)' }}>{item.text}</span>
                   </div>
                 ))}
@@ -840,7 +883,9 @@ export default function LandingClient({ oauthUrl }) {
 
               {waitlistSuccess ? (
                 <div style={{ animation: 'fadeSlideUp 0.4s ease both', padding: '16px 0' }}>
-                  <div style={{ fontSize: '44px', marginBottom: '18px' }}>✨</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--gold)', marginBottom: '18px' }}>
+                    <Sparkles size={44} />
+                  </div>
                   <h3 style={{ fontFamily: 'var(--font-headings)', color: 'var(--gold)', fontSize: '20px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>
                     Carved in the Cartouche
                   </h3>
@@ -861,12 +906,13 @@ export default function LandingClient({ oauthUrl }) {
                     </button>
                   </div>
                   {waitlistError && (
-                    <div style={{ padding: '10px 14px', background: 'rgba(168,36,36,0.08)', border: '1px solid rgba(168,36,36,0.4)', borderRadius: '6px', color: '#FF7F7F', fontSize: '12px', textAlign: 'left' }}>
-                      ⚠️ {waitlistError}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(168,36,36,0.08)', border: '1px solid rgba(168,36,36,0.4)', borderRadius: '6px', color: '#FF7F7F', fontSize: '12px', textAlign: 'left' }}>
+                      <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                      {waitlistError}
                     </div>
                   )}
-                  <p style={{ fontSize: '11px', color: 'var(--sand-dark)', margin: 0, fontFamily: 'var(--font-body)' }}>
-                    🔒 No spam. Unsubscribe anytime.
+                  <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: 'var(--sand-dark)', margin: 0, fontFamily: 'var(--font-body)' }}>
+                    <Lock size={12} /> No spam. Unsubscribe anytime.
                   </p>
                 </form>
               )}
@@ -943,9 +989,15 @@ export default function LandingClient({ oauthUrl }) {
             <span style={{ fontSize: '11px', color: 'var(--sand-dark)', fontFamily: 'var(--font-headings)', letterSpacing: '0.12em' }}>
               CARVED IN EGYPT · © 2026 TJESA SUITE · ALL RIGHTS RESERVED
             </span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {['◫', '☀️', '📜'].map(icon => (
-                <div key={icon} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid rgba(212,175,55,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', opacity: 0.6 }}>{icon}</div>
+            <div style={{ display: 'flex', gap: '6px', color: 'var(--gold)' }}>
+              {[
+                <QrCode size={14} key="qr" />,
+                <BarChart3 size={14} key="charts" />,
+                <Scroll size={14} key="forms" />
+              ].map((icon, idx) => (
+                <div key={idx} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.7 }}>
+                  {icon}
+                </div>
               ))}
             </div>
           </div>

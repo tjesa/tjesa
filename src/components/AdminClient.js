@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { AlertTriangle, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Header from './Header';
 import GlowingCard from './GlowingCard';
@@ -109,7 +110,10 @@ export default function AdminClient({ account }) {
             fontSize: '14px',
             marginBottom: '24px'
           }}>
-            ⚠️ {error}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={16} />
+              <span>{error}</span>
+            </div>
           </div>
         )}
 
@@ -152,7 +156,9 @@ export default function AdminClient({ account }) {
                   disabled={emails.length === 0}
                   style={{ padding: '10px 20px', fontSize: '12px', height: 'auto', minHeight: 'unset' }}
                 >
-                  📥 Export CSV
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Download size={14} /> Export CSV
+                  </span>
                 </button>
               </div>
             </div>

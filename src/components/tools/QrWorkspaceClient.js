@@ -7,6 +7,7 @@ import GlowingCard from '../GlowingCard';
 import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
 import { useToast } from '@/hooks/useToast';
+import { Link, Zap, Palette, Lightbulb, AlertTriangle, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
@@ -183,7 +184,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
           ...prev,
           `Query successful. Carved ${data.stats.synced} glyphs.`,
           `Skipped ${data.stats.skipped} unchanged rows.`,
-          data.stats.failed > 0 ? `⚠️ Encountered ${data.stats.failed} errors during sync.` : `✨ Sacred task completed successfully!`
+          data.stats.failed > 0 ? `[ERROR] Encountered ${data.stats.failed} errors during sync.` : `[SUCCESS] Sacred task completed successfully!`
         ]);
 
         // Refresh configs list
@@ -203,12 +204,12 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
         setEditingDbId(null);
       } else {
         setError(data.error || 'Failed to synchronize.');
-        setLogs(prev => [...prev, `❌ Error: ${data.error}`]);
+        setLogs(prev => [...prev, `[ERROR] Error: ${data.error}`]);
         showToast(data.error || 'Sync failed. Check your configuration.', 'error');
       }
     } catch (err) {
       setError('A cosmic alignment error occurred while carving. Try again.');
-      setLogs(prev => [...prev, `❌ Exception: Connection disrupted.`]);
+      setLogs(prev => [...prev, `[ERROR] Exception: Connection disrupted.`]);
       showToast('Connection disrupted. Please try again.', 'error');
       console.error(err);
     } finally {
@@ -260,8 +261,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
           </p>
           {oauthUrl && (
             <div style={{ marginTop: '12px' }}>
-              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 18px', fontSize: '12px' }}>
-                🔗 Connect Notion Database / Add Pages
+              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 18px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Link size={14} /> Connect Notion Database / Add Pages
               </a>
             </div>
           )}
@@ -307,8 +308,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
               No databases found. Make sure you have shared databases with the Tjesa connection in Notion!
             </p>
             {oauthUrl && (
-              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 20px', fontSize: '12px' }}>
-                🔗 Connect Notion Database
+              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 20px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Link size={14} /> Connect Notion Database
               </a>
             )}
           </div>
@@ -514,12 +515,65 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 borderRadius: '6px',
                                 fontSize: '12px',
                                 color: 'var(--sand-dim)',
-                                lineHeight: '1.4'
+                                lineHeight: '1.4',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px'
                               }}>
-                                <span style={{ color: 'var(--gold)', fontWeight: 'bold', display: 'block', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
-                                  ⚡ BUTTON WEBHOOK MODE ACTIVE
-                                </span>
-                                This mode stops background polling. QR codes will only be generated when a <strong>Notion Button</strong> sends a POST request to this configuration's unique webhook URL.
+                                <div>
+                                  <span style={{ color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
+                                    <Zap size={14} fill="currentColor" /> BUTTON WEBHOOK MODE ACTIVE
+                                  </span>
+                                  This mode stops background polling. QR codes will only be generated when a <strong>Notion Button</strong> sends a POST request to this configuration's unique webhook URL.
+                                </div>
+                                
+                                {config ? (
+                                  <div style={{ 
+                                    padding: '10px', 
+                                    background: 'rgba(13, 13, 11, 0.8)', 
+                                    borderRadius: '4px', 
+                                    border: '1px solid rgba(212, 175, 55, 0.1)'
+                                  }}>
+                                    <span style={{ color: 'var(--gold)', fontSize: '10px', display: 'block', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
+                                      WEBHOOK URL
+                                    </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <input 
+                                        readOnly 
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/tools/qr/webhook?config_id=${config.id}`}
+                                        style={{
+                                          flex: 1,
+                                          background: '#070706',
+                                          border: 'none',
+                                          color: 'var(--sand-dim)',
+                                          padding: '6px',
+                                          borderRadius: '4px',
+                                          fontFamily: 'monospace',
+                                          fontSize: '10px'
+                                        }}
+                                        onClick={(e) => e.target.select()}
+                                      />
+                                      <button 
+                                        type="button"
+                                        className="kemet-btn-secondary" 
+                                        style={{ padding: '4px 12px', fontSize: '10px', textTransform: 'uppercase' }}
+                                        onClick={(e) => {
+                                          const url = `${window.location.origin}/api/tools/qr/webhook?config_id=${config.id}`;
+                                          navigator.clipboard.writeText(url);
+                                          const btn = e.currentTarget;
+                                          btn.innerText = 'Copied!';
+                                          setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                                        }}
+                                      >
+                                        Copy
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: '10px', color: 'var(--sand-dark)', fontStyle: 'italic' }}>
+                                    Save settings first to generate your unique Webhook URL.
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -552,7 +606,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 textAlign: 'left'
                               }}
                             >
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>🎨 SACRED GLYPH STYLING</span>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Palette size={16} /> SACRED GLYPH STYLING</span>
                               <span>{isStylingOpen ? '▲' : '▼'}</span>
                             </button>
 
@@ -734,8 +788,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                     </div>
                   )}
 
-                  {/* Webhook copy block (Only visible for Webhook trigger type and when not editing) */}
-                  {config && config.settings?.trigger_type === 'webhook' && !isEditing && (
+                  {/* Webhook copy block (Visible for all active configurations when not editing) */}
+                  {config && !isEditing && (
                     <div style={{ 
                       marginTop: '16px', 
                       padding: '12px', 
@@ -778,8 +832,9 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                           Copy
                         </button>
                       </div>
-                      <p style={{ fontSize: '9px', marginTop: '6px', color: 'var(--sand-dark)', lineHeight: 1.3 }}>
-                        💡 In Notion, set a button to <strong>Send web request</strong> POST to this URL with JSON body: <code>{`{"page_id": "Page ID"}`}</code>
+                      <p style={{ fontSize: '9px', marginTop: '6px', color: 'var(--sand-dark)', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <Lightbulb size={12} style={{ flexShrink: 0, marginTop: '1px', color: 'var(--gold)' }} />
+                        <span><strong>For instant updates (No-Polling):</strong> In Notion, create a Database Automation (e.g. trigger when your checkbox changes) or a Button to send a <strong>web request POST</strong> to this URL. Notion will automatically populate the page ID in the request body.</span>
                       </p>
                     </div>
                   )}
@@ -817,16 +872,27 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                 gap: '6px',
                 color: '#C2A67D'
               }}>
-                {logs.map((log, i) => (
-                  <div key={i} style={{ 
-                    color: log.includes('❌') ? '#FF7F7F' : log.includes('✨') ? 'var(--gold)' : '#C2A67D'
-                  }}>
-                    {log}
-                  </div>
-                ))}
+                {logs.map((log, i) => {
+                  let isError = log.startsWith('[ERROR]');
+                  let isSuccess = log.startsWith('[SUCCESS]');
+                  let cleanLog = log.replace(/^\[ERROR\]\s*/, '').replace(/^\[SUCCESS\]\s*/, '');
+                  return (
+                    <div key={i} style={{ 
+                      color: isError ? '#FF7F7F' : isSuccess ? 'var(--gold)' : '#C2A67D',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      {isError && <AlertCircle size={12} />}
+                      {isSuccess && <Sparkles size={12} />}
+                      <span>{cleanLog}</span>
+                    </div>
+                  );
+                })}
                 {isSyncing && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold)' }}>
-                    <span>⚡ Communicating with Notion API...</span>
+                    <Zap size={12} style={{ animation: 'pulse 1.5s infinite' }} />
+                    <span>Communicating with Notion API...</span>
                   </div>
                 )}
               </div>

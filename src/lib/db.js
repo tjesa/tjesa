@@ -95,9 +95,9 @@ export async function getAccounts() {
     return local; 
   }
   
-  // Merge by workspace_id
-  const merged = [...local];
-  (data || []).forEach(row => {
+  // Merge by workspace_id, prioritizing Supabase data
+  const merged = [...(data || [])];
+  local.forEach(row => {
     if (!merged.some(m => m.workspace_id === row.workspace_id)) {
       merged.push(row);
     }
@@ -121,8 +121,8 @@ export async function getAccountsForUser(userId) {
     return local; 
   }
   
-  const merged = [...local];
-  (data || []).forEach(row => {
+  const merged = [...(data || [])];
+  local.forEach(row => {
     if (!merged.some(m => m.workspace_id === row.workspace_id)) {
       merged.push(row);
     }
@@ -258,8 +258,8 @@ export async function getConfigs(workspaceId) {
     return local; 
   }
   
-  const merged = [...local];
-  (data || []).map(migrateConfig).forEach(row => {
+  const merged = [...(data || []).map(migrateConfig)];
+  local.forEach(row => {
     if (!merged.some(m => m.id === row.id)) {
       merged.push(row);
     }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 export default function PublicFormClient({ config }) {
   const settings = config.settings || {};
@@ -192,9 +193,13 @@ export default function PublicFormClient({ config }) {
                 color: '#FF7F7F',
                 fontSize: '13px',
                 marginBottom: '20px',
-                lineHeight: 1.4
+                lineHeight: 1.4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
-                ⚠️ {error}
+                <AlertTriangle size={16} />
+                <span>{error}</span>
               </div>
             )}
 

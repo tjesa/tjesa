@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Zap } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -442,8 +443,8 @@ export default function DashboardLayout({ children }) {
               <div className="sidebar-user-info">
                 <span className="sidebar-user-email" title={user.email}>{user.email}</span>
                 {activeWorkspace ? (
-                  <span className="sidebar-workspace-status">
-                    ⚡ {activeWorkspace.workspace_name}
+                  <span className="sidebar-workspace-status" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Zap size={11} fill="currentColor" /> {activeWorkspace.workspace_name}
                   </span>
                 ) : (
                   <span className="sidebar-workspace-status" style={{ color: 'var(--sand-dim)' }}>

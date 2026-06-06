@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Zap, Lock, Palette, Globe, AlertTriangle, Scroll } from 'lucide-react';
 
 function TjesaLogo({ size = 48 }) {
   return (
@@ -239,10 +240,10 @@ export default function SignupPage() {
                 What awaits inside
               </p>
               {[
-                { icon: '⚡', title: 'Instant Setup', desc: 'Connect your Notion workspace and launch your first tool in under 5 minutes.' },
-                { icon: '🔒', title: 'Secure by Design', desc: 'OAuth-protected connections. Your Notion data never leaves your workspace.' },
-                { icon: '🎨', title: 'Full Customization', desc: 'Brand your forms, charts, and QR codes to match your style.' },
-                { icon: '🌍', title: 'Public Sharing', desc: 'Share any output via a permanent public link — no login required for viewers.' },
+                { icon: <Zap size={18} style={{ color: 'var(--gold)' }} />, title: 'Instant Setup', desc: 'Connect your Notion workspace and launch your first tool in under 5 minutes.' },
+                { icon: <Lock size={18} style={{ color: 'var(--gold)' }} />, title: 'Secure by Design', desc: 'OAuth-protected connections. Your Notion data never leaves your workspace.' },
+                { icon: <Palette size={18} style={{ color: 'var(--gold)' }} />, title: 'Full Customization', desc: 'Brand your forms, charts, and QR codes to match your style.' },
+                { icon: <Globe size={18} style={{ color: 'var(--gold)' }} />, title: 'Public Sharing', desc: 'Share any output via a permanent public link — no login required for viewers.' },
               ].map(item => (
                 <div key={item.title} style={{
                   display: 'flex',
@@ -252,8 +253,9 @@ export default function SignupPage() {
                   background: 'rgba(212,175,55,0.04)',
                   border: '1px solid rgba(212,175,55,0.08)',
                   borderRadius: '8px',
+                  alignItems: 'center'
                 }}>
-                  <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
                   <div>
                     <div style={{ fontSize: '12px', color: 'var(--sand)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', marginBottom: '2px' }}>{item.title}</div>
                     <div style={{ fontSize: '11px', color: 'var(--sand-dark)', lineHeight: 1.5 }}>{item.desc}</div>
@@ -311,7 +313,9 @@ export default function SignupPage() {
               {success ? (
                 /* ── Success State ────────────────────────────── */
                 <div style={{ textAlign: 'center', padding: '16px 0', animation: 'fadeSlideUp 0.4s ease both' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📜</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: 'var(--gold)' }}>
+                    <Scroll size={48} />
+                  </div>
                   <h2 style={{
                     fontFamily: 'var(--font-headings)',
                     fontSize: '22px',
@@ -370,7 +374,7 @@ export default function SignupPage() {
                       alignItems: 'flex-start',
                       gap: '8px',
                     }}>
-                      <span style={{ flexShrink: 0 }}>⚠️</span>
+                      <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><AlertTriangle size={16} /></span>
                       <span>{error}</span>
                     </div>
                   )}

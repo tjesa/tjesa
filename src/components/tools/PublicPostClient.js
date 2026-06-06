@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import EyeOfHorusLoader from '../EyeOfHorusLoader';
+import { AlertTriangle } from 'lucide-react';
 
 const themeStyles = {
   egyptian_dark: {
@@ -287,7 +288,9 @@ export default function PublicPostClient({ configId, postId }) {
           maxWidth: '450px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
         }}>
-          <div style={{ fontSize: '24px', marginBottom: '12px' }}>⚠️</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#FF7F7F' }}>
+            <AlertTriangle size={36} />
+          </div>
           <h3 style={{ fontFamily: 'var(--font-headings)', color: 'var(--gold)', textTransform: 'uppercase', margin: '0 0 8px 0', fontSize: '16px', letterSpacing: '0.05em' }}>
             Reading Chamber Fault
           </h3>

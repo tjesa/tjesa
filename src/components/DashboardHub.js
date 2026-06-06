@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from './Header';
 import GlowingCard from './GlowingCard';
+import { Zap } from 'lucide-react';
 
 export default function DashboardHub({ userAccounts = [], user, initialConfigs = [] }) {
   const router = useRouter();
@@ -255,8 +256,9 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
             }} />
           </div>
 
-          <div style={{ fontSize: '11px', color: 'var(--sand-dim)', display: 'flex', gap: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <span>⚡ Each tool connects to its own Notion Integration separately.</span>
+          <div style={{ fontSize: '11px', color: 'var(--sand-dim)', display: 'flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Zap size={12} fill="currentColor" style={{ color: 'var(--gold)' }} />
+            <span>Each tool connects to its own Notion Integration separately.</span>
           </div>
         </div>
 
@@ -331,8 +333,9 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                   paddingRight: '6px'
                 }}>
                   {recentSyncs.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--sand-dark)', fontSize: '13px' }}>
-                      ⚡ No entries carved yet. Sync an instrument database to trigger log recording.
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '32px 0', color: 'var(--sand-dark)', fontSize: '13px' }}>
+                      <Zap size={18} style={{ opacity: 0.5 }} />
+                      <span>No entries carved yet. Sync an instrument database to trigger log recording.</span>
                     </div>
                   ) : (
                     recentSyncs.map((cfg) => {
@@ -360,7 +363,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                               justifyContent: 'center',
                               color: 'var(--gold)'
                             }}>
-                              {inst ? React.cloneElement(inst.icon, { width: '16', height: '16' }) : '⚡'}
+                              {inst ? React.cloneElement(inst.icon, { width: '16', height: '16' }) : <Zap size={16} />}
                             </div>
                             <div style={{ minWidth: 0 }}>
                               <span style={{ fontSize: '12px', color: 'var(--sand-light)', fontWeight: 'bold', display: 'block', textTransform: 'uppercase', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -409,8 +412,9 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                   overflowY: 'auto'
                 }}>
                   {initialConfigs.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--sand-dark)', fontSize: '13px' }}>
-                      ⚡ No database routes mapped.
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '32px 0', color: 'var(--sand-dark)', fontSize: '13px' }}>
+                      <Zap size={18} style={{ opacity: 0.5 }} />
+                      <span>No database routes mapped.</span>
                     </div>
                   ) : (
                     initialConfigs.map((cfg) => {

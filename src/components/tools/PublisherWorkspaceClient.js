@@ -6,6 +6,7 @@ import Header from '../Header';
 import GlowingCard from '../GlowingCard';
 import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
+import { Sparkles } from 'lucide-react';
 
 export default function PublisherWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
@@ -214,7 +215,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMsg('✨ CMS site configuration saved successfully!');
+        setSuccessMsg('CMS site configuration saved successfully!');
         
         // Refresh configs list
         setConfigs(prev => {
@@ -255,7 +256,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
       const res = await fetch(`/api/configs?id=${configToDelete.id}`, { method: 'DELETE' });
       if (res.ok) {
         setConfigs(prev => prev.filter(c => c.id !== configToDelete.id));
-        setSuccessMsg('✨ Publisher configuration dissolved successfully.');
+        setSuccessMsg('Publisher configuration dissolved successfully.');
         if (activeConfigIdForPosts === configToDelete.id) {
           setPosts([]);
           setActiveConfigIdForPosts(null);
@@ -345,9 +346,13 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
             borderRadius: '8px',
             marginBottom: '24px',
             fontSize: '14px',
-            animation: 'fadeIn 0.3s ease'
+            animation: 'fadeIn 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            {successMsg}
+            <Sparkles size={16} />
+            <span>{successMsg}</span>
           </div>
         )}
 

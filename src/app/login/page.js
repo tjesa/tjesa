@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { QrCode, BarChart3, Scroll, BookOpen, AlertTriangle } from 'lucide-react';
 
 function TjesaLogo({ size = 48 }) {
   return (
@@ -208,10 +209,10 @@ export default function LoginPage() {
             {/* Feature pills */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {[
-                { icon: '◫', text: 'QR Codes from Notion databases' },
-                { icon: '☀️', text: 'Charts & data observatories' },
-                { icon: '📜', text: 'Public forms & surveys' },
-                { icon: '📖', text: 'CMS blogs & publications' },
+                { icon: <QrCode size={16} style={{ color: 'var(--gold)' }} />, text: 'QR Codes from Notion databases' },
+                { icon: <BarChart3 size={16} style={{ color: 'var(--gold)' }} />, text: 'Charts & data observatories' },
+                { icon: <Scroll size={16} style={{ color: 'var(--gold)' }} />, text: 'Public forms & surveys' },
+                { icon: <BookOpen size={16} style={{ color: 'var(--gold)' }} />, text: 'CMS blogs & publications' },
               ].map(feat => (
                 <div key={feat.text} style={{
                   display: 'flex',
@@ -223,7 +224,7 @@ export default function LoginPage() {
                   borderRadius: '8px',
                   textAlign: 'left',
                 }}>
-                  <span style={{ fontSize: '16px' }}>{feat.icon}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{feat.icon}</span>
                   <span style={{ fontSize: '12px', color: 'var(--sand-dim)', fontFamily: 'var(--font-body)' }}>{feat.text}</span>
                 </div>
               ))}
@@ -344,7 +345,7 @@ export default function LoginPage() {
                   alignItems: 'flex-start',
                   gap: '8px',
                 }}>
-                  <span style={{ flexShrink: 0 }}>⚠️</span>
+                  <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><AlertTriangle size={16} /></span>
                   <span>{error}</span>
                 </div>
               )}

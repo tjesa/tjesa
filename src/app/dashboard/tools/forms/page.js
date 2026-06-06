@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import FormWorkspaceClient from '@/components/tools/FormWorkspaceClient';
 import { getAccount, getConfigs } from '@/lib/db';
+import { Scroll } from 'lucide-react';
 
 export default async function FormsPage() {
   const cookieStore = await cookies();
@@ -39,10 +40,10 @@ export default async function FormsPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '36px',
+            color: 'var(--gold)',
             boxShadow: '0 0 30px rgba(212,175,55,0.1)'
           }}>
-            📋
+            <Scroll size={36} />
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '480px' }}>

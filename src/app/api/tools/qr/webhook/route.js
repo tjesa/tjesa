@@ -12,7 +12,7 @@ export async function POST(request) {
   if (!pageId) {
     try {
       const body = await request.json();
-      pageId = body.page_id || body.pageId || body.id;
+      pageId = body.page_id || body.pageId || body.id || body.entity?.id || body.data?.id;
     } catch (e) {
       // Body might be empty or not JSON
     }
@@ -55,6 +55,99 @@ export async function POST(request) {
     // 3. Fetch the specific page from Notion
     const page = await notion.pages.retrieve({ page_id: cleanPageId });
     
+    // --- TRIGGER EVALUATION ---
+    const triggerType = settings.trigger_type || 'full';
+    const triggerColumn = settings.trigger_column || '';
+    const triggerValue = settings.trigger_value || '';
+    
+    let conditionMet = true;
+    if (triggerType === 'checkbox') {
+      if (triggerColumn) {
+        const triggerProp = page.properties[triggerColumn];
+        if (!triggerProp || triggerProp.type !== 'checkbox' || !triggerProp.checkbox) {
+          conditionMet = false;
+        }
+      } else {
+        conditionMet = false;
+      }
+    } else if (triggerType === 'select') {
+      if (triggerColumn) {
+        const triggerProp = page.properties[triggerColumn];
+        if (triggerProp) {
+          let val = '';
+          if (triggerProp.type === 'select') {
+            val = triggerProp.select?.name || '';
+          } else if (triggerProp.type === 'status') {
+            val = triggerProp.status?.name || '';
+          } else if (triggerProp.type === 'multi_select') {
+            const names = triggerProp.multi_select?.map(x => x.name) || [];
+            if (names.includes(triggerValue)) {
+              val = triggerValue;
+            }
+          }
+          if (val !== triggerValue) {
+            conditionMet = false;
+          }
+        } else {
+          conditionMet = false;
+        }
+      } else {
+        conditionMet = false;
+      }
+    }
+
+    if (!conditionMet) {
+      // Clear the target column if trigger condition is not met
+      const targetPropDesc = page.properties[targetColumn];
+      if (targetPropDesc) {
+        let clearProperties = null;
+
+        if (targetPropDesc.type === 'files') {
+          if (targetPropDesc.files && targetPropDesc.files.length > 0) {
+            clearProperties = {
+              [targetColumn]: {
+                files: []
+              }
+            };
+          }
+        } else if (targetPropDesc.type === 'url') {
+          if (targetPropDesc.url) {
+            clearProperties = {
+              [targetColumn]: {
+                url: null
+              }
+            };
+          }
+        } else if (targetPropDesc.type === 'rich_text') {
+          if (targetPropDesc.rich_text && targetPropDesc.rich_text.length > 0) {
+            clearProperties = {
+              [targetColumn]: {
+                rich_text: []
+              }
+            };
+          }
+        }
+
+        if (clearProperties) {
+          await notion.pages.update({
+            page_id: cleanPageId,
+            properties: clearProperties
+          });
+        }
+      }
+
+      await saveConfig({
+        ...config,
+        last_sync: new Date().toISOString()
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Condition not met. Cleared target column for page ${cleanPageId}`
+      });
+    }
+    // --- END TRIGGER EVALUATION ---
+
     // 4. Extract URL from source column
     const sourceProp = page.properties[sourceColumn];
     let urlValue = '';

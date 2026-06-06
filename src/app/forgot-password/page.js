@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Key, Send, AlertTriangle } from 'lucide-react';
 
 function TjesaLogo({ size = 48 }) {
   return (
@@ -191,7 +192,7 @@ export default function ForgotPasswordPage() {
                 border: '1px solid rgba(212,175,55,0.08)',
                 borderRadius: '8px',
               }}>
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>🔑</span>
+                <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0, color: 'var(--gold)' }}><Key size={18} /></span>
                 <div>
                   <div style={{ fontSize: '12px', color: 'var(--sand)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', marginBottom: '2px' }}>Restore Key Access</div>
                   <div style={{ fontSize: '11px', color: 'var(--sand-dark)', lineHeight: 1.5 }}>Simply input your registered email address, and we will send you a link to reset your password.</div>
@@ -247,7 +248,9 @@ export default function ForgotPasswordPage() {
               {success ? (
                 /* ── Success State ────────────────────────────── */
                 <div style={{ textAlign: 'center', padding: '16px 0', animation: 'fadeSlideUp 0.4s ease both' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>✉️</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: 'var(--gold)' }}>
+                    <Send size={48} />
+                  </div>
                   <h2 style={{
                     fontFamily: 'var(--font-headings)',
                     fontSize: '22px',
@@ -303,7 +306,7 @@ export default function ForgotPasswordPage() {
                       alignItems: 'flex-start',
                       gap: '8px',
                     }}>
-                      <span style={{ flexShrink: 0 }}>⚠️</span>
+                      <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><AlertTriangle size={16} /></span>
                       <span>{error}</span>
                     </div>
                   )}

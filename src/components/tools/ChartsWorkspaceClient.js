@@ -8,6 +8,7 @@ import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
 import EgyptChart from './EgyptChart';
 import { useToast } from '@/hooks/useToast';
+import { Link, AlertTriangle } from 'lucide-react';
 
 export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
@@ -349,8 +350,8 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
           </p>
           {oauthUrl && (
             <div style={{ marginTop: '12px' }}>
-              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 18px', fontSize: '12px' }}>
-                🔗 Connect Notion Database / Add Pages
+              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 18px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Link size={14} /> Connect Notion Database / Add Pages
               </a>
             </div>
           )}
@@ -408,8 +409,8 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
               No databases found. Share databases with the Tjesa integration inside your Notion workspace!
             </p>
             {oauthUrl && (
-              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 20px', fontSize: '12px' }}>
-                🔗 Connect Notion Database
+              <a href={oauthUrl} className="kemet-btn" style={{ padding: '8px 20px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Link size={14} /> Connect Notion Database
               </a>
             )}
           </div>
@@ -513,7 +514,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                       }}>
                         <div>
                           <span style={{ color: 'var(--gold)', fontSize: '10px', display: 'block', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
-                            📜 PUBLIC CHART URL
+                            PUBLIC CHART URL
                           </span>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <input 
@@ -548,7 +549,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
 
                         <div>
                           <span style={{ color: 'var(--gold)', fontSize: '10px', display: 'block', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
-                            🌐 IFRAME EMBED CODE
+                            IFRAME EMBED CODE
                           </span>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <input 
@@ -745,7 +746,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                             textAlign: 'center',
                             gap: '12px'
                           }}>
-                            <span style={{ fontSize: '24px' }}>⚠️</span>
+                            <span style={{ color: '#FF7F7F' }}><AlertTriangle size={36} /></span>
                             <p style={{ fontSize: '13px', color: '#FF7F7F', margin: 0 }}>{previewError}</p>
                             <button className="kemet-btn-secondary" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={loadLivePreview}>
                               Retry Query
@@ -922,8 +923,8 @@ function ActiveChartLoader({ configId, settings }) {
 
   if (error) {
     return (
-      <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF7F7F', fontSize: '12px' }}>
-        ⚠️ Failed to display chart: {error}
+      <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF7F7F', fontSize: '12px', gap: '6px' }}>
+        <AlertTriangle size={14} /> Failed to display chart: {error}
       </div>
     );
   }

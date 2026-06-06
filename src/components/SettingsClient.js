@@ -3,6 +3,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
+import { 
+  QrCode, 
+  BarChart3, 
+  Scroll, 
+  BookOpen, 
+  FileDown, 
+  Send, 
+  Megaphone, 
+  Shield, 
+  Link, 
+  AlertTriangle 
+} from 'lucide-react';
+
+function ToolIcon({ id, size = 18 }) {
+  switch (id) {
+    case 'qr': return <QrCode size={size} style={{ color: 'var(--gold)' }} />;
+    case 'charts': return <BarChart3 size={size} style={{ color: 'var(--gold)' }} />;
+    case 'forms': return <Scroll size={size} style={{ color: 'var(--gold)' }} />;
+    case 'publisher': return <BookOpen size={size} style={{ color: 'var(--gold)' }} />;
+    case 'pdf': return <FileDown size={size} style={{ color: 'var(--gold)' }} />;
+    case 'mail': return <Send size={size} style={{ color: 'var(--gold)' }} />;
+    case 'social': return <Megaphone size={size} style={{ color: 'var(--gold)' }} />;
+    case 'sphinx': return <Shield size={size} style={{ color: 'var(--gold)' }} />;
+    default: return <Link size={size} style={{ color: 'var(--gold)' }} />;
+  }
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TABS = [
@@ -50,14 +76,14 @@ const TABS = [
 ];
 
 const TOOL_LABELS = {
-  qr: { name: 'Glyph Carver', subtitle: 'QR Code Generator', emoji: '◫' },
-  charts: { name: 'Aten Gazer', subtitle: 'Charts Observatory', emoji: '☀️' },
-  forms: { name: 'Nile Scribe', subtitle: 'Forms & Surveys', emoji: '📜' },
-  publisher: { name: 'Papyrus Publisher', subtitle: 'CMS & Blogs', emoji: '📖' },
-  pdf: { name: 'Rosetta Press', subtitle: 'PDF Exporter', emoji: '🗒️' },
-  mail: { name: 'Nile Dispatch', subtitle: 'Email Campaigns', emoji: '✉️' },
-  social: { name: 'Royal Herald', subtitle: 'Social Dispatch', emoji: '📣' },
-  sphinx: { name: 'Sphinx Shield', subtitle: 'Portal Security', emoji: '🏛️' },
+  qr: { name: 'Glyph Carver', subtitle: 'QR Code Generator' },
+  charts: { name: 'Aten Gazer', subtitle: 'Charts Observatory' },
+  forms: { name: 'Nile Scribe', subtitle: 'Forms & Surveys' },
+  publisher: { name: 'Papyrus Publisher', subtitle: 'CMS & Blogs' },
+  pdf: { name: 'Rosetta Press', subtitle: 'PDF Exporter' },
+  mail: { name: 'Nile Dispatch', subtitle: 'Email Campaigns' },
+  social: { name: 'Royal Herald', subtitle: 'Social Dispatch' },
+  sphinx: { name: 'Sphinx Shield', subtitle: 'Portal Security' },
 };
 
 const THEMES = [
@@ -441,7 +467,7 @@ export default function SettingsClient({ user }) {
           {/* Page header */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: 'var(--font-headings)', textTransform: 'uppercase', marginBottom: '6px' }}>
-              ⚙ Temple Config
+              Temple Config
             </div>
             <h1 style={{ fontSize: '20px', letterSpacing: '0.1em', margin: 0, color: 'var(--gold)' }}>
               Settings
@@ -608,7 +634,9 @@ export default function SettingsClient({ user }) {
                   </div>
                 ) : accounts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔗</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: 'var(--gold)' }}>
+                      <Link size={32} />
+                    </div>
                     <p style={{ fontSize: '13px', color: 'var(--sand-dark)', lineHeight: 1.6 }}>
                       No Notion connections found. Visit a tool page to connect your first workspace.
                     </p>
@@ -634,7 +662,7 @@ export default function SettingsClient({ user }) {
                   <>
                     {accounts.map(account => {
                       const tool = getToolFromWorkspace(account.workspace_id);
-                      const toolInfo = TOOL_LABELS[tool] || { name: 'Main Workspace', subtitle: 'General connection', emoji: '🔗' };
+                      const toolInfo = TOOL_LABELS[tool] || { name: 'Main Workspace', subtitle: 'General connection' };
                       const isDisconnecting = disconnecting === (tool || 'all');
 
                       return (
@@ -649,10 +677,9 @@ export default function SettingsClient({ user }) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '18px',
                             flexShrink: 0,
                           }}>
-                            {toolInfo.emoji}
+                            <ToolIcon id={tool} size={18} />
                           </div>
 
                           {/* Info */}
@@ -911,7 +938,7 @@ export default function SettingsClient({ user }) {
                   marginBottom: '16px',
                 }}>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+                    <span style={{ color: '#FF9F9F', display: 'flex', alignItems: 'center', flexShrink: 0 }}><AlertTriangle size={16} /></span>
                     <p style={{ fontSize: '12px', color: '#FF9F9F', lineHeight: 1.6, margin: 0 }}>
                       <strong>This action is irreversible.</strong> Your account, all Notion connections, and all tool configurations will be permanently deleted. This cannot be undone.
                     </p>
@@ -966,7 +993,9 @@ export default function SettingsClient({ user }) {
             <div style={{ height: '3px', background: 'linear-gradient(90deg, #A82424, rgba(168,36,36,0.2))' }} />
             <div style={{ padding: '28px 24px' }}>
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚠️</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: '#FF7F7F' }}>
+                  <AlertTriangle size={32} />
+                </div>
                 <h3 style={{ color: '#FF7F7F', fontFamily: 'var(--font-headings)', fontSize: '18px', letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
                   Confirm Deletion
                 </h3>
