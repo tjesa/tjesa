@@ -441,6 +441,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   position: relative;
+  margin-left: 280px;
 }
 
 /* Hide default sticky header on larger screens since sidebar handles all user action */
@@ -458,7 +459,10 @@ a:hover {
   border-right: var(--border-gold);
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
   z-index: 100;
   transition: var(--transition-smooth);
 }
@@ -688,6 +692,10 @@ a:hover {
     width: 80px;
   }
   
+  .dashboard-content {
+    margin-left: 80px;
+  }
+  
   .sidebar-logo-text {
     display: none !important;
   }
@@ -808,6 +816,7 @@ a:hover {
   
   /* Make sure container content accounts for top toggle on mobile */
   .dashboard-content {
+    margin-left: 0;
     padding-top: 15px;
   }
 
