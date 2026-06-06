@@ -8,15 +8,20 @@ import path from 'path';
 // All DB access happens in API routes / server components — never in the browser.
 // RLS must be DISABLED on accounts, configs, and waitlist tables.
 // ---------------------------------------------------------------------------
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  supabaseKey
 );
 
 const DB_FILE = path.join(process.cwd(), 'db.json');
+const TMP_DB_FILE = path.join('/tmp', 'db.json');
 
 function readLocalDb() {
   try {
+    if (fs.existsSync(TMP_DB_FILE)) {
+      return JSON.parse(fs.readFileSync(TMP_DB_FILE, 'utf8'));
+    }
     if (fs.existsSync(DB_FILE)) {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
@@ -30,7 +35,21 @@ function writeLocalDb(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
-    console.error('[db] Error writing local db:', err);
+    if (err.code === 'EROFS' || err.code === 'EACCES') {
+      try {
+        const tmpDir = path.dirname(TMP_DB_FILE);
+        if (!fs.existsSync(tmpDir)) {
+          fs.mkdirSync(tmpDir, { recursive: true });
+        }
+        fs.writeFileSync(TMP_DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+        console.log('[db] Wrote database updates to temporary storage (/tmp/db.json) due to read-only filesystem');
+        return;
+      } catch (tmpErr) {
+        console.error('[db] Error writing to /tmp/db.json:', tmpErr);
+      }
+    } else {
+      console.error('[db] Error writing local db:', err);
+    }
   }
 }
 
