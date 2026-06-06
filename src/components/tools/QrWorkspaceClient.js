@@ -854,51 +854,6 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
           </div>
         )}
 
-        {/* Scribe Ledger console logs */}
-        {(logs.length > 0 || isSyncing) && (
-          <div style={{ maxWidth: '800px', margin: '32px auto 0 auto' }}>
-            <GlowingCard title="Scribe Ledger" subtitle="Real-time execution logs of the carving process">
-              <div style={{
-                background: '#070706',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '16px',
-                borderRadius: '6px',
-                border: '1px solid rgba(212, 175, 55, 0.1)',
-                maxHeight: '160px',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px',
-                color: '#C2A67D'
-              }}>
-                {logs.map((log, i) => {
-                  let isError = log.startsWith('[ERROR]');
-                  let isSuccess = log.startsWith('[SUCCESS]');
-                  let cleanLog = log.replace(/^\[ERROR\]\s*/, '').replace(/^\[SUCCESS\]\s*/, '');
-                  return (
-                    <div key={i} style={{ 
-                      color: isError ? '#FF7F7F' : isSuccess ? 'var(--gold)' : '#C2A67D',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}>
-                      {isError && <AlertCircle size={12} />}
-                      {isSuccess && <Sparkles size={12} />}
-                      <span>{cleanLog}</span>
-                    </div>
-                  );
-                })}
-                {isSyncing && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold)' }}>
-                    <Zap size={12} style={{ animation: 'pulse 1.5s infinite' }} />
-                    <span>Communicating with Notion API...</span>
-                  </div>
-                )}
-              </div>
-            </GlowingCard>
-          </div>
-        )}
 
         {/* Custom Confirmation Modal */}
         {deleteConfirmOpen && (
