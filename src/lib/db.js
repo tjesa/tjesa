@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 // ---------------------------------------------------------------------------
 // Supabase client (server-side only)
@@ -14,16 +15,29 @@ const supabase = createClient(
   supabaseKey
 );
 
-const DB_FILE = path.join(process.cwd(), 'db.json');
-const TMP_DB_FILE = path.join('/tmp', 'db.json');
+const WORKSPACE_DB_FILE = path.join(process.cwd(), 'db.json');
+const DB_FILE = path.join(os.homedir(), '.tjesa-db.json');
+const TMP_DB_FILE = path.join(os.tmpdir(), 'db.json');
 
 function readLocalDb() {
   try {
+    // Seed home directory DB file from workspace db.json if it exists and home DB doesn't
+    if (!fs.existsSync(DB_FILE) && fs.existsSync(WORKSPACE_DB_FILE)) {
+      try {
+        fs.copyFileSync(WORKSPACE_DB_FILE, DB_FILE);
+      } catch (copyErr) {
+        console.error('[db] Error seeding home directory db.json:', copyErr);
+      }
+    }
+
     if (fs.existsSync(TMP_DB_FILE)) {
       return JSON.parse(fs.readFileSync(TMP_DB_FILE, 'utf8'));
     }
     if (fs.existsSync(DB_FILE)) {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    }
+    if (fs.existsSync(WORKSPACE_DB_FILE)) {
+      return JSON.parse(fs.readFileSync(WORKSPACE_DB_FILE, 'utf8'));
     }
   } catch (err) {
     console.error('[db] Error reading local db:', err);
@@ -372,14 +386,20 @@ export async function getConfig(id) {
 /**
  * Save an email registration to the waitlist
  */
-export async function saveWaitlist(email) {
+export async function saveWaitlist(email, name = '', excitedTool = '') {
   const bypass = await isBypassActive();
   if (bypass) {
     const db = readLocalDb();
     db.waitlist = db.waitlist || [];
     const existing = db.waitlist.find(w => w.email.toLowerCase() === email.trim().toLowerCase());
     if (existing) throw new Error('Email already registered');
-    const entry = { id: Date.now(), email: email.trim(), registered_at: new Date().toISOString() };
+    const entry = { 
+      id: Date.now(), 
+      email: email.trim(), 
+      name: name.trim(),
+      excited_tool: excitedTool.trim(),
+      registered_at: new Date().toISOString() 
+    };
     db.waitlist.push(entry);
     writeLocalDb(db);
     return entry;
@@ -396,12 +416,42 @@ export async function saveWaitlist(email) {
 
   const entry = { email: email.trim(), registered_at: new Date().toISOString() };
 
+  // Attempt to write all fields to Supabase, fallback to only email if columns don't exist
+  try {
+    const { data, error } = await supabase
+      .from('waitlist')
+      .insert({ ...entry, name: name.trim(), excited_tool: excitedTool.trim() })
+      .select()
+      .single();
+    if (!error && data) return data;
+  } catch (err) {
+    console.warn('[db] Supabase insert with name/excited_tool failed, falling back to email only. Error:', err.message || err);
+  }
+
   const { data, error } = await supabase
     .from('waitlist')
     .insert(entry)
     .select()
     .single();
   if (error) throw new Error('[db] saveWaitlist error: ' + error.message);
+
+  // Still save full details in local db.json database
+  try {
+    const db = readLocalDb();
+    db.waitlist = db.waitlist || [];
+    const localEntry = { 
+      id: data.id || Date.now(), 
+      email: email.trim(), 
+      name: name.trim(),
+      excited_tool: excitedTool.trim(),
+      registered_at: entry.registered_at 
+    };
+    db.waitlist.push(localEntry);
+    writeLocalDb(db);
+  } catch (e) {
+    console.error('[db] Error writing full waitlist entry locally:', e);
+  }
+
   return data;
 }
 

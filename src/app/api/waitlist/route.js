@@ -3,7 +3,7 @@ import { saveWaitlist } from '@/lib/db';
 
 export async function POST(request) {
   try {
-    const { email } = await request.json();
+    const { email, name, excitedTool } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
@@ -14,7 +14,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid email address format.' }, { status: 400 });
     }
 
-    await saveWaitlist(email.trim());
+    await saveWaitlist(email.trim(), name || '', excitedTool || '');
 
     return NextResponse.json({
       success: true,

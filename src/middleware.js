@@ -43,15 +43,15 @@ export async function middleware(request) {
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
   const isAuthPage = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup';
 
-  if (isDashboard && !user) {
+  if (isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
-  if (isAuthPage && user) {
+  if (isDashboard && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 

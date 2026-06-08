@@ -53,15 +53,17 @@ export default function AdminClient({ account }) {
     if (emails.length === 0) return;
 
     // Build CSV content
-    const headers = ['Email', 'Registered At'];
+    const headers = ['Name', 'Email Address', 'Excited Tool', 'Registered At'];
     const rows = emails.map(e => [
+      e.name || '',
       e.email,
+      e.excited_tool || '',
       new Date(e.registered_at).toISOString()
     ]);
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(r => r.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+      ...rows.map(r => r.map(val => `"${(val || '').replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
     // Create download link
@@ -76,16 +78,18 @@ export default function AdminClient({ account }) {
     document.body.removeChild(link);
   };
 
-  // 3. Filter emails
+  // 3. Filter waitlist
   const filteredEmails = emails.filter(e => 
-    e.email.toLowerCase().includes(search.toLowerCase())
+    e.email.toLowerCase().includes(search.toLowerCase()) ||
+    (e.name && e.name.toLowerCase().includes(search.toLowerCase())) ||
+    (e.excited_tool && e.excited_tool.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', zIndex: 1 }}>
       <Header account={account} onDisconnect={handleDisconnect} />
 
-      <div className="container" style={{ padding: '40px 24px', flex: 1, maxWidth: '800px' }}>
+      <div className="container" style={{ padding: '40px 24px', flex: 1, maxWidth: '1000px' }}>
         
         {/* Page Header */}
         <div style={{ marginBottom: '32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -96,7 +100,7 @@ export default function AdminClient({ account }) {
             Archived Cartouches
           </h2>
           <p style={{ maxWidth: '600px', fontSize: '14px', marginTop: '8px', color: 'var(--sand-dim)' }}>
-            Review all emails recorded in the waiting scrolls. Filter through the archives or export them for mailing campaigns.
+            Review all waitlist registrants recorded in the waiting scrolls. Filter through the archives or export them for mailing campaigns.
           </p>
         </div>
 
@@ -137,7 +141,7 @@ export default function AdminClient({ account }) {
                 <input 
                   className="kemet-input"
                   type="text"
-                  placeholder="Search emails..."
+                  placeholder="Search name, email or tool..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   style={{ padding: '10px 14px', fontSize: '14px' }}
@@ -179,7 +183,9 @@ export default function AdminClient({ account }) {
                   }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid rgba(212,175,55,0.15)', color: 'var(--gold)', fontFamily: 'var(--font-headings)' }}>
+                        <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>FULL NAME</th>
                         <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EMAIL ADDRESS</th>
+                        <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EXCITED TOOL</th>
                         <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>DATE REGISTRATION</th>
                       </tr>
                     </thead>
@@ -195,7 +201,24 @@ export default function AdminClient({ account }) {
                           onMouseOver={e => e.currentTarget.style.background = 'rgba(212,175,55,0.02)'}
                           onMouseOut={e => e.currentTarget.style.background = index % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}
                         >
+                          <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.name || <em style={{ color: 'var(--sand-dark)' }}>Anonymous</em>}</td>
                           <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.email}</td>
+                          <td style={{ padding: '12px', color: 'var(--sand)' }}>
+                            {item.excited_tool ? (
+                              <span style={{
+                                padding: '3px 8px',
+                                background: 'rgba(212,175,55,0.08)',
+                                border: '1px solid rgba(212,175,55,0.15)',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                color: 'var(--gold-dim)'
+                              }}>
+                                {item.excited_tool}
+                              </span>
+                            ) : (
+                              <span style={{ color: 'var(--sand-dark)' }}>None</span>
+                            )}
+                          </td>
                           <td style={{ padding: '12px', color: 'var(--sand-dim)', textAlign: 'right', fontFamily: 'monospace' }}>
                             {new Date(item.registered_at).toLocaleString()}
                           </td>

@@ -2,6 +2,7 @@ import { Cinzel, Outfit } from "next/font/google";
 import "./globals.css";
 import "../lib/poller";
 import { ToastProvider } from "@/components/ToastProvider";
+import Script from 'next/script';
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -27,6 +28,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${cinzel.variable} ${outfit.variable}`}>
       <body>
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-3WY9Z105HJ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-3WY9Z105HJ');
+          `}
+        </Script>
         <ToastProvider>
           {children}
         </ToastProvider>

@@ -5,6 +5,7 @@ let isPolling = false;
 
 // 1. Helper function for QR Generator sync
 async function syncQRGenerator(account, config) {
+  const syncStartTime = new Date().toISOString();
   const settings = config.settings || {};
   const triggerType = settings.trigger_type || 'full';
   const triggerColumn = settings.trigger_column || '';
@@ -46,9 +47,16 @@ async function syncQRGenerator(account, config) {
   let successCount = 0;
   let totalCount = pages.length;
   let hasUpdated = false;
+  const lastSyncTime = config.last_sync ? new Date(config.last_sync).getTime() : 0;
 
   for (const page of pages) {
     try {
+      // 0. Delta filtering: Skip unchanged pages
+      const pageEditedTime = new Date(page.last_edited_time).getTime();
+      if (lastSyncTime && pageEditedTime <= lastSyncTime) {
+        continue;
+      }
+
       // 1. Evaluate Trigger conditions
       let conditionMet = true;
       if (triggerType === 'checkbox') {
@@ -84,9 +92,18 @@ async function syncQRGenerator(account, config) {
         }
       }
 
+      let targetPropDesc = page.properties[targetColumn];
+      if (targetPropDesc && targetPropDesc.type === 'files') {
+        try {
+          const fullPage = await notion.pages.retrieve({ page_id: page.id });
+          targetPropDesc = fullPage.properties[targetColumn] || targetPropDesc;
+        } catch (retrieveErr) {
+          console.error(`[Tjesa Poller] Error retrieving full page properties for ${page.id}:`, retrieveErr);
+        }
+      }
+
       if (!conditionMet) {
         // If the condition is not met, clear the QR code target column if it's not already empty
-        const targetPropDesc = page.properties[targetColumn];
         if (targetPropDesc) {
           let clearProperties = null;
 
@@ -152,7 +169,6 @@ async function syncQRGenerator(account, config) {
       }
 
       // 3. Update target
-      const targetPropDesc = page.properties[targetColumn];
       if (!targetPropDesc) continue;
 
       let updateProperties = {};
@@ -192,14 +208,15 @@ async function syncQRGenerator(account, config) {
 
   if (hasUpdated) {
     console.log(`[Tjesa Poller] Successfully sync'd ${successCount} QR codes for database "${config.database_name}"`);
-    // Save updated sync status in local database
-    await saveConfig({
-      ...config,
-      last_sync: new Date().toISOString(),
-      last_sync_success_count: successCount,
-      last_sync_total_count: totalCount
-    });
   }
+
+  // Always update last_sync to prevent reprocessing unchanged pages
+  await saveConfig({
+    ...config,
+    last_sync: syncStartTime,
+    last_sync_success_count: successCount,
+    last_sync_total_count: totalCount
+  });
 }
 
 // 2. Main Background Poller loop
