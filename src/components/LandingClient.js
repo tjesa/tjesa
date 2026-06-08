@@ -900,11 +900,31 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             {/* Legal */}
             <div>
               <div style={{ fontSize: '10px', color: 'var(--gold)', fontFamily: 'var(--font-headings)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '14px' }}>Legal</div>
-              {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(item => (
-                <div key={item} style={{ fontSize: '12px', color: 'var(--sand-dark)', marginBottom: '8px', fontFamily: 'var(--font-body)', cursor: 'pointer', transition: 'color 0.2s ease' }}
-                  onMouseOver={e => e.currentTarget.style.color = 'var(--sand-dim)'} onMouseOut={e => e.currentTarget.style.color = 'var(--sand-dark)'}>
-                  {item}
-                </div>
+              {[
+                { label: 'Privacy Policy', path: '/privacy' },
+                { label: 'Terms of Service', path: '/terms' },
+                { label: 'Cookie Policy', path: '/cookies' }
+              ].map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => router.push(item.path)}
+                  style={{
+                    display: 'block',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--sand-dark)',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontFamily: 'var(--font-body)',
+                    padding: '0 0 8px',
+                    textAlign: 'left',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.color = 'var(--gold)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'var(--sand-dark)'}
+                >
+                  {item.label}
+                </button>
               ))}
             </div>
           </div>
