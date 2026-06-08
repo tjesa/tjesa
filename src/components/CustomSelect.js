@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function CustomSelect({ options, value, onChange, placeholder = 'Select an option', label }) {
+export default function CustomSelect({ options, value, onChange, placeholder = 'Select an option', label, buttonStyle = {}, id }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -32,10 +32,11 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
-      {label && <label className="kemet-label">{label}</label>}
+      {label && <label className="kemet-label" htmlFor={id}>{label}</label>}
       
       {/* Dropdown Toggle Button */}
       <button
+        id={id}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -54,6 +55,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
           alignItems: 'center',
           transition: 'var(--transition-smooth)',
           boxShadow: isOpen ? '0 0 10px rgba(212, 175, 55, 0.25)' : 'none',
+          ...buttonStyle
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

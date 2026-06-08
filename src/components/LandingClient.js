@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
+import CustomSelect from './CustomSelect';
 
 import { 
   Scroll, 
@@ -720,9 +721,9 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                 padding: '36px 32px',
                 boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.04)',
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'visible',
               }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gold-gradient)' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gold-gradient)', borderTopLeftRadius: '18px', borderTopRightRadius: '18px' }} />
 
                 {waitlistSuccess ? (
                   <div style={{ animation: 'fadeSlideUp 0.4s ease both', padding: '16px 0', textAlign: 'center' }}>
@@ -792,35 +793,21 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                         <label htmlFor="waitlist-excited-tool" style={{ fontSize: '9px', color: 'var(--sand-dark)', letterSpacing: '0.15em', fontFamily: 'var(--font-headings)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                           WHICH TOOL EXCITES YOU MOST?
                         </label>
-                        <select
+                        <CustomSelect
                           id="waitlist-excited-tool"
+                          options={INSTRUMENTS.map(inst => ({
+                            value: inst.name,
+                            label: `${inst.name} (${inst.status === 'live' ? 'Live' : 'Soon'})`
+                          }))}
                           value={excitedTool}
-                          onChange={(e) => setExcitedTool(e.target.value)}
-                          required
-                          style={{
-                            width: '100%',
+                          onChange={setExcitedTool}
+                          placeholder="Select a tool →"
+                          buttonStyle={{
                             fontSize: '13px',
-                            background: '#0D0D0B',
-                            border: '1px solid rgba(212,175,55,0.25)',
-                            borderRadius: '6px',
-                            color: excitedTool ? 'var(--sand-light)' : 'var(--sand-dark)',
-                            padding: '10px 12px',
-                            outline: 'none',
-                            cursor: 'pointer',
-                            fontFamily: 'var(--font-body)',
-                            appearance: 'none',
-                            backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23C9A84C\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'/%3e%3c/svg%3e")',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'right 12px center',
+                            background: 'rgba(13, 13, 11, 0.7)',
+                            border: '1px solid rgba(212, 175, 55, 0.25)',
                           }}
-                        >
-                          <option value="" disabled>Select a tool →</option>
-                          {INSTRUMENTS.map(inst => (
-                            <option key={inst.id} value={inst.name} style={{ background: '#0D0D0B', color: 'var(--sand-light)' }}>
-                              {inst.name} ({inst.status === 'live' ? 'Live' : 'Soon'})
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
 
                     </div>
