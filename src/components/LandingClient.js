@@ -184,7 +184,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const handleLogoClick = () => {
     setLogoClicks(prev => {
       const next = prev + 1;
-      if (next >= 3) { triggerBypass(); return 0; }
+      if (next >= 5) { triggerBypass(); return 0; }
       return next;
     });
   };
