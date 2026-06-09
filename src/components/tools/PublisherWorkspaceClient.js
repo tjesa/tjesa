@@ -358,7 +358,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
 
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', 
+          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', 
           gap: '32px',
           alignItems: 'start'
         }}>
@@ -398,7 +398,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                     {/* Status Column Select */}
                     <div>
                       <CustomSelect
@@ -423,7 +423,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                     {/* Date Column Select */}
                     <div>
                       <CustomSelect

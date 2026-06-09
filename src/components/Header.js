@@ -71,14 +71,14 @@ export default function Header({ account, onDisconnect }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           {/* User Session Details */}
           {user && (
-            <div style={{
+            <div className="header-user-details" style={{
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
               borderRight: '1px solid rgba(212, 175, 55, 0.15)',
               paddingRight: '16px'
             }}>
-              <span style={{ fontSize: '12px', color: 'var(--sand-dim)' }}>
+              <span className="header-user-email" style={{ fontSize: '12px', color: 'var(--sand-dim)' }}>
                 {user.email}
               </span>
               {user && (user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com')) && (
@@ -101,7 +101,7 @@ export default function Header({ account, onDisconnect }) {
           )}
 
           {account ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div className="header-connection-status" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
                   <span style={{
@@ -121,7 +121,7 @@ export default function Header({ account, onDisconnect }) {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div className="header-resting-status" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{
                 width: '6px',
                 height: '6px',

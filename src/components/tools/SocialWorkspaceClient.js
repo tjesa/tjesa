@@ -393,7 +393,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
 
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', 
+          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', 
           gap: '32px',
           alignItems: 'start'
         }}>
@@ -450,7 +450,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                       2. Notion Property Mappings
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px', marginBottom: '16px' }}>
                       <div>
                         <CustomSelect
                           label="Post Caption Column *"
@@ -471,7 +471,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px', marginBottom: '16px' }}>
                       <div>
                         <CustomSelect
                           label="Status Trigger Column"
@@ -499,7 +499,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                       )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                       <div>
                         <CustomSelect
                           label="Published Checker Column"

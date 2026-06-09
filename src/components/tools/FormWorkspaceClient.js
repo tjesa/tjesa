@@ -516,7 +516,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                     <EyeOfHorusLoader size={45} text="Consulting Notion scroll schema..." />
                   </div>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', alignItems: 'start' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '32px', alignItems: 'start' }}>
                     
                     {/* Left Panel: Form Settings */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -591,7 +591,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                                   borderTop: '1px solid rgba(212, 175, 55, 0.08)',
                                   animation: 'fadeIn 0.2s ease-out'
                                 }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '12px' }}>
                                     <div>
                                       <label className="kemet-label" style={{ fontSize: '11px' }}>DISPLAY LABEL</label>
                                       <input 

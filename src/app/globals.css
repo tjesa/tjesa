@@ -824,4 +824,15 @@ a:hover {
   .header-logo {
     padding-left: 44px;
   }
+
+  .header-user-email {
+    display: none !important;
+  }
+  .header-connection-status {
+    display: none !important;
+  }
+  .header-user-details {
+    border-right: none !important;
+    padding-right: 0 !important;
+  }
 }

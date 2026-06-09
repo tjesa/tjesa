@@ -614,7 +614,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                     <EyeOfHorusLoader size={45} text="Consulting Notion database properties..." />
                   </div>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '32px', alignItems: 'start' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '32px', alignItems: 'start' }}>
                     
                     {/* Left Panel: Configuration Form */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -632,7 +632,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                             />
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '16px' }}>
                             <div>
                               <CustomSelect
                                 label="CHART TYPE"
@@ -671,7 +671,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                             />
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '16px' }}>
                             <div>
                               <CustomSelect
                                 label="AGGREGATION OPERATOR"

@@ -425,7 +425,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                           
                           {/* Columns selectors */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '20px' }}>
                             <div>
                               <CustomSelect
                                 label="SOURCE COLUMN (URL / Text)"
@@ -621,7 +621,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 animation: 'fadeIn 0.2s ease-out'
                               }}>
                                 {/* Colors Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                                   <div>
                                     <label className="kemet-label" htmlFor="fg-color">GLYPH COLOR (FOREGROUND)</label>
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -678,7 +678,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 </div>
 
                                 {/* Size & Margin Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px', alignItems: 'end' }}>
                                   <div>
                                     <label className="kemet-label" htmlFor="qr-size">SIZE: {size}px</label>
                                     <input

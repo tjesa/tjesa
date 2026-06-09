@@ -268,7 +268,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
             {/* Stats Cards Row */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
               gap: '24px'
             }}>
               <GlowingCard title="ACTIVE SYNCS" subtitle="Currently running databases">
@@ -319,7 +319,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
             {/* Split Section: Scribe Ledger & Active Map */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
               gap: '32px'
             }}>
               {/* Scribe Ledger */}
@@ -463,7 +463,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
         {/* Instruments Grid */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', 
           gap: '32px',
           marginTop: '24px'
         }}>

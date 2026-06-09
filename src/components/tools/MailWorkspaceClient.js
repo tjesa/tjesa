@@ -416,7 +416,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
 
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', 
+          gridTemplateColumns: editingDbId ? '1fr' : 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', 
           gap: '32px',
           alignItems: 'start'
         }}>
@@ -475,7 +475,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                           </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                           <div>
                             <label className="kemet-label">SMTP Username</label>
                             <input 
@@ -498,7 +498,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                           </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                           <div>
                             <label className="kemet-label">From Address</label>
                             <input 
@@ -530,7 +530,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                       2. Notion Database Column Mapping
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px', marginBottom: '16px' }}>
                       <div>
                         <CustomSelect
                           label="Recipient Email Column *"
@@ -551,7 +551,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                       <div>
                         <CustomSelect
                           label="Status / Sent Checker Column"
