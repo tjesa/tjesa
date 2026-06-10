@@ -693,10 +693,10 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                           {indexStr}
                         </span>
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                          <span style={{ fontSize: '10px', color: 'var(--sand-dark)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'var(--font-headings)' }}>
+                          <span style={{ fontSize: '14px', color: 'var(--sand-light)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {inst.subtitle.replace('ADVANCED ', '').replace(' SYSTEM', '')}
                           </span>
-                          <span style={{ fontSize: '14px', color: 'var(--sand-light)', fontWeight: 600, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ fontSize: '10px', color: 'var(--sand-dark)', letterSpacing: '0.08em', marginTop: '2px', fontFamily: 'var(--font-headings)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {inst.name}
                           </span>
                         </div>
