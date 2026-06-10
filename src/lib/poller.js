@@ -70,8 +70,8 @@ async function syncQRGenerator(account, config) {
   const pages = [];
 
   while (hasMore) {
-    const response = await notion.dataSources.query({
-      data_source_id: config.database_id,
+    const response = await notion.databases.query({
+      database_id: config.database_id,
       start_cursor: startCursor,
       page_size: 100
     });
