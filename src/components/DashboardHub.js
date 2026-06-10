@@ -53,11 +53,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
   const instruments = [
     {
       id: 'qr',
-      name: 'The Glyph Carver',
-      subtitle: 'QR CODE GENERATOR',
+      name: 'QR Code Generator',
+      subtitle: 'The Glyph Carver',
       description: 'Translate links inside your Notion database rows into dynamic, scannable QR Code image assets that render inline in your tables.',
       status: 'active',
-      actionText: 'Enter Carving Station',
+      actionText: 'Open QR Generator',
       path: '/dashboard/tools/qr',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -71,11 +71,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'charts',
-      name: 'The Aten Gazer',
-      subtitle: 'DATABASE CHARTS & OBSERVATORIES',
+      name: 'Charts & Observatories',
+      subtitle: 'The Aten Gazer',
       description: 'Visualize database properties, tasks progress, and financial values as sleek, interactive charts and dashboard observatories.',
       status: 'active',
-      actionText: 'Enter Observatory',
+      actionText: 'Open Charts Observatory',
       path: '/dashboard/tools/charts',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -87,11 +87,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'forms',
-      name: 'The Nile Scribe',
-      subtitle: 'NOTION FORMS & SURVEYS',
+      name: 'Notion Forms & Surveys',
+      subtitle: 'The Nile Scribe',
       description: 'Build public-facing, themed survey forms that automatically populate survey records directly into your Notion database scrolls.',
       status: 'active',
-      actionText: 'Enter Scribe Chambers',
+      actionText: 'Open Form Builder',
       path: '/dashboard/tools/forms',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -105,11 +105,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'publisher',
-      name: 'The Papyrus Publisher',
-      subtitle: 'NOTION CMS & BLOG GENERATOR',
+      name: 'Notion CMS & Blogs',
+      subtitle: 'The Papyrus Publisher',
       description: 'Generate a public, themed blog or wiki dashboard directly from a Notion database. Write your articles in Notion, publish instantly.',
       status: 'active',
-      actionText: 'Enter Publisher Chambers',
+      actionText: 'Open CMS Publisher',
       path: '/dashboard/tools/publisher',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -120,11 +120,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'sphinx',
-      name: 'The Sphinx Shield',
-      subtitle: 'PORTAL SECURITY & VAULT GATES',
+      name: 'Portal Security & Vaults',
+      subtitle: 'The Sphinx Shield',
       description: 'Safeguard your public scrolls. Protect your generated sites, observatories, or Nile surveys with secure passwords and client gates.',
       status: 'active',
-      actionText: 'Enter Sphinx Chambers',
+      actionText: 'Open Security Vaults',
       path: '/dashboard/tools/sphinx',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -135,11 +135,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'pdf',
-      name: 'The Rosetta Press',
-      subtitle: 'PDF & DOCUMENT EXPORTER',
+      name: 'PDF & Document Exporter',
+      subtitle: 'The Rosetta Press',
       description: 'Convert Notion document pages into print-ready PDF scrolls. Choose visual templates, page margins, and download instantly.',
       status: 'active',
-      actionText: 'Enter Press Chambers',
+      actionText: 'Open PDF Exporter',
       path: '/dashboard/tools/pdf',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -152,11 +152,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'mail',
-      name: 'The Nile Dispatch',
-      subtitle: 'NOTION MAIL & EMAIL CAMPAIGNS',
+      name: 'Notion Mail Campaigns',
+      subtitle: 'The Nile Dispatch',
       description: 'Send bulk email newsletters and template campaigns directly to contact lists inside your Notion database scrolls. Map columns to variables and track delivery status.',
       status: 'active',
-      actionText: 'Enter Dispatch Chambers',
+      actionText: 'Open Mail Campaigns',
       path: '/dashboard/tools/mail',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -167,11 +167,11 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
     },
     {
       id: 'social',
-      name: 'The Royal Herald',
-      subtitle: 'AUTOMATIC SOCIAL MEDIA DISPATCHER',
+      name: 'Automatic Social Dispatch',
+      subtitle: 'The Royal Herald',
       description: 'Auto-publish database rows containing drafted captions and images directly to social channels. Configure custom webhooks and track publishing dates.',
       status: 'active',
-      actionText: 'Enter Herald Chambers',
+      actionText: 'Open Social Dispatch',
       path: '/dashboard/tools/social',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
@@ -205,7 +205,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
             TJESA INTEGRATED SUITE
           </span>
           <h1 style={{ fontSize: '42px', marginTop: '6px', textTransform: 'uppercase', fontFamily: 'var(--font-headings)' }}>
-            The Hall of Instruments
+            Tools & Integrations
           </h1>
           <p style={{ maxWidth: '650px', fontSize: '15px', marginTop: '12px', marginLeft: 'auto', marginRight: 'auto', color: 'var(--sand-dim)', lineHeight: 1.6 }}>
             Select an instrument from the archives to integrate with your workspace database scrolls. All tools connect securely with their bound Notion integration keys.
@@ -293,7 +293,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                 </div>
               </GlowingCard>
 
-              <GlowingCard title="OBSERVATORIES" subtitle="Aten Gazer active charts">
+              <GlowingCard title="OBSERVATORIES" subtitle="Charts Observatory active">
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
                   <span style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--gold)', fontFamily: 'var(--font-headings)', textShadow: '0 0 10px var(--gold-glow)' }}>
                     {chartsCount}
@@ -304,7 +304,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                 </div>
               </GlowingCard>
 
-              <GlowingCard title="SCRIBE FORMS" subtitle="Nile survey forms collecting data">
+              <GlowingCard title="SURVEY FORMS" subtitle="Active forms collecting data">
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
                   <span style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--gold)', fontFamily: 'var(--font-headings)', textShadow: '0 0 10px var(--gold-glow)' }}>
                     {formsCount}

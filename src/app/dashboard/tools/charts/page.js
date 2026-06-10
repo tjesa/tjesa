@@ -51,7 +51,7 @@ export default async function ChartsPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '480px' }}>
             <span style={{ fontSize: '11px', color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: 'var(--font-headings)' }}>
-              ATEN GAZER — NOTION CONNECTION
+              CHARTS & OBSERVATORIES — NOTION CONNECTION
             </span>
             <h2 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0 }}>
               Connect Your Charts Observatory

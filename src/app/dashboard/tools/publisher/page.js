@@ -52,13 +52,13 @@ export default async function PublisherPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '480px' }}>
             <span style={{ fontSize: '11px', color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: 'var(--font-headings)' }}>
-              THE PAPYRUS PUBLISHER — NOTION CMS
+              NOTION CMS & BLOGS
             </span>
             <h2 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0 }}>
               Connect Your Publisher Chambers
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--sand-dim)', lineHeight: '1.6' }}>
-              The Papyrus Publisher uses a dedicated Notion integration connection.
+              The CMS & Blog Publisher uses a dedicated Notion integration connection.
               Connect it to grant access to the database scrolls containing your blog posts.
             </p>
           </div>

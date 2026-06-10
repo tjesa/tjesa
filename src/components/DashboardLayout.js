@@ -78,8 +78,8 @@ export default function DashboardLayout({ children }) {
   const instruments = [
     {
       id: 'qr',
-      name: 'The Glyph Carver',
-      subtitle: 'QR CODE GENERATOR',
+      name: 'QR Code Generator',
+      subtitle: 'The Glyph Carver',
       path: '/dashboard/tools/qr',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -93,8 +93,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'charts',
-      name: 'The Aten Gazer',
-      subtitle: 'CHARTS & OBSERVATORIES',
+      name: 'Charts & Observatories',
+      subtitle: 'The Aten Gazer',
       path: '/dashboard/tools/charts',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -106,8 +106,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'forms',
-      name: 'The Nile Scribe',
-      subtitle: 'NOTION FORMS & SURVEYS',
+      name: 'Notion Forms & Surveys',
+      subtitle: 'The Nile Scribe',
       path: '/dashboard/tools/forms',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -121,8 +121,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'publisher',
-      name: 'The Papyrus Publisher',
-      subtitle: 'NOTION CMS & BLOGS',
+      name: 'Notion CMS & Blogs',
+      subtitle: 'The Papyrus Publisher',
       path: '/dashboard/tools/publisher',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -133,8 +133,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'sphinx',
-      name: 'The Sphinx Shield',
-      subtitle: 'PORTAL SECURITY & VAULTS',
+      name: 'Portal Security & Vaults',
+      subtitle: 'The Sphinx Shield',
       path: '/dashboard/tools/sphinx',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -145,8 +145,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'pdf',
-      name: 'The Rosetta Press',
-      subtitle: 'PDF & DOCUMENT EXPORTER',
+      name: 'PDF & Document Exporter',
+      subtitle: 'The Rosetta Press',
       path: '/dashboard/tools/pdf',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -159,8 +159,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'mail',
-      name: 'The Nile Dispatch',
-      subtitle: 'NOTION MAIL CAMPAIGNS',
+      name: 'Notion Mail Campaigns',
+      subtitle: 'The Nile Dispatch',
       path: '/dashboard/tools/mail',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -171,8 +171,8 @@ export default function DashboardLayout({ children }) {
     },
     {
       id: 'social',
-      name: 'The Royal Herald',
-      subtitle: 'AUTOMATIC SOCIAL DISPATCH',
+      name: 'Automatic Social Dispatch',
+      subtitle: 'The Royal Herald',
       path: '/dashboard/tools/social',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

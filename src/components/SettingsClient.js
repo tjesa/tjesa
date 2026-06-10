@@ -76,14 +76,14 @@ const TABS = [
 ];
 
 const TOOL_LABELS = {
-  qr: { name: 'Glyph Carver', subtitle: 'QR Code Generator' },
-  charts: { name: 'Aten Gazer', subtitle: 'Charts Observatory' },
-  forms: { name: 'Nile Scribe', subtitle: 'Forms & Surveys' },
-  publisher: { name: 'Papyrus Publisher', subtitle: 'CMS & Blogs' },
-  pdf: { name: 'Rosetta Press', subtitle: 'PDF Exporter' },
-  mail: { name: 'Nile Dispatch', subtitle: 'Email Campaigns' },
-  social: { name: 'Royal Herald', subtitle: 'Social Dispatch' },
-  sphinx: { name: 'Sphinx Shield', subtitle: 'Portal Security' },
+  qr: { name: 'QR Code Generator', subtitle: 'The Glyph Carver' },
+  charts: { name: 'Charts Observatory', subtitle: 'The Aten Gazer' },
+  forms: { name: 'Forms & Surveys', subtitle: 'The Nile Scribe' },
+  publisher: { name: 'CMS & Blogs', subtitle: 'The Papyrus Publisher' },
+  pdf: { name: 'PDF Exporter', subtitle: 'The Rosetta Press' },
+  mail: { name: 'Email Campaigns', subtitle: 'The Nile Dispatch' },
+  social: { name: 'Social Dispatch', subtitle: 'The Royal Herald' },
+  sphinx: { name: 'Portal Security', subtitle: 'The Sphinx Shield' },
 };
 
 const THEMES = [
