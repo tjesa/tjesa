@@ -80,6 +80,7 @@ export default function DashboardLayout({ children }) {
       id: 'qr',
       name: 'QR Code Generator',
       subtitle: 'The Glyph Carver',
+      status: 'active',
       path: '/dashboard/tools/qr',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -95,6 +96,7 @@ export default function DashboardLayout({ children }) {
       id: 'charts',
       name: 'Charts & Observatories',
       subtitle: 'The Aten Gazer',
+      status: 'locked',
       path: '/dashboard/tools/charts',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -108,6 +110,7 @@ export default function DashboardLayout({ children }) {
       id: 'forms',
       name: 'Notion Forms & Surveys',
       subtitle: 'The Nile Scribe',
+      status: 'locked',
       path: '/dashboard/tools/forms',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -123,6 +126,7 @@ export default function DashboardLayout({ children }) {
       id: 'publisher',
       name: 'Notion CMS & Blogs',
       subtitle: 'The Papyrus Publisher',
+      status: 'locked',
       path: '/dashboard/tools/publisher',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -135,6 +139,7 @@ export default function DashboardLayout({ children }) {
       id: 'sphinx',
       name: 'Portal Security & Vaults',
       subtitle: 'The Sphinx Shield',
+      status: 'locked',
       path: '/dashboard/tools/sphinx',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -147,6 +152,7 @@ export default function DashboardLayout({ children }) {
       id: 'pdf',
       name: 'PDF & Document Exporter',
       subtitle: 'The Rosetta Press',
+      status: 'locked',
       path: '/dashboard/tools/pdf',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -161,6 +167,7 @@ export default function DashboardLayout({ children }) {
       id: 'mail',
       name: 'Notion Mail Campaigns',
       subtitle: 'The Nile Dispatch',
+      status: 'locked',
       path: '/dashboard/tools/mail',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -173,6 +180,7 @@ export default function DashboardLayout({ children }) {
       id: 'social',
       name: 'Automatic Social Dispatch',
       subtitle: 'The Royal Herald',
+      status: 'locked',
       path: '/dashboard/tools/social',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -261,34 +269,46 @@ export default function DashboardLayout({ children }) {
             {instruments.map(inst => {
               const isLinkActive = pathname === inst.path;
               const isConnected = accounts && accounts.some(a => a.tool === inst.id);
-              
+              const isLocked = inst.status === 'locked';
+
               return (
-                <Link 
+                <Link
                   key={inst.id}
-                  href={inst.path}
+                  href={isLocked ? '#' : inst.path}
                   className={`sidebar-link ${isLinkActive ? 'active' : ''}`}
-                  data-tooltip={inst.name}
-                  onClick={() => setIsMobileOpen(false)}
+                  data-tooltip={isLocked ? `${inst.name} — Coming Soon` : inst.name}
+                  onClick={(e) => {
+                    if (isLocked) { e.preventDefault(); return; }
+                    setIsMobileOpen(false);
+                  }}
+                  style={isLocked ? { opacity: 0.4, cursor: 'not-allowed', pointerEvents: 'all' } : {}}
                 >
                   <span className="sidebar-icon-wrap">
                     {inst.icon}
                   </span>
-                  
+
                   <div className="sidebar-link-text">
                     <span className="sidebar-label">{inst.name}</span>
-                    <span className="sidebar-sub">{inst.subtitle}</span>
+                    <span className="sidebar-sub">{isLocked ? 'Coming Soon' : inst.subtitle}</span>
                   </div>
 
                   {/* Status Indicator */}
-                  <span 
-                    className="sidebar-status-dot" 
-                    style={{
-                      backgroundColor: isConnected ? '#34D399' : 'transparent',
-                      border: isConnected ? '1px solid #34D399' : '1px solid rgba(212, 175, 55, 0.35)',
-                      boxShadow: isConnected ? '0 0 8px #34D399' : 'none'
-                    }}
-                    title={isConnected ? 'Connection Bound' : 'Not Connected'}
-                  />
+                  {isLocked ? (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(212,175,55,0.3)" strokeWidth="2" style={{ flexShrink: 0 }}>
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  ) : (
+                    <span
+                      className="sidebar-status-dot"
+                      style={{
+                        backgroundColor: isConnected ? '#34D399' : 'transparent',
+                        border: isConnected ? '1px solid #34D399' : '1px solid rgba(212, 175, 55, 0.35)',
+                        boxShadow: isConnected ? '0 0 8px #34D399' : 'none'
+                      }}
+                      title={isConnected ? 'Connection Bound' : 'Not Connected'}
+                    />
+                  )}
                 </Link>
               );
             })}

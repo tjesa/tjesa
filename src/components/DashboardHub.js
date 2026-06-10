@@ -74,7 +74,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Charts & Observatories',
       subtitle: 'The Aten Gazer',
       description: 'Visualize database properties, tasks progress, and financial values as sleek, interactive charts and dashboard observatories.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open Charts Observatory',
       path: '/dashboard/tools/charts',
       icon: (
@@ -90,7 +90,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Notion Forms & Surveys',
       subtitle: 'The Nile Scribe',
       description: 'Build public-facing, themed survey forms that automatically populate survey records directly into your Notion database scrolls.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open Form Builder',
       path: '/dashboard/tools/forms',
       icon: (
@@ -108,7 +108,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Notion CMS & Blogs',
       subtitle: 'The Papyrus Publisher',
       description: 'Generate a public, themed blog or wiki dashboard directly from a Notion database. Write your articles in Notion, publish instantly.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open CMS Publisher',
       path: '/dashboard/tools/publisher',
       icon: (
@@ -123,7 +123,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Portal Security & Vaults',
       subtitle: 'The Sphinx Shield',
       description: 'Safeguard your public scrolls. Protect your generated sites, observatories, or Nile surveys with secure passwords and client gates.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open Security Vaults',
       path: '/dashboard/tools/sphinx',
       icon: (
@@ -138,7 +138,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'PDF & Document Exporter',
       subtitle: 'The Rosetta Press',
       description: 'Convert Notion document pages into print-ready PDF scrolls. Choose visual templates, page margins, and download instantly.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open PDF Exporter',
       path: '/dashboard/tools/pdf',
       icon: (
@@ -155,7 +155,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Notion Mail Campaigns',
       subtitle: 'The Nile Dispatch',
       description: 'Send bulk email newsletters and template campaigns directly to contact lists inside your Notion database scrolls. Map columns to variables and track delivery status.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open Mail Campaigns',
       path: '/dashboard/tools/mail',
       icon: (
@@ -170,7 +170,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       name: 'Automatic Social Dispatch',
       subtitle: 'The Royal Herald',
       description: 'Auto-publish database rows containing drafted captions and images directly to social channels. Configure custom webhooks and track publishing dates.',
-      status: 'active',
+      status: 'locked',
       actionText: 'Open Social Dispatch',
       path: '/dashboard/tools/social',
       icon: (
@@ -469,8 +469,9 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
         }}>
           {instruments.map(inst => {
             const isConnected = userAccounts && userAccounts.some(a => a.tool === inst.id);
-            const badgeText = isConnected ? 'READY' : 'NOT CONNECTED';
-            const actionText = isConnected ? inst.actionText : 'Setup Connection';
+            const isLocked = inst.status === 'locked';
+            const badgeText = isLocked ? 'COMING SOON' : isConnected ? 'READY' : 'NOT CONNECTED';
+            const actionText = isLocked ? 'Coming Soon' : isConnected ? inst.actionText : 'Setup Connection';
             
             const cardStyle = isConnected ? {
               height: '100%',
@@ -524,17 +525,23 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                         fontFamily: 'var(--font-headings)',
                         letterSpacing: '0.05em',
                         borderRadius: '20px',
-                        background: isConnected ? 'rgba(52, 211, 153, 0.08)' : 'rgba(212, 175, 55, 0.02)',
-                        color: isConnected ? '#34D399' : 'var(--sand-dim)',
-                        border: isConnected ? '1px solid rgba(52, 211, 153, 0.25)' : '1px solid rgba(212, 175, 55, 0.12)',
+                        background: isLocked ? 'rgba(255,255,255,0.03)' : isConnected ? 'rgba(52, 211, 153, 0.08)' : 'rgba(212, 175, 55, 0.02)',
+                        color: isLocked ? 'rgba(255,255,255,0.25)' : isConnected ? '#34D399' : 'var(--sand-dim)',
+                        border: isLocked ? '1px solid rgba(255,255,255,0.08)' : isConnected ? '1px solid rgba(52, 211, 153, 0.25)' : '1px solid rgba(212, 175, 55, 0.12)',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
                         fontWeight: 'bold',
-                        boxShadow: isConnected ? '0 0 8px rgba(52, 211, 153, 0.15)' : 'none'
+                        boxShadow: isConnected && !isLocked ? '0 0 8px rgba(52, 211, 153, 0.15)' : 'none'
                       }}>
-                        {isConnected && (
-                          <span 
+                        {isLocked && (
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                        )}
+                        {!isLocked && isConnected && (
+                          <span
                             className="pulse-indicator"
                             style={{
                               width: '6px',
@@ -542,7 +549,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                               borderRadius: '50%',
                               background: '#34D399',
                               boxShadow: '0 0 6px #34D399'
-                            }} 
+                            }}
                           />
                         )}
                         {badgeText}
