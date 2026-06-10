@@ -162,27 +162,16 @@ export async function saveAccount(account) {
     return account;
   }
 
-  try {
-    const { data, error } = await supabase
-      .from('accounts')
-      .upsert(account, { onConflict: 'workspace_id' })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  } catch (err) {
-    console.warn('[db] saveAccount to Supabase failed, falling back to local db.json. Error:', err.message || err);
-    const db = readLocalDb();
-    db.accounts = db.accounts || [];
-    const index = db.accounts.findIndex(a => a.workspace_id === account.workspace_id);
-    if (index >= 0) {
-      db.accounts[index] = { ...db.accounts[index], ...account };
-    } else {
-      db.accounts.push(account);
-    }
-    writeLocalDb(db);
-    return account;
+  const { data, error } = await supabase
+    .from('accounts')
+    .upsert(account, { onConflict: 'workspace_id' })
+    .select()
+    .single();
+  if (error) {
+    console.error('[db] saveAccount Supabase error:', error);
+    throw new Error('Failed to save account: ' + error.message);
   }
+  return data;
 }
 
 /**
@@ -327,27 +316,16 @@ export async function saveConfig(config) {
     return migrateConfig(config);
   }
 
-  try {
-    const { data, error } = await supabase
-      .from('configs')
-      .upsert(config, { onConflict: 'id' })
-      .select()
-      .single();
-    if (error) throw error;
-    return migrateConfig(data);
-  } catch (err) {
-    console.warn('[db] saveConfig to Supabase failed, falling back to local db.json. Error:', err.message || err);
-    const db = readLocalDb();
-    db.configs = db.configs || [];
-    const index = db.configs.findIndex(c => c.id === config.id);
-    if (index >= 0) {
-      db.configs[index] = { ...db.configs[index], ...config };
-    } else {
-      db.configs.push(config);
-    }
-    writeLocalDb(db);
-    return migrateConfig(config);
+  const { data, error } = await supabase
+    .from('configs')
+    .upsert(config, { onConflict: 'id' })
+    .select()
+    .single();
+  if (error) {
+    console.error('[db] saveConfig Supabase error:', error);
+    throw new Error('Failed to save config: ' + error.message);
   }
+  return migrateConfig(data);
 }
 
 /**
