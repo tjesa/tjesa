@@ -53,11 +53,9 @@ export async function middleware(request) {
     return NextResponse.redirect(`https://app.tjesa.com${pathname}`);
   }
 
-  // app.tjesa.com root → /dashboard
-  if (isAppSubdomain && pathname === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+  // app.tjesa.com is only for the dashboard — non-dashboard paths go to www.tjesa.com
+  if (isAppSubdomain && isTjesaDomain && !isDashboard) {
+    return NextResponse.redirect(`https://www.tjesa.com${pathname}`);
   }
 
   // Authenticated users visiting login/signup → send to dashboard
