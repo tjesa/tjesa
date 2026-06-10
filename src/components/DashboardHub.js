@@ -58,7 +58,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Translate links inside your Notion database rows into dynamic, scannable QR Code image assets that render inline in your tables.',
       status: 'active',
       actionText: 'Open QR Generator',
-      path: '/dashboard/tools/qr',
+      path: '/dashboard/qr',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <rect x="3" y="3" width="7" height="7" />
@@ -76,7 +76,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Visualize database properties, tasks progress, and financial values as sleek, interactive charts and dashboard observatories.',
       status: 'locked',
       actionText: 'Open Charts Observatory',
-      path: '/dashboard/tools/charts',
+      path: '/dashboard/charts',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <line x1="18" y1="20" x2="18" y2="10" />
@@ -92,7 +92,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Build public-facing, themed survey forms that automatically populate survey records directly into your Notion database scrolls.',
       status: 'locked',
       actionText: 'Open Form Builder',
-      path: '/dashboard/tools/forms',
+      path: '/dashboard/forms',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -110,7 +110,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Generate a public, themed blog or wiki dashboard directly from a Notion database. Write your articles in Notion, publish instantly.',
       status: 'locked',
       actionText: 'Open CMS Publisher',
-      path: '/dashboard/tools/publisher',
+      path: '/dashboard/publisher',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -125,7 +125,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Safeguard your public scrolls. Protect your generated sites, observatories, or Nile surveys with secure passwords and client gates.',
       status: 'locked',
       actionText: 'Open Security Vaults',
-      path: '/dashboard/tools/sphinx',
+      path: '/dashboard/sphinx',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -140,7 +140,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Convert Notion document pages into print-ready PDF scrolls. Choose visual templates, page margins, and download instantly.',
       status: 'locked',
       actionText: 'Open PDF Exporter',
-      path: '/dashboard/tools/pdf',
+      path: '/dashboard/pdf',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -157,7 +157,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Send bulk email newsletters and template campaigns directly to contact lists inside your Notion database scrolls. Map columns to variables and track delivery status.',
       status: 'locked',
       actionText: 'Open Mail Campaigns',
-      path: '/dashboard/tools/mail',
+      path: '/dashboard/mail',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -172,7 +172,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       description: 'Auto-publish database rows containing drafted captions and images directly to social channels. Configure custom webhooks and track publishing dates.',
       status: 'locked',
       actionText: 'Open Social Dispatch',
-      path: '/dashboard/tools/social',
+      path: '/dashboard/social',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
           <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />

@@ -77,6 +77,7 @@ export const config = {
     '/dashboard',
     '/dashboard/:path*',
     '/login',
-    '/signup'
+    '/signup',
+    '/qr', '/charts', '/forms', '/publisher', '/sphinx', '/pdf', '/mail', '/social', '/settings'
   ]
 };

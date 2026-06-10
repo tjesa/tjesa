@@ -340,7 +340,7 @@ export default function PublicPrintClient({
           <span className="control-title">Scroll Print Chamber</span>
         </div>
         <div className="btn-group">
-          <a href="/dashboard/tools/pdf" className="action-btn action-btn-secondary">
+          <a href="/dashboard/pdf" className="action-btn action-btn-secondary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }}>
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>

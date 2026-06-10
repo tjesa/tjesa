@@ -108,7 +108,7 @@ export async function GET(request, { params }) {
     await saveAccount(account);
 
     // Redirect to the specific tool page after connection
-    const toolPath = tool === 'qr' ? '/dashboard/tools/qr' : tool === 'forms' ? '/dashboard/tools/forms' : tool === 'charts' ? '/dashboard/tools/charts' : tool === 'publisher' ? '/dashboard/tools/publisher' : tool === 'sphinx' ? '/dashboard/tools/sphinx' : tool === 'pdf' ? '/dashboard/tools/pdf' : tool === 'mail' ? '/dashboard/tools/mail' : tool === 'social' ? '/dashboard/tools/social' : '/dashboard';
+    const toolPath = tool === 'qr' ? '/dashboard/qr' : tool === 'forms' ? '/dashboard/forms' : tool === 'charts' ? '/dashboard/charts' : tool === 'publisher' ? '/dashboard/publisher' : tool === 'sphinx' ? '/dashboard/sphinx' : tool === 'pdf' ? '/dashboard/pdf' : tool === 'mail' ? '/dashboard/mail' : tool === 'social' ? '/dashboard/social' : '/dashboard';
     const response = NextResponse.redirect(new URL(toolPath, request.url));
     
     // Set secure cookie with the RAW Notion workspace ID (no tool suffix)

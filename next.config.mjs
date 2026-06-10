@@ -2,15 +2,18 @@
 const nextConfig = {
   async redirects() {
     return [
-      { source: '/qr',        destination: '/dashboard/tools/qr',        permanent: true },
-      { source: '/charts',    destination: '/dashboard/tools/charts',    permanent: true },
-      { source: '/forms',     destination: '/dashboard/tools/forms',     permanent: true },
-      { source: '/publisher', destination: '/dashboard/tools/publisher', permanent: true },
-      { source: '/sphinx',    destination: '/dashboard/tools/sphinx',    permanent: true },
-      { source: '/pdf',       destination: '/dashboard/tools/pdf',       permanent: true },
-      { source: '/mail',      destination: '/dashboard/tools/mail',      permanent: true },
-      { source: '/social',    destination: '/dashboard/tools/social',    permanent: true },
-      { source: '/settings',  destination: '/dashboard/settings',        permanent: true },
+      // Short URL shortcuts
+      { source: '/qr',        destination: '/dashboard/qr',        permanent: true },
+      { source: '/charts',    destination: '/dashboard/charts',    permanent: true },
+      { source: '/forms',     destination: '/dashboard/forms',     permanent: true },
+      { source: '/publisher', destination: '/dashboard/publisher', permanent: true },
+      { source: '/sphinx',    destination: '/dashboard/sphinx',    permanent: true },
+      { source: '/pdf',       destination: '/dashboard/pdf',       permanent: true },
+      { source: '/mail',      destination: '/dashboard/mail',      permanent: true },
+      { source: '/social',    destination: '/dashboard/social',    permanent: true },
+      { source: '/settings',  destination: '/dashboard/settings',  permanent: true },
+      // Backward compat — old /dashboard/tools/* URLs
+      { source: '/dashboard/tools/:tool', destination: '/dashboard/:tool', permanent: true },
     ];
   },
 };
