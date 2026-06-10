@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import DashboardHub from '@/components/DashboardHub';
-import { getAnyAccountForWorkspace, getAccountsForUser, getConfigs } from '@/lib/db';
+import { getAnyAccountForWorkspace, getAccountsForUser, getAccount, getConfigs } from '@/lib/db';
 import { getCurrentUser } from '@/lib/supabase/server';
 
 export default async function DashboardPage() {
@@ -20,6 +20,19 @@ export default async function DashboardPage() {
   if (!workspaceId && userAccounts && userAccounts.length > 0) {
     const firstAccount = userAccounts[0];
     workspaceId = firstAccount.workspace_id.split('_')[0];
+  }
+
+  // Merge in tool accounts by workspace_id — handles user_id mismatch on save
+  if (workspaceId) {
+    const toolSuffixes = ['qr', 'forms', 'charts', 'publisher', 'sphinx', 'pdf', 'mail', 'social'];
+    const toolAccounts = await Promise.all(
+      toolSuffixes.map(t => getAccount(`${workspaceId}_${t}`))
+    );
+    toolAccounts.forEach(ta => {
+      if (ta && !userAccounts.some(a => a.workspace_id === ta.workspace_id)) {
+        userAccounts.push(ta);
+      }
+    });
   }
 
   // Fetch configs for all connected accounts (tools)
