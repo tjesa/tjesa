@@ -92,8 +92,8 @@ export async function POST(request) {
     const pages = [];
 
     while (hasMore) {
-      const response = await notion.dataSources.query({
-        data_source_id: databaseId,
+      const response = await notion.databases.query({
+        database_id: databaseId,
         start_cursor: startCursor,
         page_size: 100
       });
