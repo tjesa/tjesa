@@ -8,6 +8,7 @@ export async function GET(request) {
   const bg = searchParams.get('bg') || 'F6F0E0';
   const size = parseInt(searchParams.get('size') || '400', 10);
   const margin = parseInt(searchParams.get('margin') || '2', 10);
+  const ecl = ['L', 'M', 'Q', 'H'].includes(searchParams.get('ecl')) ? searchParams.get('ecl') : 'M';
 
   if (!data) {
     return new NextResponse('Missing data parameter', { status: 400 });
@@ -25,9 +26,10 @@ export async function GET(request) {
       type: 'png',
       width: isNaN(size) ? 400 : size,
       margin: isNaN(margin) ? 2 : margin,
+      errorCorrectionLevel: ecl,
       color: {
-        dark: fgColor, // Customized foreground color
-        light: bgColor // Customized background color
+        dark: fgColor,
+        light: bgColor
       }
     });
 

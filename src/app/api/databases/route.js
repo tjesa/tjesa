@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Client } from '@notionhq/client';
 import { getAccount } from '@/lib/db';
-import { pollAndSync } from '@/lib/poller';
 
 export async function GET(request) {
-  // Fire background poll & sync loop (non-blocking)
-  pollAndSync().catch(err => console.error('[Tjesa Poller Trigger Error]:', err));
-
   // Retrieve workspace ID from cookies
   const workspaceId = request.cookies.get('tjesa_workspace_id')?.value;
 
@@ -45,8 +41,8 @@ export async function GET(request) {
       // Categorize columns by their data types
       Object.keys(properties).forEach(key => {
         const prop = properties[key];
-        // URLs can come from URL fields, Rich Text fields, or Title fields
-        if (['url', 'rich_text', 'title'].includes(prop.type)) {
+        // URLs can come from URL fields, Rich Text fields, Title fields, or Formula fields
+        if (['url', 'rich_text', 'title', 'formula'].includes(prop.type)) {
           urlColumns.push({ name: key, type: prop.type });
         }
         // QR Codes can be written into Files & Media fields (renders image) or Rich Text / URL fields (renders links)
