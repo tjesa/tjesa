@@ -70,12 +70,13 @@ async function syncQRGenerator(account, config) {
   const pages = [];
 
   while (hasMore) {
-    const response = await notion.databases.query({
-      database_id: config.database_id,
+    const response = await notion.dataSources.query({
+      data_source_id: config.database_id,
+      result_type: 'page',
       start_cursor: startCursor,
       page_size: 100
     });
-    pages.push(...response.results);
+    pages.push(...response.results.filter(r => r.object === 'page'));
     hasMore = response.has_more;
     startCursor = response.next_cursor;
   }
@@ -176,9 +177,15 @@ async function syncQRGenerator(account, config) {
     console.log(`[Tjesa Poller] Successfully sync'd ${successCount} QR codes for database "${config.database_name}"`);
   }
 
+  // Only advance last_sync when we actually processed pages, so rows edited
+  // before a failed/empty sync are not permanently skipped.
+  const newLastSync = totalCount > 0 && successCount === 0 && !hasUpdated
+    ? config.last_sync
+    : syncStartTime;
+
   await saveConfig({
     ...config,
-    last_sync: syncStartTime,
+    last_sync: newLastSync,
     last_sync_success_count: successCount,
     last_sync_total_count: totalCount
   });

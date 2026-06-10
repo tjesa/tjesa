@@ -92,12 +92,13 @@ export async function POST(request) {
     const pages = [];
 
     while (hasMore) {
-      const response = await notion.databases.query({
-        database_id: databaseId,
+      const response = await notion.dataSources.query({
+        data_source_id: databaseId,
+        result_type: 'page',
         start_cursor: startCursor,
         page_size: 100
       });
-      pages.push(...response.results);
+      pages.push(...response.results.filter(r => r.object === 'page'));
       hasMore = response.has_more;
       startCursor = response.next_cursor;
     }
