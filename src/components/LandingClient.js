@@ -475,7 +475,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             {/* Main title */}
             <h1 className="landing-hero-title" style={{
               fontSize: 'clamp(4.5rem, 12vw, 9rem)', fontFamily: 'var(--font-headings)',
-              fontWeight: 700, letterSpacing: '0.22em', lineHeight: 0.9, marginBottom: '28px',
+              fontWeight: 700, letterSpacing: '0.22em', lineHeight: 0.9, paddingBottom: '0.1em', marginBottom: 'calc(28px - 0.1em)',
             }}>
               TJESA
             </h1>
