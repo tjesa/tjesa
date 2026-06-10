@@ -40,8 +40,19 @@ export async function middleware(request) {
     user = data?.user;
   }
 
-  const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
-  const isAuthPage = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup';
+  const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
+  const isAppSubdomain = hostname.startsWith('app.');
+
+  const isDashboard = pathname.startsWith('/dashboard');
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+  // app.tjesa.com root → /dashboard
+  if (isAppSubdomain && pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
 
   if (isAuthPage) {
     const url = request.nextUrl.clone();
@@ -60,6 +71,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
+    '/',
     '/dashboard',
     '/dashboard/:path*',
     '/login',
