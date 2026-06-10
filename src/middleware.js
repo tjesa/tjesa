@@ -27,7 +27,6 @@ export async function middleware(request) {
     }
   );
 
-  // Refresh session if expired - required for Server Components
   const bypassActive = request.cookies.get('tjesa_bypass_active')?.value === 'true';
   let user = null;
   if (bypassActive) {
@@ -43,18 +42,22 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
   const isAppSubdomain = hostname.startsWith('app.');
+  const isTjesaDomain = hostname.endsWith('tjesa.com');
 
   const isDashboard = pathname.startsWith('/dashboard');
   const isAuthPage = pathname === '/login' || pathname === '/signup';
 
-  // app.tjesa.com root → /dashboard
-  if (isAppSubdomain && pathname === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+  // /dashboard on non-app tjesa.com domains → app.tjesa.com
+  if (isDashboard && isTjesaDomain && !isAppSubdomain) {
+    return NextResponse.redirect(`https://app.tjesa.com${pathname}`);
   }
 
-  // On live domain, login/signup are closed during waitlist phase
+  // app.tjesa.com is dashboard-only — all other paths go to www.tjesa.com
+  if (isAppSubdomain && isTjesaDomain && !isDashboard) {
+    return NextResponse.redirect(`https://www.tjesa.com${pathname}`);
+  }
+
+  // Waitlist phase: block login/signup on live domain for unauthenticated users
   if (isAuthPage && isTjesaDomain && !user) {
     return NextResponse.redirect('https://www.tjesa.com');
   }
@@ -66,11 +69,12 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // Unauthenticated users visiting dashboard → send to login (not /, avoids loop on app subdomain)
+  // Unauthenticated users visiting dashboard → login on main domain
   if (isDashboard && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+    const loginUrl = isTjesaDomain
+      ? 'https://www.tjesa.com/login'
+      : `${request.nextUrl.origin}/login`;
+    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;
