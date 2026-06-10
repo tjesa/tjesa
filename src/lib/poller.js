@@ -84,13 +84,9 @@ async function syncQRGenerator(account, config) {
   let successCount = 0;
   let totalCount = pages.length;
   let hasUpdated = false;
-  const lastSyncTime = config.last_sync ? new Date(config.last_sync).getTime() : 0;
 
   for (const page of pages) {
     try {
-      const pageEditedTime = new Date(page.last_edited_time).getTime();
-      if (lastSyncTime && pageEditedTime <= lastSyncTime) continue;
-
       // Trigger evaluation
       let conditionMet = true;
       if (triggerType === 'checkbox') {
@@ -177,15 +173,9 @@ async function syncQRGenerator(account, config) {
     console.log(`[Tjesa Poller] Successfully sync'd ${successCount} QR codes for database "${config.database_name}"`);
   }
 
-  // Only advance last_sync when we actually processed pages, so rows edited
-  // before a failed/empty sync are not permanently skipped.
-  const newLastSync = totalCount > 0 && successCount === 0 && !hasUpdated
-    ? config.last_sync
-    : syncStartTime;
-
   await saveConfig({
     ...config,
-    last_sync: newLastSync,
+    last_sync: syncStartTime,
     last_sync_success_count: successCount,
     last_sync_total_count: totalCount
   });
