@@ -46,6 +46,12 @@ export async function middleware(request) {
 
   const isDashboard = pathname.startsWith('/dashboard');
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isTjesaDomain = hostname.endsWith('tjesa.com');
+
+  // On deployed tjesa.com domains, /dashboard must be on app.tjesa.com
+  if (isDashboard && isTjesaDomain && !isAppSubdomain) {
+    return NextResponse.redirect(`https://app.tjesa.com${pathname}`);
+  }
 
   // app.tjesa.com root → /dashboard
   if (isAppSubdomain && pathname === '/') {
