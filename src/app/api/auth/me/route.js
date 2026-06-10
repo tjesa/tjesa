@@ -28,6 +28,20 @@ export async function GET(request) {
     }
   }
 
+  // Merge in tool-specific accounts by workspace_id so the sidebar green dot
+  // lights up even when the account was saved with a different/null user_id.
+  if (workspaceId) {
+    const toolSuffixes = ['qr', 'forms', 'charts', 'publisher', 'sphinx', 'pdf', 'mail', 'social'];
+    const toolAccounts = await Promise.all(
+      toolSuffixes.map(t => getAccount(`${workspaceId}_${t}`))
+    );
+    toolAccounts.forEach(ta => {
+      if (ta && !userAccounts.some(a => a.workspace_id === ta.workspace_id)) {
+        userAccounts.push(ta);
+      }
+    });
+  }
+
   let account = null;
   if (workspaceId) {
     account = await getAccount(workspaceId);

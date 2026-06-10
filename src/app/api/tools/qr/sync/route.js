@@ -105,8 +105,13 @@ export async function POST(request) {
 
     totalCount = pages.length;
 
-    for (const page of pages) {
+    for (const partialPage of pages) {
       try {
+        // Upgrade PartialPageObjectResponse (only has id/object, no properties) to full page
+        const page = partialPage.properties
+          ? partialPage
+          : await notion.pages.retrieve({ page_id: partialPage.id });
+
         // Trigger evaluation
         let conditionMet = true;
         if (triggerType === 'checkbox') {
