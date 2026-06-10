@@ -54,6 +54,11 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
+  // On live domain, login/signup are closed during waitlist phase
+  if (isAuthPage && isTjesaDomain && !user) {
+    return NextResponse.redirect('https://www.tjesa.com');
+  }
+
   // Authenticated users visiting login/signup → send to dashboard
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
