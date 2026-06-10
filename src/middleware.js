@@ -65,11 +65,12 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // Unauthenticated users visiting dashboard → send to login (not /, avoids loop on app subdomain)
+  // Unauthenticated users visiting dashboard → always send to login on main domain
   if (isDashboard && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+    const loginUrl = isTjesaDomain
+      ? 'https://www.tjesa.com/login'
+      : `${request.nextUrl.origin}/login`;
+    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;
