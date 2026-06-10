@@ -7,18 +7,10 @@ export async function POST(request) {
     await supabase.auth.signOut();
 
     const response = NextResponse.json({ success: true });
-    
-    // Clear workspace cookie as well
-    response.cookies.set('tjesa_workspace_id', '', {
-      path: '/',
-      maxAge: 0,
-    });
+    const cookieDomain = process.env.NODE_ENV === 'production' ? '.tjesa.com' : undefined;
 
-    // Clear bypass cookie
-    response.cookies.set('tjesa_bypass_active', '', {
-      path: '/',
-      maxAge: 0,
-    });
+    response.cookies.set('tjesa_workspace_id', '', { path: '/', maxAge: 0, domain: cookieDomain });
+    response.cookies.set('tjesa_bypass_active', '', { path: '/', maxAge: 0, domain: cookieDomain });
 
     return response;
   } catch (err) {

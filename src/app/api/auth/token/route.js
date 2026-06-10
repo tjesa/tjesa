@@ -44,7 +44,8 @@ export async function POST(request) {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
+      domain: process.env.NODE_ENV === 'production' ? '.tjesa.com' : undefined,
     });
 
     return response;

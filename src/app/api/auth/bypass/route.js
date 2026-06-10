@@ -13,7 +13,8 @@ export async function POST(request) {
     response.cookies.set('tjesa_bypass_active', 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
+      domain: process.env.NODE_ENV === 'production' ? '.tjesa.com' : undefined,
       path: '/'
     });
 
@@ -24,7 +25,8 @@ export async function POST(request) {
       response.cookies.set('tjesa_workspace_id', workspaceId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
+        maxAge: 60 * 60 * 24 * 30,
+      domain: process.env.NODE_ENV === 'production' ? '.tjesa.com' : undefined,
         path: '/'
       });
     } else {
