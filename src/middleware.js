@@ -43,19 +43,15 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
   const isAppSubdomain = hostname.startsWith('app.');
-  const isTjesaDomain = hostname.endsWith('tjesa.com');
 
   const isDashboard = pathname.startsWith('/dashboard');
   const isAuthPage = pathname === '/login' || pathname === '/signup';
 
-  // /dashboard on non-app tjesa.com domains → app.tjesa.com
-  if (isDashboard && isTjesaDomain && !isAppSubdomain) {
-    return NextResponse.redirect(`https://app.tjesa.com${pathname}`);
-  }
-
-  // app.tjesa.com is dashboard-only — all other paths go to www.tjesa.com
-  if (isAppSubdomain && isTjesaDomain && !isDashboard) {
-    return NextResponse.redirect(`https://www.tjesa.com${pathname}`);
+  // app.tjesa.com root → /dashboard
+  if (isAppSubdomain && pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
   }
 
   // Authenticated users visiting login/signup → send to dashboard
@@ -65,12 +61,11 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // Unauthenticated users visiting dashboard → always login on main domain
+  // Unauthenticated users visiting dashboard → send to login (not /, avoids loop on app subdomain)
   if (isDashboard && !user) {
-    const loginUrl = isTjesaDomain
-      ? 'https://www.tjesa.com/login'
-      : `${request.nextUrl.origin}/login`;
-    return NextResponse.redirect(loginUrl);
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
