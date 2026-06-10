@@ -47,34 +47,34 @@ export async function middleware(request) {
   const isDashboard = pathname.startsWith('/dashboard');
   const isAuthPage = pathname === '/login' || pathname === '/signup';
 
-  // /dashboard on non-app tjesa.com domains → app.tjesa.com
+  // /dashboard on www/tjesa.com → app.tjesa.com (where sessions live)
   if (isDashboard && isTjesaDomain && !isAppSubdomain) {
     return NextResponse.redirect(`https://app.tjesa.com${pathname}`);
   }
 
-  // app.tjesa.com is dashboard-only — all other paths go to www.tjesa.com
-  if (isAppSubdomain && isTjesaDomain && !isDashboard) {
+  // app.tjesa.com non-dashboard, non-auth paths → www.tjesa.com
+  // (login stays on app.tjesa.com so sessions are set on the right domain)
+  if (isAppSubdomain && isTjesaDomain && !isDashboard && !isAuthPage) {
     return NextResponse.redirect(`https://www.tjesa.com${pathname}`);
   }
 
-  // Waitlist phase: block login/signup on live domain for unauthenticated users
-  if (isAuthPage && isTjesaDomain && !user) {
+  // Waitlist phase: block login/signup on www.tjesa.com only
+  if (isAuthPage && !isAppSubdomain && isTjesaDomain && !user) {
     return NextResponse.redirect('https://www.tjesa.com');
   }
 
-  // Authenticated users visiting login/signup → send to dashboard
+  // Authenticated users visiting login/signup → dashboard
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
-  // Unauthenticated users visiting dashboard → login on main domain
+  // Unauthenticated dashboard → login on same domain (keeps session on app.tjesa.com)
   if (isDashboard && !user) {
-    const loginUrl = isTjesaDomain
-      ? 'https://www.tjesa.com/login'
-      : `${request.nextUrl.origin}/login`;
-    return NextResponse.redirect(loginUrl);
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
