@@ -54,15 +54,17 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  if (isAuthPage) {
+  // Authenticated users visiting login/signup → send to dashboard
+  if (isAuthPage && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
+  // Unauthenticated users visiting dashboard → send to login (not /, avoids loop on app subdomain)
   if (isDashboard && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
