@@ -148,7 +148,7 @@ export async function getAccountsForUser(userId) {
  * Save or update an account (identified by workspace_id)
  */
 export async function saveAccount(account) {
-  const bypass = account.user_id === '00000000-0000-0000-0000-000000000000' || await isBypassActive();
+  const bypass = account.user_id === '00000000-0000-0000-0000-000000000000';
   if (bypass) {
     const db = readLocalDb();
     db.accounts = db.accounts || [];
@@ -274,7 +274,7 @@ export async function getConfigs(workspaceId) {
  * Save or update a database synchronization config
  */
 export async function saveConfig(config) {
-  const bypass = await isBypassActive() || (readLocalDb().accounts || []).some(a => a.workspace_id.split('_')[0] === config.workspace_id.split('_')[0]);
+  const bypass = (readLocalDb().accounts || []).some(a => a.workspace_id.split('_')[0] === config.workspace_id.split('_')[0]);
 
   // Generate ID for new configs
   if (!config.id) {
