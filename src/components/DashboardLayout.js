@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
   const [accounts, setAccounts] = useState([]);
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [theme, setTheme] = useState('obsidian');
   const [brightness, setBrightness] = useState('dark');
 
@@ -65,8 +65,7 @@ export default function DashboardLayout({ children }) {
     try {
       const response = await fetch('/api/auth/signout', { method: 'POST' });
       if (response.ok) {
-        router.push('/login');
-        router.refresh();
+        router.push('/');
       }
     } catch (err) {
       console.error('[DashboardLayout] SignOut error:', err);
