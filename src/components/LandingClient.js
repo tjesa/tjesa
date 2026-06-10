@@ -66,14 +66,14 @@ function InstrumentIcon({ id, size = 24 }) {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const INSTRUMENTS = [
-  { id: 'forms', name: 'The Nile Scribe', subtitle: 'ADVANCED FORM BUILDER', status: 'live', description: 'Configure public-facing themed survey forms that map directly to Notion columns. Replies instantly create new rows in your database.' },
+  { id: 'forms', name: 'The Nile Scribe', subtitle: 'ADVANCED FORM BUILDER', status: 'coming-soon', description: 'Configure public-facing themed survey forms that map directly to Notion columns. Replies instantly create new rows in your database.' },
   { id: 'qr', name: 'The Glyph Carver', subtitle: 'QR CODE GENERATOR', status: 'live', description: 'Translate URLs in Notion columns into custom-colored, brandable QR Code images. Supports instant button triggers and automation.' },
-  { id: 'charts', name: 'The Aten Gazer', subtitle: 'ADVANCED ANALYTICS DASHBOARD', status: 'live', description: 'Transform dry Notion data columns into interactive charts — bar, pie, line — to track tasks, finances, or project progress.' },
-  { id: 'publisher', name: 'The Papyrus Publisher', subtitle: 'NOTION CMS & BLOGS', status: 'live', description: 'Publish blog posts and public-facing web pages directly from Notion database entries. Your CMS lives inside Notion.' },
-  { id: 'pdf', name: 'The Rosetta Press', subtitle: 'PDF GENERATOR', status: 'live', description: 'Export Notion pages and database records as beautifully formatted PDF documents with custom branding and layout options.' },
+  { id: 'charts', name: 'The Aten Gazer', subtitle: 'ADVANCED ANALYTICS DASHBOARD', status: 'coming-soon', description: 'Transform dry Notion data columns into interactive charts — bar, pie, line — to track tasks, finances, or project progress.' },
+  { id: 'publisher', name: 'The Papyrus Publisher', subtitle: 'NOTION CMS & BLOGS', status: 'coming-soon', description: 'Publish blog posts and public-facing web pages directly from Notion database entries. Your CMS lives inside Notion.' },
+  { id: 'pdf', name: 'The Rosetta Press', subtitle: 'PDF GENERATOR', status: 'coming-soon', description: 'Export Notion pages and database records as beautifully formatted PDF documents with custom branding and layout options.' },
   { id: 'mail', name: 'The Nile Dispatch', subtitle: 'EMAIL CAMPAIGNS', status: 'coming-soon', description: 'Send branded email campaigns driven entirely by your Notion database. Write in Notion, dispatch to your subscribers.' },
   { id: 'social', name: 'The Royal Herald', subtitle: 'SOCIAL MEDIA PUBLISHER', status: 'coming-soon', description: 'Schedule and publish social posts automatically from Notion. One database, all your social channels synchronized.' },
-  { id: 'sphinx', name: 'The Sphinx Shield', subtitle: 'PORTAL SECURITY & VAULTS', status: 'live', description: 'Password-protect any public-facing TJESA output with a secure gate. Control who enters each portal you create.' },
+  { id: 'sphinx', name: 'The Sphinx Shield', subtitle: 'PORTAL SECURITY & VAULTS', status: 'coming-soon', description: 'Password-protect any public-facing TJESA output with a secure gate. Control who enters each portal you create.' },
   { id: 'booking', name: 'The Temple Registrar', subtitle: 'BOOKING & SCHEDULING', status: 'coming-soon', description: 'Reserve and schedule sessions, consultations, or resources directly into Notion calendar databases with visual booking widgets.' },
   { id: 'invoice', name: 'The Pharaoh\'s Treasury', subtitle: 'INVOICE & PAYMENT SYSTEM', status: 'coming-soon', description: 'Generate invoice bills and collect secure Stripe payments linked straight to your Notion transaction logs.' },
   { id: 'portal', name: 'The Sacred Sanctuary', subtitle: 'CLIENT PORTAL GENERATOR', status: 'coming-soon', description: 'Create private login areas for your clients to access their personal Notion database rows, files, and project updates.' },
@@ -465,7 +465,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                 fontSize: '11px', fontFamily: 'var(--font-headings)', letterSpacing: '0.12em', color: '#34D399',
               }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34D399', display: 'inline-block', animation: 'badgePulse 2s ease infinite' }} />
-                NOW IN EARLY ACCESS — INSTRUMENTS ARE LIVE
+                NOW IN EARLY ACCESS — QR CODE GENERATOR IS LIVE
               </div>
             </div>
 
@@ -570,7 +570,72 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           </div>
         </div>
 
-        {/* ── COMBINED DECK & WAITLIST SECTION ────────────────────────────────── */}
+        {/* ── HOW IT WORKS ────────────────────────────────────────────────────── */}
+        <section style={{ padding: '100px 32px 0', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <div className="section-label" style={{ marginBottom: '16px' }}>How It Works</div>
+            <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', letterSpacing: '0.08em', lineHeight: 1.2, margin: '0 0 16px' }}>
+              Notion database → live product
+            </h2>
+            <p style={{ fontSize: '15px', color: 'var(--sand-dim)', maxWidth: '460px', margin: '0 auto', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
+              Three steps from your existing Notion workspace to a live, shareable output.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+            {[
+              {
+                step: '01',
+                title: 'Connect Notion',
+                description: 'Link your Notion workspace with one click via OAuth. No API keys, no configuration files — just click and authorize.',
+                icon: <Key size={20} />,
+              },
+              {
+                step: '02',
+                title: 'Pick an Instrument',
+                description: 'Select a database, choose a tool — form, chart, QR code, PDF — and map your columns to the right fields.',
+                icon: <Zap size={20} />,
+              },
+              {
+                step: '03',
+                title: 'Go Live Instantly',
+                description: 'Your output is live at a shareable URL the moment you save. Responses write back to Notion automatically.',
+                icon: <Globe size={20} />,
+              }
+            ].map((item, i) => (
+              <div key={item.step} style={{
+                background: 'rgba(20,19,17,0.5)',
+                border: '1px solid rgba(212,175,55,0.1)',
+                borderRadius: '16px',
+                padding: '32px 28px',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.04))',
+                    border: '1px solid rgba(212,175,55,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--gold)', flexShrink: 0,
+                  }}>
+                    {item.icon}
+                  </div>
+                  <span style={{ fontSize: '36px', fontFamily: 'var(--font-headings)', color: 'rgba(212,175,55,0.1)', lineHeight: 1 }}>
+                    {item.step}
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '16px', letterSpacing: '0.05em', marginBottom: '10px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)' }}>
+                  {item.title}
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-body)' }}>
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+{/* ── COMBINED DECK & WAITLIST SECTION ────────────────────────────────── */}
         <section id="features" style={{
           padding: '100px 32px',
           maxWidth: '1200px',
