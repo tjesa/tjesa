@@ -1,23 +1,27 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 import CustomSelect from './CustomSelect';
 
-import { 
-  Scroll, 
-  QrCode, 
-  BarChart3, 
-  BookOpen, 
-  FileDown, 
-  Send, 
-  Megaphone, 
-  Shield, 
-  Zap, 
-  Lock, 
-  Globe, 
+const AnkhScene = dynamic(() => import('./AnkhScene'), { ssr: false });
+const EyeScene  = dynamic(() => import('./EyeScene'),  { ssr: false });
+
+import {
+  Scroll,
+  QrCode,
+  BarChart3,
+  BookOpen,
+  FileDown,
+  Send,
+  Megaphone,
+  Shield,
+  Zap,
+  Lock,
+  Globe,
   Palette,
   Sparkles,
   AlertCircle,
@@ -33,7 +37,9 @@ import {
   History,
   Key,
   MessageCircle,
-  Download
+  Download,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 function InstrumentIcon({ id, size = 24 }) {
@@ -143,6 +149,96 @@ function AnimatedCounter({ target, suffix = '', duration = 2000 }) {
 
 // FaqItem component removed to streamline layout
 
+// ─── (Pharaoh SVG removed — replaced with 3D Eye of Horus) ───────────────────
+function _unused_FloatingPharaoh() {
+  return (
+    <div className="pharaoh-character">
+      <svg viewBox="0 0 130 310" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+        <defs>
+          <radialGradient id="pharaohAura" cx="50%" cy="40%" r="55%">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.25"/>
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0"/>
+          </radialGradient>
+        </defs>
+
+        {/* Aura glow behind whole figure */}
+        <ellipse cx="62" cy="140" rx="52" ry="115" fill="url(#pharaohAura)"/>
+
+        {/* ── NEMES HEADDRESS ── */}
+        {/* Top crown band */}
+        <rect x="26" y="12" width="68" height="11" rx="3" fill="#C9A84C"/>
+        {/* Uraeus cobra */}
+        <path d="M 57 12 C 55 7 53 4 56 1 C 59 -1 63 2 60 7 L 57 12 Z" fill="#FFD700"/>
+        {/* Main cloth dome */}
+        <path d="M 26 18 C 26 18 44 26 60 26 C 76 26 94 18 94 18 L 90 52 C 90 52 78 58 60 58 C 42 58 30 52 26 52 Z" fill="#C9A84C" opacity="0.88"/>
+        {/* Front lappet (falls left over chest) */}
+        <path d="M 30 52 C 28 56 24 66 22 84 C 20 102 22 118 26 126 L 38 124 C 34 114 32 100 34 84 C 36 68 40 56 40 52 Z" fill="#C9A84C" opacity="0.8"/>
+        {/* Back lappet (falls right behind shoulder) */}
+        <path d="M 90 52 C 92 56 98 68 100 86 C 102 102 100 114 98 122 L 87 120 C 89 112 91 100 89 86 C 87 68 83 56 80 52 Z" fill="#C9A84C" opacity="0.75"/>
+        {/* Lappet stripes */}
+        <line x1="22" y1="72" x2="38" y2="70" stroke="#0D0D0B" strokeWidth="2" opacity="0.22"/>
+        <line x1="21" y1="86" x2="37" y2="84" stroke="#0D0D0B" strokeWidth="2" opacity="0.22"/>
+        <line x1="21" y1="100" x2="36" y2="98" stroke="#0D0D0B" strokeWidth="2" opacity="0.22"/>
+        <line x1="22" y1="114" x2="37" y2="113" stroke="#0D0D0B" strokeWidth="2" opacity="0.22"/>
+
+        {/* ── FACE (profile, facing left) ── */}
+        <path d="M 38 22 C 29 27 18 38 16 54 C 14 68 16 80 23 90 C 27 96 34 100 40 100 C 46 100 50 94 48 86 C 46 80 39 76 41 67 C 43 58 49 52 47 43 C 45 36 43 28 38 22 Z" fill="#C9A84C" opacity="0.88"/>
+        {/* Eye of Horus — glowing */}
+        <ellipse cx="27" cy="57" rx="7" ry="5" fill="#141410" opacity="0.95"/>
+        <ellipse cx="27" cy="57" rx="3" ry="3" fill="#FFD700" style={{ animation: 'eyeGlowPulse 3.5s ease-in-out infinite' }}/>
+        {/* Kohl liner */}
+        <path d="M 14 57 L 22 57" stroke="#141410" strokeWidth="1.5" opacity="0.5"/>
+        <path d="M 34 55 L 40 52" stroke="#141410" strokeWidth="1.5" opacity="0.5"/>
+        {/* Nose bump */}
+        <path d="M 15 68 C 12 72 13 78 17 80" stroke="#0D0D0B" strokeWidth="1.5" fill="none" opacity="0.18"/>
+
+        {/* ── FALSE BEARD ── */}
+        <path d="M 21 98 L 16 112 C 15 116 18 120 22 119 L 28 117 L 32 101 Z" fill="#C9A84C" opacity="0.78"/>
+
+        {/* ── NECK ── */}
+        <rect x="34" y="98" width="15" height="16" rx="3" fill="#C9A84C" opacity="0.82"/>
+
+        {/* ── BROAD COLLAR (Wesekh) ── */}
+        <path d="M 20 112 Q 52 130 92 114 L 94 122 Q 52 142 18 122 Z" fill="#C9A84C" opacity="0.68"/>
+        <path d="M 22 116 Q 52 132 90 118" stroke="#FFD700" strokeWidth="1" fill="none" opacity="0.45"/>
+        <path d="M 21 122 Q 52 138 90 124" stroke="#FFD700" strokeWidth="1" fill="none" opacity="0.28"/>
+
+        {/* ── TORSO ── */}
+        <path d="M 20 120 L 92 114 L 96 202 L 16 202 Z" fill="#C9A84C" opacity="0.7"/>
+
+        {/* ── ARMS ── */}
+        {/* Right arm raised (to staff) */}
+        <path d="M 90 120 L 102 90 L 110 95 L 98 126 Z" fill="#C9A84C" opacity="0.72"/>
+        {/* Left arm lowered (crook) */}
+        <path d="M 20 122 L 8 146 L 15 152 L 27 128 Z" fill="#C9A84C" opacity="0.72"/>
+
+        {/* ── SHENDYT KILT ── */}
+        <path d="M 16 200 L 96 200 L 102 266 L 10 266 Z" fill="#C9A84C" opacity="0.66"/>
+        {/* Kilt apron panel */}
+        <path d="M 40 200 L 72 200 L 74 244 L 38 244 Z" fill="#FFD700" opacity="0.18"/>
+        <line x1="56" y1="200" x2="58" y2="266" stroke="#FFD700" strokeWidth="1" opacity="0.22"/>
+
+        {/* ── LEGS ── */}
+        <rect x="18" y="264" width="24" height="22" rx="4" fill="#C9A84C" opacity="0.7"/>
+        <rect x="68" y="264" width="24" height="22" rx="4" fill="#C9A84C" opacity="0.65"/>
+        {/* Sandal bases */}
+        <path d="M 14 284 L 46 284 L 42 292 L 12 290 Z" fill="#C9A84C" opacity="0.6"/>
+        <path d="M 64 286 L 96 286 L 95 292 L 62 292 Z" fill="#C9A84C" opacity="0.55"/>
+
+        {/* ── WAS SCEPTER ── */}
+        {/* Shaft */}
+        <line x1="110" y1="82" x2="118" y2="290" stroke="#C9A84C" strokeWidth="4" strokeLinecap="round" opacity="0.78"/>
+        {/* Was head (animal top — stylized) */}
+        <path d="M 103 80 C 101 70 106 62 113 65 C 119 68 120 76 116 83 L 110 85 Z" fill="#FFD700" style={{ animation: 'staffTopPulse 4s ease-in-out infinite' }}/>
+        {/* Ears on Was head */}
+        <path d="M 104 72 C 100 66 102 60 106 62" stroke="#FFD700" strokeWidth="2" fill="none" opacity="0.7"/>
+        {/* Forked base */}
+        <path d="M 115 284 L 111 292 L 121 292 L 118 284 Z" fill="#C9A84C" opacity="0.8"/>
+      </svg>
+    </div>
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const router = useRouter();
@@ -158,6 +254,46 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const [waitlistSuccess, setWaitlistSuccess] = useState(false);
   const [waitlistError, setWaitlistError] = useState('');
   const [waitlistCount, setWaitlistCount] = useState(initialWaitlistCount);
+
+  // Audio
+  const audioRef = useRef(null);
+  const fadingRef = useRef(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  const toggleMusic = useCallback(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/audio/mystic-ambient.mp3');
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0;
+    }
+    if (fadingRef.current) clearInterval(fadingRef.current);
+
+    if (isMusicPlaying) {
+      let vol = audioRef.current.volume;
+      fadingRef.current = setInterval(() => {
+        vol = Math.max(0, vol - 0.02);
+        audioRef.current.volume = vol;
+        if (vol <= 0) { clearInterval(fadingRef.current); audioRef.current.pause(); }
+      }, 40);
+      setIsMusicPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      let vol = 0;
+      fadingRef.current = setInterval(() => {
+        vol = Math.min(0.45, vol + 0.015);
+        audioRef.current.volume = vol;
+        if (vol >= 0.45) clearInterval(fadingRef.current);
+      }, 40);
+      setIsMusicPlaying(true);
+    }
+  }, [isMusicPlaying]);
+
+  useEffect(() => {
+    return () => {
+      if (fadingRef.current) clearInterval(fadingRef.current);
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    };
+  }, []);
 
   // Portal Modal States
   const [portalOpen, setPortalOpen] = useState(false);
@@ -286,6 +422,40 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
+        @keyframes pharaohFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-14px); }
+        }
+        @keyframes pharaohFadeIn {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes eyeGlowPulse {
+          0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 3px #FFD700); }
+          50% { opacity: 1; filter: drop-shadow(0 0 8px #FFD700) drop-shadow(0 0 14px rgba(212,175,55,0.6)); }
+        }
+        @keyframes staffTopPulse {
+          0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(255,215,0,0.4)); }
+          50% { opacity: 1; filter: drop-shadow(0 0 12px rgba(255,215,0,0.9)); }
+        }
+        @keyframes musicRipple {
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(2.2); opacity: 0; }
+        }
+        .eye-scene-wrap {
+          position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+          width: 360px; height: 340px;
+          pointer-events: none; z-index: 0;
+          opacity: 0; animation: fadeIn 2s ease 1.4s forwards;
+        }
+        @media (max-width: 1100px) { .eye-scene-wrap { display: none !important; } }
+        .ankh-scene-wrap {
+          position: absolute; left: 3%; top: 50%; transform: translateY(-50%);
+          width: 260px; height: 380px;
+          pointer-events: none; z-index: 0;
+          opacity: 0; animation: fadeIn 2s ease 1.2s forwards;
+        }
+        @media (max-width: 960px) { .ankh-scene-wrap { display: none !important; } }
         @keyframes pricingGlow {
           0%, 100% { box-shadow: 0 0 24px rgba(212,175,55,0.15), 0 20px 40px rgba(0,0,0,0.6); }
           50% { box-shadow: 0 0 40px rgba(212,175,55,0.28), 0 20px 40px rgba(0,0,0,0.6); }
@@ -437,6 +607,34 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           </div>
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {/* Music toggle */}
+            <button
+              onClick={toggleMusic}
+              title={isMusicPlaying ? 'Silence the chamber' : 'Awaken the ambient'}
+              style={{
+                position: 'relative',
+                width: '34px', height: '34px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: isMusicPlaying ? 'rgba(212,175,55,0.12)' : 'transparent',
+                border: `1px solid ${isMusicPlaying ? 'rgba(212,175,55,0.4)' : 'rgba(212,175,55,0.18)'}`,
+                borderRadius: '8px', cursor: 'pointer',
+                color: isMusicPlaying ? 'var(--gold)' : 'var(--sand-dark)',
+                transition: 'all 0.25s ease',
+              }}
+            >
+              {isMusicPlaying
+                ? <Volume2 size={15} />
+                : <VolumeX size={15} />
+              }
+              {isMusicPlaying && (
+                <span style={{
+                  position: 'absolute', inset: 0, borderRadius: '8px',
+                  border: '1px solid rgba(212,175,55,0.5)',
+                  animation: 'musicRipple 1.8s ease-out infinite',
+                  pointerEvents: 'none',
+                }}/>
+              )}
+            </button>
             <button onClick={() => scrollTo('waitlist-section')} className="landing-cta-primary" style={{ padding: '8px 18px', fontSize: '11px' }}>Join Waitlist</button>
           </div>
         </nav>
@@ -453,6 +651,16 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             <div style={{ position: 'absolute', top: '45%', right: '2%', width: '440px', height: '440px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,70,138,0.12) 0%, transparent 70%)', animation: 'orbFloat2 18s ease-in-out infinite' }} />
             <div style={{ position: 'absolute', bottom: '5%', left: '25%', width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%)', animation: 'orbFloat3 22s ease-in-out infinite' }} />
           </div>
+
+          {/* 3D Ankh — left guardian */}
+          {/* <div className="ankh-scene-wrap">
+            <AnkhScene />
+          </div> */}
+
+          {/* 3D Eye of Horus — right guardian */}
+          {/* <div className="eye-scene-wrap">
+            <EyeScene />
+          </div> */}
 
           {/* Hero Content */}
           <div style={{ position: 'relative', zIndex: 1, maxWidth: '820px', animation: 'fadeSlideUp 0.7s ease both' }}>
@@ -482,7 +690,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
 
             {/* Tagline */}
             <p style={{ fontSize: 'clamp(17px, 2.5vw, 22px)', color: 'var(--sand)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', lineHeight: 1.4, marginBottom: '14px' }}>
-              22 Sacred Instruments.<br />One Notion Workspace.
+              20+ Sacred Instruments.<br />One Notion Workspace.
             </p>
 
             <p style={{ fontSize: '15px', color: 'var(--sand-dim)', lineHeight: 1.75, maxWidth: '560px', margin: '0 auto 44px', fontFamily: 'var(--font-body)' }}>
@@ -504,7 +712,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             {/* Animated Stat Pills */}
             <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '56px' }}>
               {[
-                { value: '22', label: 'Sacred Instruments' },
+                { value: '20+', label: 'Sacred Instruments' },
                 { value: `${waitlistCount}+`, label: 'Architects Waiting' },
                 { value: '0', label: 'Lines of Code Needed' },
               ].map(stat => (
@@ -655,10 +863,10 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
               <div style={{ marginBottom: '28px' }}>
                 <div className="section-label" style={{ justifyContent: 'flex-start', marginBottom: '16px' }}>Sacred Instruments</div>
                 <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', margin: '0 0 12px', letterSpacing: '0.08em', lineHeight: 1.2 }}>
-                  22 Tools. One Workspace.
+                  20+ Tools. One Workspace.
                 </h2>
                 <p style={{ fontSize: '14px', color: 'var(--sand-dim)', lineHeight: 1.6, fontFamily: 'var(--font-body)', margin: 0 }}>
-                  A list of the Notion-integrated instruments we are building. Expand the vault to explore all 22 tools.
+                  A list of the Notion-integrated instruments we are building. Expand the vault to explore all 20+ tools.
                 </p>
               </div>
 
@@ -728,7 +936,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                     background: showAllTools ? 'rgba(212,175,55,0.08)' : 'transparent',
                   }}
                 >
-                  {showAllTools ? 'Close the Sacred Vault' : 'Reveal the Sacred Vault (View All 22 Tools)'}
+                  {showAllTools ? 'Close the Sacred Vault' : 'Reveal the Sacred Vault (View All 20+ Tools)'}
                   <svg
                     width="12"
                     height="12"
