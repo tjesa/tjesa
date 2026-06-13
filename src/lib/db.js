@@ -364,7 +364,7 @@ export async function getConfig(id) {
 /**
  * Save an email registration to the waitlist
  */
-export async function saveWaitlist(email, name = '', excitedTool = '') {
+export async function saveWaitlist(email, name = '', excitedTool = '', utmSource = '', utmMedium = '', utmCampaign = '') {
   const bypass = await isBypassActive();
   if (bypass) {
     const db = readLocalDb();
@@ -376,6 +376,9 @@ export async function saveWaitlist(email, name = '', excitedTool = '') {
       email: email.trim(), 
       name: name.trim(),
       excited_tool: excitedTool.trim(),
+      utm_source: utmSource.trim(),
+      utm_medium: utmMedium.trim(),
+      utm_campaign: utmCampaign.trim(),
       registered_at: new Date().toISOString() 
     };
     db.waitlist.push(entry);
@@ -392,23 +395,32 @@ export async function saveWaitlist(email, name = '', excitedTool = '') {
 
   if (existing) throw new Error('Email already registered');
 
-  const entry = { email: email.trim(), registered_at: new Date().toISOString() };
+  const entry = { 
+    email: email.trim(), 
+    name: name.trim(), 
+    excited_tool: excitedTool.trim(),
+    utm_source: utmSource.trim(),
+    utm_medium: utmMedium.trim(),
+    utm_campaign: utmCampaign.trim(),
+    registered_at: new Date().toISOString() 
+  };
 
   // Attempt to write all fields to Supabase, fallback to only email if columns don't exist
   try {
     const { data, error } = await supabase
       .from('waitlist')
-      .insert({ ...entry, name: name.trim(), excited_tool: excitedTool.trim() })
+      .insert(entry)
       .select()
       .single();
     if (!error && data) return data;
   } catch (err) {
-    console.warn('[db] Supabase insert with name/excited_tool failed, falling back to email only. Error:', err.message || err);
+    console.warn('[db] Supabase insert with name/excited_tool/UTMs failed, falling back to email only. Error:', err.message || err);
   }
 
+  const fallbackEntry = { email: email.trim(), registered_at: entry.registered_at };
   const { data, error } = await supabase
     .from('waitlist')
-    .insert(entry)
+    .insert(fallbackEntry)
     .select()
     .single();
   if (error) throw new Error('[db] saveWaitlist error: ' + error.message);
@@ -418,11 +430,8 @@ export async function saveWaitlist(email, name = '', excitedTool = '') {
     const db = readLocalDb();
     db.waitlist = db.waitlist || [];
     const localEntry = { 
-      id: data.id || Date.now(), 
-      email: email.trim(), 
-      name: name.trim(),
-      excited_tool: excitedTool.trim(),
-      registered_at: entry.registered_at 
+      ...entry,
+      id: data.id || Date.now()
     };
     db.waitlist.push(localEntry);
     writeLocalDb(db);

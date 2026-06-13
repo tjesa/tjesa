@@ -5,6 +5,40 @@ import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
 import { validateGateSession } from '@/lib/gate';
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  if (!id) return {};
+
+  try {
+    const config = await getConfig(id);
+    if (!config || !config.active || config.tool !== 'charts_observatory') {
+      return {
+        title: "Observatory Record Retracted",
+      };
+    }
+    const title = config.settings?.chart_title || config.database_name || "Notion Chart";
+    const description = config.settings?.chart_description || "Visualize database properties and progress as sleek, interactive charts.";
+    return {
+      title,
+      description,
+      openGraph: {
+        title: `${title} | Aten Gazer Chart`,
+        description,
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Aten Gazer Chart`,
+        description,
+      }
+    };
+  } catch (error) {
+    return {
+      title: "Public Chart",
+    };
+  }
+}
+
 export default async function PublicChartPage({ params }) {
   const { id } = await params;
 

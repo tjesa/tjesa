@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from './Header';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminClient({ account }) {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function AdminClient({ account }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 1. Fetch waitlist emails on mount
+  // 1. Fetch waitlist emails on mount + subscribe to real-time updates
   useEffect(() => {
     async function loadWaitlist() {
       try {
@@ -35,6 +36,41 @@ export default function AdminClient({ account }) {
     }
 
     loadWaitlist();
+
+    let channel;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('realtime-waitlist')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'waitlist' },
+          (payload) => {
+            console.log('Real-time waitlist signup received:', payload.new);
+            setEmails((prev) => {
+              if (prev.some(e => e.id === payload.new.id || e.email.toLowerCase() === payload.new.email.toLowerCase())) {
+                return prev;
+              }
+              const newEntry = { ...payload.new, newlyInserted: true };
+              return [newEntry, ...prev];
+            });
+          }
+        )
+        .subscribe();
+    } catch (realtimeErr) {
+      console.warn('[Real-time] Connection active fallback/bypass:', realtimeErr);
+    }
+
+    return () => {
+      if (channel) {
+        try {
+          const supabase = createClient();
+          supabase.removeChannel(channel);
+        } catch (removeErr) {
+          console.error(removeErr);
+        }
+      }
+    };
   }, []);
 
   const handleDisconnect = async () => {
@@ -53,11 +89,14 @@ export default function AdminClient({ account }) {
     if (emails.length === 0) return;
 
     // Build CSV content
-    const headers = ['Name', 'Email Address', 'Excited Tool', 'Registered At'];
+    const headers = ['Name', 'Email Address', 'Excited Tool', 'UTM Source', 'UTM Medium', 'UTM Campaign', 'Registered At'];
     const rows = emails.map(e => [
       e.name || '',
       e.email,
       e.excited_tool || '',
+      e.utm_source || '',
+      e.utm_medium || '',
+      e.utm_campaign || '',
       new Date(e.registered_at).toISOString()
     ]);
 
@@ -78,11 +117,27 @@ export default function AdminClient({ account }) {
     document.body.removeChild(link);
   };
 
-  // 3. Filter waitlist
+  // 3. Calculate metrics for the dashboard
+  const sourceCounts = {};
+  const toolCounts = {};
+
+  emails.forEach(e => {
+    const src = (e.utm_source || 'Direct / Organic').trim();
+    sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+
+    const tool = (e.excited_tool || 'None').trim();
+    toolCounts[tool] = (toolCounts[tool] || 0) + 1;
+  });
+
+  const sortedSources = Object.entries(sourceCounts).sort((a, b) => b[1] - a[1]);
+  const sortedTools = Object.entries(toolCounts).sort((a, b) => b[1] - a[1]);
+
+  // 4. Filter waitlist
   const filteredEmails = emails.filter(e => 
     e.email.toLowerCase().includes(search.toLowerCase()) ||
     (e.name && e.name.toLowerCase().includes(search.toLowerCase())) ||
-    (e.excited_tool && e.excited_tool.toLowerCase().includes(search.toLowerCase()))
+    (e.excited_tool && e.excited_tool.toLowerCase().includes(search.toLowerCase())) ||
+    (e.utm_source && e.utm_source.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -128,6 +183,68 @@ export default function AdminClient({ account }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
+            {/* Real-time Dashboard widgets */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '10px' }}>
+              
+              {/* Stat 1: Total Registrants */}
+              <GlowingCard title="Total Scribes Registered" subtitle="Real-time waitlist size">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '110px' }}>
+                  <div style={{ fontSize: '46px', fontFamily: 'var(--font-headings)', color: 'var(--gold)', letterSpacing: '0.05em', fontWeight: 'bold' }}>
+                    {emails.length}
+                  </div>
+                </div>
+              </GlowingCard>
+
+              {/* Stat 2: Top UTM Sources */}
+              <GlowingCard title="Traffic & UTM Channels" subtitle="Referral distribution breakdown">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '110px', overflowY: 'auto' }} className="sacred-scroll-list">
+                  {sortedSources.length === 0 ? (
+                    <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '36px 0' }}>No sources captured yet.</div>
+                  ) : (
+                    sortedSources.slice(0, 4).map(([src, count]) => {
+                      const percentage = Math.round((count / emails.length) * 100) || 0;
+                      return (
+                        <div key={src} style={{ fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <span style={{ color: 'var(--sand)', textTransform: 'capitalize', fontWeight: '500' }}>{src}</span>
+                            <span style={{ color: 'var(--gold-dim)' }}>{count} ({percentage}%)</span>
+                          </div>
+                          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                            <div style={{ width: `${percentage}%`, height: '100%', background: 'var(--gold-gradient)', borderRadius: '10px' }} />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </GlowingCard>
+
+              {/* Stat 3: Tool Popularity */}
+              <GlowingCard title="Sacred Tools of Choice" subtitle="Highest interest by tool category">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '110px', overflowY: 'auto' }} className="sacred-scroll-list">
+                  {sortedTools.length === 0 ? (
+                    <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '36px 0' }}>No tool selections recorded.</div>
+                  ) : (
+                    sortedTools.slice(0, 4).map(([tool, count]) => {
+                      const percentage = Math.round((count / emails.length) * 100) || 0;
+                      return (
+                        <div key={tool} style={{ fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <span style={{ color: 'var(--sand)', textTransform: 'capitalize', fontWeight: '500' }}>{tool}</span>
+                            <span style={{ color: 'var(--gold-dim)' }}>{count} ({percentage}%)</span>
+                          </div>
+                          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                            <div style={{ width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg, #8C6E2E, #C9A84C)', borderRadius: '10px' }} />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </GlowingCard>
+
+            </div>
+
             {/* Stats & Search Row */}
             <div style={{
               display: 'flex',
@@ -141,7 +258,7 @@ export default function AdminClient({ account }) {
                 <input 
                   className="kemet-input"
                   type="text"
-                  placeholder="Search name, email or tool..."
+                  placeholder="Search name, email, tool, or UTM source..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   style={{ padding: '10px 14px', fontSize: '14px' }}
@@ -151,7 +268,7 @@ export default function AdminClient({ account }) {
               {/* Stats & Export */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--sand-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.05em' }}>
-                  REGISTRANTS: <strong style={{ color: 'var(--gold)', fontSize: '14px' }}>{emails.length}</strong>
+                  SHOWING: <strong style={{ color: 'var(--gold)', fontSize: '14px' }}>{filteredEmails.length}</strong> of {emails.length}
                 </div>
 
                 <button 
@@ -175,6 +292,12 @@ export default function AdminClient({ account }) {
                 </p>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
+                  <style>{`
+                    @keyframes rowFlashGlow {
+                      0% { background-color: rgba(212, 175, 55, 0.3); }
+                      100% { background-color: transparent; }
+                    }
+                  `}</style>
                   <table style={{
                     width: '100%',
                     borderCollapse: 'collapse',
@@ -186,44 +309,54 @@ export default function AdminClient({ account }) {
                         <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>FULL NAME</th>
                         <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EMAIL ADDRESS</th>
                         <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EXCITED TOOL</th>
+                        <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>UTM SOURCE</th>
+                        <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>UTM MEDIUM</th>
+                        <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>UTM CAMPAIGN</th>
                         <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>DATE REGISTRATION</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredEmails.map((item, index) => (
-                        <tr 
-                          key={item.id || index}
-                          style={{
-                            borderBottom: '1px solid rgba(255,255,255,0.03)',
-                            background: index % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent',
-                            transition: 'background 0.2s ease'
-                          }}
-                          onMouseOver={e => e.currentTarget.style.background = 'rgba(212,175,55,0.02)'}
-                          onMouseOut={e => e.currentTarget.style.background = index % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}
-                        >
-                          <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.name || <em style={{ color: 'var(--sand-dark)' }}>Anonymous</em>}</td>
-                          <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.email}</td>
-                          <td style={{ padding: '12px', color: 'var(--sand)' }}>
-                            {item.excited_tool ? (
-                              <span style={{
-                                padding: '3px 8px',
-                                background: 'rgba(212,175,55,0.08)',
-                                border: '1px solid rgba(212,175,55,0.15)',
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                color: 'var(--gold-dim)'
-                              }}>
-                                {item.excited_tool}
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--sand-dark)' }}>None</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '12px', color: 'var(--sand-dim)', textAlign: 'right', fontFamily: 'monospace' }}>
-                            {new Date(item.registered_at).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredEmails.map((item, index) => {
+                        const isNew = item.newlyInserted;
+                        return (
+                          <tr 
+                            key={item.id || index}
+                            style={{
+                              borderBottom: '1px solid rgba(255,255,255,0.03)',
+                              background: index % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent',
+                              animation: isNew ? 'rowFlashGlow 4s ease-out forwards' : 'none',
+                              transition: 'background 0.2s ease'
+                            }}
+                            onMouseOver={e => e.currentTarget.style.background = 'rgba(212,175,55,0.04)'}
+                            onMouseOut={e => e.currentTarget.style.background = index % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}
+                          >
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.name || <em style={{ color: 'var(--sand-dark)' }}>Anonymous</em>}</td>
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.email}</td>
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>
+                              {item.excited_tool ? (
+                                <span style={{
+                                  padding: '3px 8px',
+                                  background: 'rgba(212,175,55,0.08)',
+                                  border: '1px solid rgba(212,175,55,0.15)',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  color: 'var(--gold-dim)'
+                                }}>
+                                  {item.excited_tool}
+                                </span>
+                              ) : (
+                                <span style={{ color: 'var(--sand-dark)' }}>None</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.utm_source || <span style={{ color: 'var(--sand-dark)' }}>-</span>}</td>
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.utm_medium || <span style={{ color: 'var(--sand-dark)' }}>-</span>}</td>
+                            <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.utm_campaign || <span style={{ color: 'var(--sand-dark)' }}>-</span>}</td>
+                            <td style={{ padding: '12px', color: 'var(--sand-dim)', textAlign: 'right', fontFamily: 'monospace' }}>
+                              {new Date(item.registered_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

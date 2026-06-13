@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: "Privacy Policy | TJESA Suite",
-  description: "TJESA Suite privacy policy, data practices, and security measures.",
+  title: "Privacy Policy",
+  description: "Read the privacy policy, data safety practices, and security covenants for the Tjesa Notion-Integrated Suite.",
 };
 
 export default function PrivacyPage() {

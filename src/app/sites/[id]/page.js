@@ -5,6 +5,40 @@ import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
 import { validateGateSession } from '@/lib/gate';
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  if (!id) return {};
+
+  try {
+    const config = await getConfig(id);
+    if (!config || !config.active || config.tool !== 'papyrus_publisher') {
+      return {
+        title: "Publication Retracted",
+      };
+    }
+    const title = config.settings?.site_title || config.database_name || "Notion Site";
+    const description = config.settings?.site_description || "Generate public, themed blogs and wiki publications directly from a Notion database.";
+    return {
+      title,
+      description,
+      openGraph: {
+        title: `${title} | Papyrus Publisher Site`,
+        description,
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Papyrus Publisher Site`,
+        description,
+      }
+    };
+  } catch (error) {
+    return {
+      title: "Public Site",
+    };
+  }
+}
+
 export default async function PublicSitePage({ params }) {
   const { id } = await params;
 

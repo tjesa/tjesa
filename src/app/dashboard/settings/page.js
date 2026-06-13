@@ -3,8 +3,8 @@ import { getCurrentUser } from '@/lib/supabase/server';
 import SettingsClient from '@/components/SettingsClient';
 
 export const metadata = {
-  title: 'Temple Config | TJESA',
-  description: 'Manage your TJESA account, Notion connections, appearance, and preferences.',
+  title: 'Temple Config',
+  description: 'Manage your Tjesa account, bind Notion connections, set app appearance, and customize preference parameters.',
 };
 
 export default async function SettingsPage() {

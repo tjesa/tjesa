@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: "Terms of Service | TJESA Suite",
-  description: "TJESA Suite terms of service, usage guidelines, and service agreement.",
+  title: "Terms of Service",
+  description: "Read the terms of service, usage guidelines, and service agreements for using Tjesa's Notion-integrated tools.",
 };
 
 export default function TermsPage() {

@@ -5,6 +5,40 @@ import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
 import { validateGateSession } from '@/lib/gate';
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  if (!id) return {};
+
+  try {
+    const config = await getConfig(id);
+    if (!config || !config.active || config.tool !== 'form_builder') {
+      return {
+        title: "Scroll Not Found",
+      };
+    }
+    const title = config.settings?.form_title || config.database_name || "Notion Form";
+    const description = config.settings?.form_description || "Submit survey records directly into Notion database scrolls.";
+    return {
+      title,
+      description,
+      openGraph: {
+        title: `${title} | Nile Scribe Form`,
+        description,
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Nile Scribe Form`,
+        description,
+      }
+    };
+  } catch (error) {
+    return {
+      title: "Public Form",
+    };
+  }
+}
+
 export default async function PublicFormPage({ params }) {
   // Wait for dynamic params
   const { id } = await params;

@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: "Cookie Policy | TJESA Suite",
-  description: "TJESA Suite cookie policy and tracking preferences declaration.",
+  title: "Cookie Policy",
+  description: "Learn about the cookies, tracking identifiers, and browser storage preferences used across the Tjesa suite.",
 };
 
 export default function CookiesPage() {

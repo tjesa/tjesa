@@ -255,6 +255,42 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const [waitlistError, setWaitlistError] = useState('');
   const [waitlistCount, setWaitlistCount] = useState(initialWaitlistCount);
 
+  // UTM tracking state
+  const [utmParams, setUtmParams] = useState({
+    utm_source: '',
+    utm_medium: '',
+    utm_campaign: ''
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const utm_source = urlParams.get('utm_source') || '';
+      const utm_medium = urlParams.get('utm_medium') || '';
+      const utm_campaign = urlParams.get('utm_campaign') || '';
+
+      if (utm_source) {
+        const params = { utm_source, utm_medium, utm_campaign };
+        localStorage.setItem('tjesa_utm', JSON.stringify(params));
+        setTimeout(() => {
+          setUtmParams(params);
+        }, 0);
+      } else {
+        const saved = localStorage.getItem('tjesa_utm');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setTimeout(() => {
+              setUtmParams(parsed);
+            }, 0);
+          } catch (e) {
+            console.error('[UTM Error]', e);
+          }
+        }
+      }
+    }
+  }, []);
+
   // Audio
   const audioRef = useRef(null);
   const fadingRef = useRef(null);
@@ -342,7 +378,14 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
     try {
       const response = await fetch('/api/waitlist', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, excitedTool }),
+        body: JSON.stringify({ 
+          email, 
+          name, 
+          excitedTool,
+          utm_source: utmParams.utm_source,
+          utm_medium: utmParams.utm_medium,
+          utm_campaign: utmParams.utm_campaign
+        }),
       });
       const data = await response.json();
       if (response.ok) { 
@@ -351,6 +394,14 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
         setEmail(''); 
         setName('');
         setExcitedTool('');
+
+        // Trigger Meta Pixel Lead event
+        if (typeof window !== 'undefined' && window.fbq) {
+          window.fbq('track', 'Lead', {
+            content_name: 'Waitlist Signup',
+            status: 'success'
+          });
+        }
       }
       else setWaitlistError(data.error || 'Failed to join waitlist.');
     } catch { setWaitlistError('An ancient curse disrupted the connection. Try again.'); }
