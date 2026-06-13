@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
+import { createClient } from '@/lib/supabase/client';
 import { 
   QrCode, 
   BarChart3, 
@@ -192,6 +193,80 @@ export default function SettingsClient({ user }) {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const getPasswordStrength = () => {
+    if (!newPassword) return { score: 0, label: '', color: 'transparent' };
+    let score = 0;
+    if (newPassword.length >= 6) score += 1;
+    if (newPassword.length >= 10) score += 1;
+    if (/[A-Z]/.test(newPassword)) score += 1;
+    if (/[0-9]/.test(newPassword)) score += 1;
+    if (/[^A-Za-z0-9]/.test(newPassword)) score += 1;
+
+    if (score <= 2) return { score, label: 'Weak Glyph Strength', color: '#EF4444' };
+    if (score <= 4) return { score, label: 'Fair Glyph Strength', color: '#F59E0B' };
+    return { score, label: 'Strong Shield Active', color: '#10B981' };
+  };
+
+  const strength = getPasswordStrength();
+
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    if (!newPassword || !confirmPassword) return;
+    if (newPassword !== confirmPassword) {
+      showToast('The secret keys do not match.', 'error');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast('Password must be at least 6 glyphs long.', 'error');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        showToast(error.message || 'Failed to update password.', 'error');
+      } else {
+        showToast('Secret key successfully updated in the archives.', 'success');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      showToast('An ancient error disrupted the update. Try again.', 'error');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/auth/delete', { method: 'DELETE' });
+      if (res.ok) {
+        showToast('Your account and records have been severed from the archives.', 'success');
+        setDeleteModalOpen(false);
+        localStorage.removeItem('tjesa_theme');
+        localStorage.removeItem('tjesa_brightness');
+        router.push('/');
+        router.refresh();
+      } else {
+        const data = await res.json();
+        showToast(data.error || 'Failed to sever connection.', 'error');
+      }
+    } catch {
+      showToast('Network error during deletion.', 'error');
+    } finally {
+      setDeleteLoading(false);
+      setDeleteConfirm('');
+    }
+  };
 
   // Load theme from localStorage
   useEffect(() => {
@@ -574,45 +649,98 @@ export default function SettingsClient({ user }) {
               </SectionCard>
 
               <SectionCard title="Password & Security" subtitle="Manage your authentication credentials.">
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '14px',
-                  padding: '14px',
-                  background: 'rgba(212,175,55,0.04)',
-                  border: '1px solid rgba(212,175,55,0.1)',
-                  borderRadius: '8px',
-                }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <div>
-                    <p style={{ fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.6, margin: '0 0 10px' }}>
-                      Password changes are handled via Supabase Auth. To reset your password, sign out and use the forgot password flow on the login page.
-                    </p>
-                    <button
-                      onClick={() => { router.push('/login'); }}
-                      style={{
-                        background: 'none',
-                        border: '1px solid rgba(212,175,55,0.25)',
-                        borderRadius: '6px',
-                        color: 'var(--gold)',
-                        padding: '7px 16px',
-                        fontSize: '11px',
-                        fontFamily: 'var(--font-headings)',
-                        letterSpacing: '0.08em',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                      onMouseOver={e => e.currentTarget.style.background = 'rgba(212,175,55,0.08)'}
-                      onMouseOut={e => e.currentTarget.style.background = 'none'}
-                    >
-                      Go to Sign In Page →
-                    </button>
+                {user?.id === '00000000-0000-0000-0000-000000000000' ? (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '14px',
+                    padding: '14px',
+                    background: 'rgba(212,175,55,0.04)',
+                    border: '1px solid rgba(212,175,55,0.1)',
+                    borderRadius: '8px',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <div>
+                      <p style={{ fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.6, margin: 0 }}>
+                        <strong>Developer Bypass Active:</strong> Password updates are disabled because authentication is currently simulated locally.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <form onSubmit={handlePasswordUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <label className="kemet-label" htmlFor="new-password" style={{ display: 'block', fontSize: '11px', color: 'var(--sand-dim)', marginBottom: '6px' }}>NEW SECRET KEY (PASSWORD)</label>
+                      <input
+                        id="new-password"
+                        type="password"
+                        className="kemet-input"
+                        placeholder="••••••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        disabled={passwordLoading}
+                        style={{ background: 'rgba(13, 13, 11, 0.5)' }}
+                      />
+                      
+                      {newPassword && (
+                        <div style={{ marginTop: '8px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '10px', color: 'var(--sand-dark)', letterSpacing: '0.04em' }}>{strength.label}</span>
+                            <span style={{ fontSize: '10px', color: strength.color, fontWeight: 'bold' }}>{strength.score}/5</span>
+                          </div>
+                          <div style={{ height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{
+                              height: '100%',
+                              width: `${(strength.score / 5) * 100}%`,
+                              background: strength.color,
+                              transition: 'width 0.3s ease, background-color 0.3s ease'
+                            }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="kemet-label" htmlFor="confirm-new-password" style={{ display: 'block', fontSize: '11px', color: 'var(--sand-dim)', marginBottom: '6px' }}>CONFIRM SECRET KEY</label>
+                      <input
+                        id="confirm-new-password"
+                        type="password"
+                        className="kemet-input"
+                        placeholder="••••••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        disabled={passwordLoading}
+                        style={{ background: 'rgba(13, 13, 11, 0.5)' }}
+                      />
+                      {confirmPassword && (
+                        <div style={{
+                          marginTop: '6px',
+                          fontSize: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: newPassword === confirmPassword ? '#10B981' : '#EF4444'
+                        }}>
+                          {newPassword === confirmPassword ? '✓ Keys match perfectly' : '✗ Keys do not match yet'}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="kemet-btn"
+                      disabled={passwordLoading || !newPassword || newPassword !== confirmPassword}
+                      style={{ padding: '8px 18px', fontSize: '11px', alignSelf: 'flex-start', height: 'auto', minHeight: 'unset' }}
+                    >
+                      {passwordLoading ? 'Carving New Key...' : 'Update Secret Key'}
+                    </button>
+                  </form>
+                )}
               </SectionCard>
             </div>
           )}
@@ -1031,12 +1159,8 @@ export default function SettingsClient({ user }) {
                   Cancel
                 </button>
                 <button
-                  disabled={deleteConfirm !== 'DELETE'}
-                  onClick={() => {
-                    showToast('Account deletion requires a backend admin endpoint. Contact support.', 'info');
-                    setDeleteModalOpen(false);
-                    setDeleteConfirm('');
-                  }}
+                  disabled={deleteConfirm !== 'DELETE' || deleteLoading}
+                  onClick={handleDeleteAccount}
                   style={{
                     flex: 1,
                     padding: '10px',
@@ -1051,7 +1175,7 @@ export default function SettingsClient({ user }) {
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  Delete Forever
+                  {deleteLoading ? 'Severing...' : 'Delete Forever'}
                 </button>
               </div>
             </div>

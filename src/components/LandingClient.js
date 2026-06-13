@@ -255,6 +255,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const [waitlistError, setWaitlistError] = useState('');
   const [waitlistCount, setWaitlistCount] = useState(initialWaitlistCount);
 
+
   // UTM tracking state
   const [utmParams, setUtmParams] = useState({
     utm_source: '',
@@ -828,6 +829,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             ))}
           </div>
         </div>
+
 
         {/* ── HOW IT WORKS ────────────────────────────────────────────────────── */}
         <section style={{ padding: '100px 32px 0', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>

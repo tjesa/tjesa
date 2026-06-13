@@ -25,8 +25,8 @@ async function syncQRGenerator(account, config) {
   const sourceColumn = settings.source_column;
   const targetColumn = settings.target_column;
   const errorColumn = settings.error_column || '';
-  const foregroundColor = settings.foreground_color || '141311';
-  const backgroundColor = settings.background_color || 'F6F0E0';
+  const foregroundColor = settings.foreground_color || 'D4AF37';
+  const backgroundColor = settings.background_color || '0D0D0B';
   const size = settings.size || 400;
   const margin = settings.margin !== undefined ? settings.margin : 2;
   const ecl = ['L', 'M', 'Q', 'H'].includes(settings.error_correction_level) ? settings.error_correction_level : 'M';
@@ -84,6 +84,7 @@ async function syncQRGenerator(account, config) {
   let successCount = 0;
   let totalCount = pages.length;
   let hasUpdated = false;
+  let errorCount = 0;
 
   for (const partialPage of pages) {
     try {
@@ -169,8 +170,9 @@ async function syncQRGenerator(account, config) {
       successCount++;
       hasUpdated = true;
     } catch (pageErr) {
-      console.error(`[Tjesa Poller] Error updating page ${page.id}:`, pageErr);
-      await writeErrorColumn(page.id, `Sync error: ${pageErr.message}`).catch(() => {});
+      errorCount++;
+      console.error(`[Tjesa Poller] Error updating page ${partialPage.id}:`, pageErr);
+      await writeErrorColumn(partialPage.id, `Sync error: ${pageErr.message}`).catch(() => {});
     }
   }
 
@@ -182,7 +184,11 @@ async function syncQRGenerator(account, config) {
     ...config,
     last_sync: syncStartTime,
     last_sync_success_count: successCount,
-    last_sync_total_count: totalCount
+    last_sync_total_count: totalCount,
+    settings: {
+      ...config.settings,
+      last_sync_error_count: errorCount
+    }
   });
 }
 

@@ -24,8 +24,8 @@ export async function POST(request) {
     triggerType = 'full',
     triggerColumn = '',
     triggerValue = '',
-    foregroundColor = '141311',
-    backgroundColor = 'F6F0E0',
+    foregroundColor = 'D4AF37',
+    backgroundColor = '0D0D0B',
     size = 400,
     margin = 2,
     errorCorrectionLevel = 'M',
@@ -204,7 +204,8 @@ export async function POST(request) {
         size,
         margin,
         error_correction_level: ecl,
-        error_column: errorColumn
+        error_column: errorColumn,
+        last_sync_error_count: errorCount
       },
       last_sync: new Date().toISOString(),
       last_sync_success_count: successCount,

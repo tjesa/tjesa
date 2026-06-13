@@ -25,8 +25,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
   const [errorColumn, setErrorColumn] = useState('');
 
   // QR styling settings
-  const [foregroundColor, setForegroundColor] = useState('#141311');
-  const [backgroundColor, setBackgroundColor] = useState('#F6F0E0');
+  const [foregroundColor, setForegroundColor] = useState('#D4AF37');
+  const [backgroundColor, setBackgroundColor] = useState('#0D0D0B');
   const [margin, setMargin] = useState(2);
   const [errorCorrectionLevel, setErrorCorrectionLevel] = useState('M');
   const [isStylingOpen, setIsStylingOpen] = useState(false);
@@ -52,8 +52,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
     setTriggerColumn('');
     setTriggerValue('');
     setErrorColumn('');
-    setForegroundColor('#141311');
-    setBackgroundColor('#F6F0E0');
+    setForegroundColor('#D4AF37');
+    setBackgroundColor('#0D0D0B');
     setMargin(2);
     setErrorCorrectionLevel('M');
     setIsStylingOpen(false);
@@ -97,8 +97,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
           setTriggerColumn(s.trigger_column || '');
           setTriggerValue(s.trigger_value || '');
           setErrorColumn(s.error_column || '');
-          setForegroundColor(s.foreground_color || '#141311');
-          setBackgroundColor(s.background_color || '#F6F0E0');
+          setForegroundColor(s.foreground_color || '#D4AF37');
+          setBackgroundColor(s.background_color || '#0D0D0B');
           setMargin(s.margin !== undefined ? s.margin : 2);
           setErrorCorrectionLevel(s.error_correction_level || 'M');
         } else {
@@ -116,8 +116,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
           setTriggerColumn('');
           setTriggerValue('');
           setErrorColumn('');
-          setForegroundColor('#141311');
-          setBackgroundColor('#F6F0E0');
+          setForegroundColor('#D4AF37');
+          setBackgroundColor('#0D0D0B');
           setMargin(2);
           setErrorCorrectionLevel('M');
         }
@@ -372,18 +372,37 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                       {config ? (
-                        <span style={{
-                          fontSize: '10px',
-                          padding: '4px 10px',
-                          background: 'rgba(52, 211, 153, 0.1)',
-                          border: '1px solid rgba(52, 211, 153, 0.3)',
-                          borderRadius: '20px',
-                          color: '#34D399',
-                          fontFamily: 'var(--font-headings)',
-                          letterSpacing: '0.05em'
-                        }}>
-                          ACTIVE SYNC
-                        </span>
+                        <>
+                          <span style={{
+                            fontSize: '10px',
+                            padding: '4px 10px',
+                            background: 'rgba(52, 211, 153, 0.1)',
+                            border: '1px solid rgba(52, 211, 153, 0.3)',
+                            borderRadius: '20px',
+                            color: '#34D399',
+                            fontFamily: 'var(--font-headings)',
+                            letterSpacing: '0.05em'
+                          }}>
+                            ACTIVE SYNC
+                          </span>
+                          {config.settings?.last_sync_error_count > 0 && (
+                            <span style={{
+                              fontSize: '10px',
+                              padding: '4px 10px',
+                              background: 'rgba(168, 36, 36, 0.15)',
+                              border: '1px solid rgba(168, 36, 36, 0.4)',
+                              borderRadius: '20px',
+                              color: '#FF7F7F',
+                              fontFamily: 'var(--font-headings)',
+                              letterSpacing: '0.05em',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              ⚠️ {config.settings.last_sync_error_count} SYNC ERRORS
+                            </span>
+                          )}
+                        </>
                       ) : (
                         <span style={{
                           fontSize: '10px',
@@ -794,26 +813,39 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                     SACRED GLYPH PREVIEW
                                   </span>
                                   <div style={{
-                                    width: '150px',
-                                    height: '150px',
+                                    width: '180px',
+                                    height: '180px',
                                     background: backgroundColor,
-                                    borderRadius: '6px',
+                                    borderRadius: '12px',
+                                    border: `2px solid ${foregroundColor}33`,
                                     display: 'flex',
-                                    justifyContent: 'center',
                                     alignItems: 'center',
-                                    border: '1px solid rgba(212, 175, 55, 0.1)',
-                                    overflow: 'hidden'
+                                    justifyContent: 'center',
+                                    boxShadow: `0 10px 30px rgba(0,0,0,0.5), 0 0 20px ${foregroundColor}1a`,
+                                    overflow: 'hidden',
+                                    position: 'relative'
                                   }}>
                                     <img
-                                      src={`/api/tools/qr/image?data=${encodeURIComponent('https://tjesa.com')}&fg=${foregroundColor.replace('#', '')}&bg=${backgroundColor.replace('#', '')}&margin=${margin}&ecl=${errorCorrectionLevel}&size=150`}
+                                      src={`/api/tools/qr/image?data=${encodeURIComponent('https://tjesa.com')}&fg=${foregroundColor.replace('#', '')}&bg=${backgroundColor.replace('#', '')}&margin=${margin}&ecl=${errorCorrectionLevel}&size=180`}
                                       alt="QR Code Preview"
                                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                       key={`${foregroundColor}-${backgroundColor}-${margin}-${errorCorrectionLevel}`}
                                     />
                                   </div>
-                                  <span style={{ fontSize: '10px', color: 'var(--sand-dark)', textAlign: 'center' }}>
-                                    Previewing "https://tjesa.com" · ECL: {errorCorrectionLevel}
-                                  </span>
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    <span style={{ fontSize: '10px', color: 'var(--sand-dark)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                      Previewing "https://tjesa.com" · ECL: {errorCorrectionLevel} ·
+                                    </span>
+                                    <a
+                                      href={`/api/tools/qr/image?data=${encodeURIComponent('https://tjesa.com')}&fg=${foregroundColor.replace('#', '')}&bg=${backgroundColor.replace('#', '')}&margin=${margin}&ecl=${errorCorrectionLevel}&size=400`}
+                                      download="tjesa-glyph.png"
+                                      style={{ fontSize: '10px', color: foregroundColor, fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      Download Glyph
+                                    </a>
+                                  </div>
                                 </div>
                               </div>
                             )}
