@@ -38,8 +38,7 @@ export async function POST(request) {
     if (brevoApiKey) {
       try {
         if (brevoListId) {
-          // Mode A: Add contact to List (triggers Brevo automation workflow)
-          const listResponse = await fetch('https://api.brevo.com/v3/contacts', {
+          let listResponse = await fetch('https://api.brevo.com/v3/contacts', {
             method: 'POST',
             headers: {
               'accept': 'application/json',
@@ -63,7 +62,37 @@ export async function POST(request) {
 
           if (!listResponse.ok) {
             const errBody = await listResponse.json();
-            console.warn('[Brevo API] Contact list sync warning:', errBody);
+            console.warn('[Brevo API] Contact list sync warning (attempt 1):', errBody);
+
+            // If it failed because of custom attributes not defined on Brevo, retry with only standard fields
+            if (listResponse.status === 400 || (errBody && (errBody.code === 'invalid_parameter' || String(errBody.message).toLowerCase().includes('attribute')))) {
+              console.log('[Brevo API] Retrying contact sync with fallback standard attributes...');
+              const retryResponse = await fetch('https://api.brevo.com/v3/contacts', {
+                method: 'POST',
+                headers: {
+                  'accept': 'application/json',
+                  'api-key': brevoApiKey,
+                  'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                  email: email.trim(),
+                  listIds: [parseInt(brevoListId)],
+                  attributes: {
+                    FIRSTNAME: name ? name.split(' ')[0] : ''
+                  },
+                  updateEnabled: true
+                })
+              });
+
+              if (!retryResponse.ok) {
+                const retryErr = await retryResponse.json();
+                console.warn('[Brevo API] Contact list sync warning (fallback retry):', retryErr);
+              } else {
+                console.log('[Brevo API] Contact list sync succeeded via standard fallback attributes.');
+              }
+            }
+          } else {
+            console.log('[Brevo API] Contact list sync succeeded with full attributes.');
           }
         }
 
