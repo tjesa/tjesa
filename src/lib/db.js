@@ -461,3 +461,165 @@ export async function getWaitlist() {
   });
   return merged;
 }
+
+// ---------------------------------------------------------------------------
+// UTM Links
+// ---------------------------------------------------------------------------
+
+/**
+ * Retrieve all UTM links
+ */
+export async function getUtmLinks() {
+  const local = readLocalDb().utm_links || [];
+  const { data, error } = await supabase
+    .from('utm_links')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error('[db] getUtmLinks error:', error);
+    return local;
+  }
+  
+  const merged = [...local];
+  (data || []).forEach(row => {
+    if (!merged.some(m => m.id === row.id)) {
+      merged.push(row);
+    }
+  });
+  return merged;
+}
+
+/**
+ * Save or update a UTM link
+ */
+export async function saveUtmLink(utmLink) {
+  const bypass = await isBypassActive();
+  if (!utmLink.id) {
+    utmLink.id = Math.random().toString(36).substring(2, 9);
+  }
+  if (!utmLink.created_at) {
+    utmLink.created_at = new Date().toISOString();
+  }
+
+  if (bypass) {
+    const db = readLocalDb();
+    db.utm_links = db.utm_links || [];
+    const index = db.utm_links.findIndex(u => u.id === utmLink.id);
+    if (index >= 0) {
+      db.utm_links[index] = { ...db.utm_links[index], ...utmLink };
+    } else {
+      db.utm_links.push(utmLink);
+    }
+    writeLocalDb(db);
+    return utmLink;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('utm_links')
+      .upsert(utmLink, { onConflict: 'id' })
+      .select()
+      .single();
+    if (!error && data) return data;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('[db] Supabase insert/upsert for utm_links failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  // Fallback to local db.json
+  const db = readLocalDb();
+  db.utm_links = db.utm_links || [];
+  const index = db.utm_links.findIndex(u => u.id === utmLink.id);
+  if (index >= 0) {
+    db.utm_links[index] = { ...db.utm_links[index], ...utmLink };
+  } else {
+    db.utm_links.push(utmLink);
+  }
+  writeLocalDb(db);
+  return utmLink;
+}
+
+/**
+ * Delete a UTM link by ID
+ */
+export async function deleteUtmLink(id) {
+  const db = readLocalDb();
+  db.utm_links = (db.utm_links || []).filter(u => u.id !== id);
+  writeLocalDb(db);
+
+  try {
+    const { error } = await supabase.from('utm_links').delete().eq('id', id);
+    if (error) console.error('[db] deleteUtmLink Supabase error:', error);
+  } catch (err) {
+    console.error('[db] deleteUtmLink Supabase catch error:', err);
+  }
+}
+
+/**
+ * Invite a waitlist scribe (updates status to 'invited' and records timestamp)
+ */
+export async function inviteWaitlistScribe(id) {
+  const bypass = await isBypassActive();
+  const invitedAt = new Date().toISOString();
+
+  if (bypass) {
+    const db = readLocalDb();
+    db.waitlist = db.waitlist || [];
+    const index = db.waitlist.findIndex(w => String(w.id) === String(id));
+    if (index >= 0) {
+      db.waitlist[index] = {
+        ...db.waitlist[index],
+        status: 'invited',
+        invited_at: invitedAt
+      };
+      writeLocalDb(db);
+      return db.waitlist[index];
+    }
+    throw new Error('Scribe not found in local scrolls.');
+  }
+
+  // Attempt Supabase update first
+  try {
+    const { data, error } = await supabase
+      .from('waitlist')
+      .update({ status: 'invited', invited_at: invitedAt })
+      .eq('id', id)
+      .select()
+      .single();
+    if (!error && data) {
+      // Sync local DB as well
+      try {
+        const db = readLocalDb();
+        db.waitlist = db.waitlist || [];
+        const idx = db.waitlist.findIndex(w => String(w.id) === String(id) || w.email?.toLowerCase() === data.email?.toLowerCase());
+        if (idx >= 0) {
+          db.waitlist[idx] = { ...db.waitlist[idx], status: 'invited', invited_at: invitedAt };
+          writeLocalDb(db);
+        }
+      } catch (localErr) {
+        console.error('[db] Error syncing local waitlist invite status:', localErr);
+      }
+      return data;
+    }
+    if (error) throw error;
+  } catch (err) {
+    console.warn('[db] Supabase update waitlist status failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  // Fallback local update
+  const db = readLocalDb();
+  db.waitlist = db.waitlist || [];
+  const index = db.waitlist.findIndex(w => String(w.id) === String(id));
+  if (index >= 0) {
+    db.waitlist[index] = {
+      ...db.waitlist[index],
+      status: 'invited',
+      invited_at: invitedAt
+    };
+    writeLocalDb(db);
+    return db.waitlist[index];
+  }
+  throw new Error('Scribe not found in waitlist database.');
+}
+
+

@@ -504,7 +504,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                       {/* Embed and copy panel */}
                       <div style={{ 
                         padding: '16px', 
-                        background: 'rgba(13, 13, 11, 0.7)', 
+                        background: 'rgba(var(--obsidian-rgb), 0.7)', 
                         borderRadius: '6px', 
                         border: '1px solid rgba(212, 175, 55, 0.1)', 
                         fontSize: '12px',
@@ -522,7 +522,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                               value={getPublicUrl(config.id)}
                               style={{
                                 flex: 1,
-                                background: '#070706',
+                                background: 'var(--obsidian)',
                                 border: 'none',
                                 color: 'var(--sand-dim)',
                                 padding: '6px 8px',
@@ -557,7 +557,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                               value={`<iframe src="${getPublicUrl(config.id)}" style="width:100%; min-height:380px; border:none; border-radius:12px; background:transparent;"></iframe>`}
                               style={{
                                 flex: 1,
-                                background: '#070706',
+                                background: 'var(--obsidian)',
                                 border: 'none',
                                 color: 'var(--sand-dim)',
                                 padding: '6px 8px',

@@ -613,7 +613,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 {config ? (
                                   <div style={{
                                     padding: '10px',
-                                    background: 'rgba(13, 13, 11, 0.8)',
+                                    background: 'rgba(var(--obsidian-rgb), 0.8)',
                                     borderRadius: '4px',
                                     border: '1px solid rgba(212, 175, 55, 0.1)'
                                   }}>
@@ -626,7 +626,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                         value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/tools/qr/webhook?config_id=${config.id}`}
                                         style={{
                                           flex: 1,
-                                          background: '#070706',
+                                          background: 'var(--obsidian)',
                                           border: 'none',
                                           color: 'var(--sand-dim)',
                                           padding: '6px',
@@ -685,7 +685,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                           <div style={{
                             border: '1px solid rgba(212, 175, 55, 0.15)',
                             borderRadius: '8px',
-                            background: 'rgba(20, 19, 17, 0.4)',
+                            background: 'rgba(var(--obsidian-mid-rgb), 0.4)',
                             overflow: 'hidden',
                             marginTop: '10px'
                           }}>
@@ -801,7 +801,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                 {/* Live Preview */}
                                 <div style={{
                                   padding: '16px',
-                                  background: 'rgba(13, 13, 11, 0.8)',
+                                  background: 'rgba(var(--obsidian-rgb), 0.8)',
                                   borderRadius: '6px',
                                   border: '1px dashed rgba(212, 175, 55, 0.2)',
                                   display: 'flex',
@@ -898,7 +898,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                     <div style={{
                       marginTop: '16px',
                       padding: '12px 14px',
-                      background: 'rgba(13, 13, 11, 0.8)',
+                      background: 'rgba(var(--obsidian-rgb), 0.8)',
                       border: '1px solid rgba(52, 211, 153, 0.2)',
                       borderRadius: '6px',
                       animation: 'fadeIn 0.3s ease-out'

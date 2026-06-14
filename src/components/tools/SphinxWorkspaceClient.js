@@ -297,7 +297,7 @@ export default function SphinxWorkspaceClient({ account, initialConfigs, oauthUr
                   textAlign: 'center',
                   border: '1px dashed rgba(212, 175, 55, 0.15)',
                   borderRadius: '12px',
-                  background: 'rgba(13, 13, 11, 0.4)'
+                  background: 'rgba(var(--obsidian-rgb), 0.4)'
                 }}>
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.5 }}>
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />

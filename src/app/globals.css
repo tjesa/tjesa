@@ -1,8 +1,11 @@
 :root {
   /* Tjesa Pharaonic Theme Colors */
   --obsidian: #0D0D0B;
+  --obsidian-rgb: 13, 13, 11;
   --obsidian-mid: #141311;
+  --obsidian-mid-rgb: 20, 19, 17;
   --obsidian-light: #1E1D19;
+  --obsidian-light-rgb: 30, 29, 25;
   --obsidian-card: rgba(20, 19, 17, 0.75);
   
   --gold: #D4AF37;
@@ -35,13 +38,27 @@
   --border-gold: 1px solid rgba(212, 175, 55, 0.2);
   --border-gold-active: 1px solid rgba(212, 175, 55, 0.6);
   --spotlight-color: rgba(212, 175, 55, 0.12);
+
+  /* Connected Card Theme-aware variables */
+  --card-connected-start: rgba(20, 19, 17, 0.8);
+  --card-connected-end: rgba(28, 25, 21, 0.9);
+  --card-connected-border: rgba(212, 175, 55, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.05);
+
+  /* Sidebar active/hover theme variables */
+  --sidebar-link-hover-bg: rgba(212, 175, 55, 0.05);
+  --sidebar-link-active-bg: rgba(212, 175, 55, 0.08);
+  --sidebar-link-active-border: rgba(212, 175, 55, 0.25);
 }
 
 /* Gemstone Theme Palette Overrides */
 body[data-theme='lapis'] {
   --obsidian: #070B19;
+  --obsidian-rgb: 7, 11, 25;
   --obsidian-mid: #0D1326;
+  --obsidian-mid-rgb: 13, 19, 38;
   --obsidian-light: #161E38;
+  --obsidian-light-rgb: 22, 30, 56;
   --obsidian-card: rgba(13, 19, 38, 0.75);
   
   --gold: #38BDF8;
@@ -55,12 +72,25 @@ body[data-theme='lapis'] {
   --sand-dark: #2D374A;
   --sand-light: #C9D4F2;
   --spotlight-color: rgba(56, 189, 248, 0.15);
+
+  /* Connected Card Lapis variables */
+  --card-connected-start: rgba(13, 19, 38, 0.85);
+  --card-connected-end: rgba(22, 30, 56, 0.95);
+  --card-connected-border: rgba(56, 189, 248, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.05);
+
+  --sidebar-link-hover-bg: rgba(56, 189, 248, 0.05);
+  --sidebar-link-active-bg: rgba(56, 189, 248, 0.08);
+  --sidebar-link-active-border: rgba(56, 189, 248, 0.25);
 }
 
 body[data-theme='emerald'] {
   --obsidian: #05100B;
+  --obsidian-rgb: 5, 16, 11;
   --obsidian-mid: #0A1C14;
+  --obsidian-mid-rgb: 10, 28, 20;
   --obsidian-light: #122E22;
+  --obsidian-light-rgb: 18, 46, 34;
   --obsidian-card: rgba(10, 28, 20, 0.75);
   
   --gold: #10B981;
@@ -74,21 +104,51 @@ body[data-theme='emerald'] {
   --sand-dark: #2D4A3E;
   --sand-light: #C9F2E3;
   --spotlight-color: rgba(16, 185, 129, 0.15);
+
+  /* Connected Card Emerald variables */
+  --card-connected-start: rgba(10, 28, 20, 0.85);
+  --card-connected-end: rgba(18, 46, 34, 0.95);
+  --card-connected-border: rgba(16, 185, 129, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 185, 129, 0.05);
+
+  --sidebar-link-hover-bg: rgba(16, 185, 129, 0.05);
+  --sidebar-link-active-bg: rgba(16, 185, 129, 0.08);
+  --sidebar-link-active-border: rgba(16, 185, 129, 0.25);
 }
 
 /* Light Mode Variables & Adjustments */
 body[data-brightness='light'] {
   --obsidian: #FAF6EE;
+  --obsidian-rgb: 250, 246, 238;
   --obsidian-mid: #F5EFEB;
+  --obsidian-mid-rgb: 245, 239, 235;
   --obsidian-light: #EBE3D5;
+  --obsidian-light-rgb: 235, 227, 213;
   --obsidian-card: rgba(255, 255, 255, 0.75);
   
   --sand-light: #0D0D0B;
   --sand-dim: #4A3E2D;
   --sand-dark: #C2A67D;
   
-  --border-gold: 1px solid rgba(212, 175, 55, 0.35);
-  --spotlight-color: rgba(212, 175, 55, 0.06);
+  /* High contrast brand colors for light mode (Pharaonic Bronze/Gold) */
+  --gold: #8A671C;
+  --gold-glow: rgba(138, 103, 28, 0.2);
+  --gold-dim: #6B4E13;
+  --gold-bright: #B08B35;
+  --gold-gradient: linear-gradient(135deg, #8A671C 0%, #6B4E13 50%, #B08B35 100%);
+  
+  --border-gold: 1px solid rgba(138, 103, 28, 0.35);
+  --spotlight-color: rgba(138, 103, 28, 0.06);
+
+  /* Theme-aware connected card variables for light mode */
+  --card-connected-start: rgba(255, 255, 255, 0.9);
+  --card-connected-end: rgba(245, 239, 235, 0.95);
+  --card-connected-border: rgba(138, 103, 28, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), 0 0 15px rgba(138, 103, 28, 0.05);
+
+  --sidebar-link-hover-bg: rgba(138, 103, 28, 0.05);
+  --sidebar-link-active-bg: rgba(138, 103, 28, 0.08);
+  --sidebar-link-active-border: rgba(138, 103, 28, 0.25);
   
   background-image: 
     radial-gradient(circle at 10% 20%, var(--gold-glow) 0%, transparent 40%),
@@ -98,24 +158,66 @@ body[data-brightness='light'] {
 
 body[data-brightness='light'][data-theme='lapis'] {
   --obsidian: #F0F4FA;
+  --obsidian-rgb: 240, 244, 250;
   --obsidian-mid: #E5ECF6;
+  --obsidian-mid-rgb: 229, 236, 246;
   --obsidian-light: #D6E2F3;
+  --obsidian-light-rgb: 214, 226, 243;
   --sand-light: #0A0F1D;
   --sand-dim: #2D374A;
   --sand-dark: #7D8FC2;
-  --border-gold: 1px solid rgba(56, 189, 248, 0.35);
-  --spotlight-color: rgba(56, 189, 248, 0.06);
+
+  /* Lapis High Contrast Light Accent Colors (Deep Royal Blue) */
+  --gold: #1B4385;
+  --gold-glow: rgba(27, 67, 133, 0.2);
+  --gold-dim: #0F2957;
+  --gold-bright: #2B5EA8;
+  --gold-gradient: linear-gradient(135deg, #1B4385 0%, #0F2957 50%, #2B5EA8 100%);
+  
+  --border-gold: 1px solid rgba(27, 67, 133, 0.35);
+  --spotlight-color: rgba(27, 67, 133, 0.06);
+
+  /* Connected Card Lapis Light Mode styles */
+  --card-connected-start: rgba(255, 255, 255, 0.9);
+  --card-connected-end: rgba(229, 236, 246, 0.95);
+  --card-connected-border: rgba(27, 67, 133, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), 0 0 15px rgba(27, 67, 133, 0.05);
+
+  --sidebar-link-hover-bg: rgba(27, 67, 133, 0.05);
+  --sidebar-link-active-bg: rgba(27, 67, 133, 0.08);
+  --sidebar-link-active-border: rgba(27, 67, 133, 0.25);
 }
 
 body[data-brightness='light'][data-theme='emerald'] {
   --obsidian: #F0FAF5;
+  --obsidian-rgb: 240, 250, 245;
   --obsidian-mid: #E5F6ED;
+  --obsidian-mid-rgb: 229, 246, 237;
   --obsidian-light: #D6F3E4;
+  --obsidian-light-rgb: 214, 243, 228;
   --sand-light: #05100B;
   --sand-dim: #2D4A3E;
   --sand-dark: #7DC2A6;
-  --border-gold: 1px solid rgba(16, 185, 129, 0.35);
-  --spotlight-color: rgba(16, 185, 129, 0.06);
+
+  /* Emerald High Contrast Light Accent Colors (Deep Emerald/Forest Green) */
+  --gold: #0A6C44;
+  --gold-glow: rgba(10, 108, 68, 0.2);
+  --gold-dim: #064E30;
+  --gold-bright: #128C5A;
+  --gold-gradient: linear-gradient(135deg, #0A6C44 0%, #064E30 50%, #128C5A 100%);
+  
+  --border-gold: 1px solid rgba(10, 108, 68, 0.35);
+  --spotlight-color: rgba(10, 108, 68, 0.06);
+
+  /* Connected Card Emerald Light Mode styles */
+  --card-connected-start: rgba(255, 255, 255, 0.9);
+  --card-connected-end: rgba(229, 246, 237, 0.95);
+  --card-connected-border: rgba(10, 108, 68, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), 0 0 15px rgba(10, 108, 68, 0.05);
+
+  --sidebar-link-hover-bg: rgba(10, 108, 68, 0.05);
+  --sidebar-link-active-bg: rgba(10, 108, 68, 0.08);
+  --sidebar-link-active-border: rgba(10, 108, 68, 0.25);
 }
 
 /* Specific elements styles for light mode */
@@ -350,7 +452,7 @@ a:hover {
 /* Form Elements */
 .kemet-input, .kemet-select {
   width: 100%;
-  background: rgba(13, 13, 11, 0.7);
+  background: rgba(var(--obsidian-rgb), 0.7);
   border: var(--border-gold);
   border-radius: 8px;
   padding: 12px 16px;
@@ -589,7 +691,7 @@ a:hover {
 
 /* Hover & Active States */
 .sidebar-link:hover {
-  background: rgba(212, 175, 55, 0.05);
+  background: var(--sidebar-link-hover-bg);
   color: var(--gold-bright);
 }
 
@@ -599,8 +701,8 @@ a:hover {
 }
 
 .sidebar-link.active {
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: var(--sidebar-link-active-bg);
+  border: 1px solid var(--sidebar-link-active-border);
   color: var(--gold-bright);
 }
 
@@ -617,7 +719,7 @@ a:hover {
 .sidebar-footer {
   padding: 20px;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
-  background: rgba(13, 13, 11, 0.5);
+  background: rgba(var(--obsidian-rgb), 0.5);
 }
 
 .sidebar-user-block {

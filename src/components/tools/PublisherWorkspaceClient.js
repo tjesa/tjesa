@@ -501,7 +501,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                     textAlign: 'center',
                     border: '1px dashed rgba(212, 175, 55, 0.15)',
                     borderRadius: '12px',
-                    background: 'rgba(13, 13, 11, 0.4)'
+                    background: 'rgba(var(--obsidian-rgb), 0.4)'
                   }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.5 }}>
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -530,7 +530,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                           </p>
 
                           <div style={{ 
-                            background: 'rgba(13, 13, 11, 0.6)', 
+                            background: 'rgba(var(--obsidian-rgb), 0.6)', 
                             border: '1px solid rgba(212, 175, 55, 0.1)', 
                             borderRadius: '6px',
                             padding: '10px 12px',
@@ -670,7 +670,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                     textAlign: 'center',
                     border: '1px dashed rgba(212, 175, 55, 0.15)',
                     borderRadius: '12px',
-                    background: 'rgba(13, 13, 11, 0.4)'
+                    background: 'rgba(var(--obsidian-rgb), 0.4)'
                   }}>
                     <p style={{ fontSize: '13px', color: 'var(--sand-dim)' }}>
                       No databases found. Make sure you shared databases with the integration during setup.
@@ -689,7 +689,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                           className="kemet-card"
                           style={{
                             padding: '20px',
-                            background: 'rgba(13, 13, 11, 0.65)',
+                            background: 'rgba(var(--obsidian-rgb), 0.65)',
                             border: isConfigured ? '1px solid rgba(212, 175, 55, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
                             boxShadow: isConfigured ? '0 0 15px rgba(212, 175, 55, 0.05)' : 'none',
                             borderRadius: '10px',

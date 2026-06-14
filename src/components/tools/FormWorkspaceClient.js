@@ -404,14 +404,14 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                     </div>
                   </div>
 
-                  {/* Active Form URL and Embed code display */}
-                  {config && (
-                    <div style={{ 
-                      marginTop: '16px', 
-                      padding: '16px', 
-                      background: 'rgba(13, 13, 11, 0.7)', 
-                      borderRadius: '6px', 
-                      border: '1px solid rgba(212, 175, 55, 0.1)', 
+                      {/* Active Form URL and Embed code display */}
+                      {config && (
+                        <div style={{ 
+                          marginTop: '16px', 
+                          padding: '16px', 
+                          background: 'rgba(var(--obsidian-rgb), 0.7)', 
+                          borderRadius: '6px', 
+                          border: '1px solid rgba(212, 175, 55, 0.1)', 
                       fontSize: '12px',
                       display: 'flex',
                       flexDirection: 'column',
@@ -427,7 +427,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                             value={getPublicUrl(config.id)}
                             style={{
                               flex: 1,
-                              background: '#070706',
+                              background: 'var(--obsidian)',
                               border: 'none',
                               color: 'var(--sand-dim)',
                               padding: '6px 8px',
@@ -462,7 +462,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                             value={`<iframe src="${getPublicUrl(config.id)}" style="width:100%; min-height:600px; border:none; border-radius:12px; background:transparent;"></iframe>`}
                             style={{
                               flex: 1,
-                              background: '#070706',
+                              background: 'var(--obsidian)',
                               border: 'none',
                               color: 'var(--sand-dim)',
                               padding: '6px 8px',
@@ -654,7 +654,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                     <div style={{ position: 'sticky', top: '24px' }}>
                       <GlowingCard title="Live Layout Preview" subtitle="See what your visitors will see">
                         <div style={{
-                          background: 'rgba(7,7,6,0.95)',
+                          background: 'var(--obsidian-mid)',
                           border: '1px solid rgba(212,175,55,0.15)',
                           borderRadius: '8px',
                           padding: '24px 20px',

@@ -580,7 +580,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                     textAlign: 'center',
                     border: '1px dashed rgba(212, 175, 55, 0.15)',
                     borderRadius: '12px',
-                    background: 'rgba(13, 13, 11, 0.4)'
+                    background: 'rgba(var(--obsidian-rgb), 0.4)'
                   }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.5 }}>
                       <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
@@ -788,7 +788,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                     textAlign: 'center',
                     border: '1px dashed rgba(212, 175, 55, 0.15)',
                     borderRadius: '12px',
-                    background: 'rgba(13, 13, 11, 0.4)'
+                    background: 'rgba(var(--obsidian-rgb), 0.4)'
                   }}>
                     <p style={{ fontSize: '13px', color: 'var(--sand-dim)' }}>
                       No databases found. Make sure you shared database drafts with the integration during setup.
@@ -807,7 +807,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                           className="kemet-card"
                           style={{
                             padding: '20px',
-                            background: 'rgba(13, 13, 11, 0.65)',
+                            background: 'rgba(var(--obsidian-rgb), 0.65)',
                             border: isConfigured ? '1px solid rgba(212, 175, 55, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
                             boxShadow: isConfigured ? '0 0 15px rgba(212, 175, 55, 0.05)' : 'none',
                             borderRadius: '10px',

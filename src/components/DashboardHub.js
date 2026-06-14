@@ -5,7 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from './Header';
 import GlowingCard from './GlowingCard';
-import { Zap } from 'lucide-react';
+import { 
+  Zap,
+  QrCode,
+  BarChart3,
+  ClipboardList,
+  BookOpen,
+  Lock,
+  FileDown,
+  Mail,
+  Share2 
+} from 'lucide-react';
 
 export default function DashboardHub({ userAccounts = [], user, initialConfigs = [] }) {
   const router = useRouter();
@@ -59,15 +69,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'active',
       actionText: 'Open QR Generator',
       path: '/dashboard/qr',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-          <path d="M14 14h7v7h-7z" />
-          <path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01" strokeWidth="3" />
-        </svg>
-      )
+      icon: <QrCode size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'charts',
@@ -77,13 +79,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open Charts Observatory',
       path: '/dashboard/charts',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <line x1="18" y1="20" x2="18" y2="10" />
-          <line x1="12" y1="20" x2="12" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="14" />
-        </svg>
-      )
+      icon: <BarChart3 size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'forms',
@@ -93,15 +89,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open Form Builder',
       path: '/dashboard/forms',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-          <polyline points="10 9 9 9 8 9" />
-        </svg>
-      )
+      icon: <ClipboardList size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'publisher',
@@ -111,12 +99,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open CMS Publisher',
       path: '/dashboard/publisher',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        </svg>
-      )
+      icon: <BookOpen size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'sphinx',
@@ -126,12 +109,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open Security Vaults',
       path: '/dashboard/sphinx',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
-      )
+      icon: <Lock size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'pdf',
@@ -141,14 +119,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open PDF Exporter',
       path: '/dashboard/pdf',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-        </svg>
-      )
+      icon: <FileDown size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'mail',
@@ -158,12 +129,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open Mail Campaigns',
       path: '/dashboard/mail',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-          <polyline points="22,6 12,13 2,6" />
-        </svg>
-      )
+      icon: <Mail size={40} strokeWidth={1.5} stroke="var(--gold)" />
     },
     {
       id: 'social',
@@ -173,11 +139,7 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
       status: 'locked',
       actionText: 'Open Social Dispatch',
       path: '/dashboard/social',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
-        </svg>
-      )
+      icon: <Share2 size={40} strokeWidth={1.5} stroke="var(--gold)" />
     }
   ];
 
@@ -343,8 +305,8 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
                       
                       return (
                         <div key={cfg.id} style={{
-                          background: 'rgba(13, 13, 11, 0.5)',
-                          border: '1px solid rgba(212, 175, 55, 0.1)',
+                          background: 'var(--obsidian-light)',
+                          border: '1px solid var(--gold-glow)',
                           borderRadius: '8px',
                           padding: '12px 16px',
                           display: 'flex',
@@ -477,9 +439,9 @@ export default function DashboardHub({ userAccounts = [], user, initialConfigs =
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              borderColor: 'rgba(212, 175, 55, 0.4)',
-              background: 'linear-gradient(180deg, rgba(20, 19, 17, 0.8) 0%, rgba(28, 25, 21, 0.9) 100%)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.05)'
+              borderColor: 'var(--card-connected-border)',
+              background: 'linear-gradient(180deg, var(--card-connected-start) 0%, var(--card-connected-end) 100%)',
+              boxShadow: 'var(--card-connected-shadow)'
             } : {
               height: '100%',
               display: 'flex',

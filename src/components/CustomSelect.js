@@ -41,8 +41,8 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: '100%',
-          background: 'rgba(13, 13, 11, 0.85)',
-          border: isOpen ? '1px solid var(--gold)' : '1px solid rgba(212, 175, 55, 0.25)',
+          background: 'rgba(var(--obsidian-rgb), 0.85)',
+          border: isOpen ? '1px solid var(--gold)' : 'var(--border-gold)',
           borderRadius: '8px',
           padding: '12px 16px',
           color: selectedOption ? 'var(--sand-light)' : 'var(--sand-dim)',
@@ -54,7 +54,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
           justifyContent: 'space-between',
           alignItems: 'center',
           transition: 'var(--transition-smooth)',
-          boxShadow: isOpen ? '0 0 10px rgba(212, 175, 55, 0.25)' : 'none',
+          boxShadow: isOpen ? '0 0 10px var(--gold-glow)' : 'none',
           ...buttonStyle
         }}
       >
@@ -91,9 +91,9 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
             left: 0,
             width: '100%',
             background: 'var(--obsidian-mid)',
-            border: '1px solid rgba(212, 175, 55, 0.3)',
+            border: 'var(--border-gold)',
             borderRadius: '8px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.05)',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.35), 0 0 15px var(--gold-glow)',
             maxHeight: '220px',
             overflowY: 'auto',
             zIndex: 1000,
@@ -129,7 +129,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
                     padding: '10px 16px',
                     fontSize: '14px',
                     color: isSelected ? 'var(--gold-bright)' : 'var(--sand-light)',
-                    background: isSelected ? 'rgba(212, 175, 55, 0.12)' : 'transparent',
+                    background: isSelected ? 'var(--sidebar-link-active-bg)' : 'transparent',
                     cursor: 'pointer',
                     transition: 'var(--transition-smooth)',
                     display: 'flex',
@@ -138,7 +138,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(212, 175, 55, 0.06)';
+                      e.currentTarget.style.background = 'var(--sidebar-link-hover-bg)';
                       e.currentTarget.style.color = 'var(--gold)';
                     }
                   }}

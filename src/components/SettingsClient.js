@@ -683,7 +683,7 @@ export default function SettingsClient({ user }) {
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         disabled={passwordLoading}
-                        style={{ background: 'rgba(13, 13, 11, 0.5)' }}
+                        style={{ background: 'rgba(var(--obsidian-rgb), 0.5)' }}
                       />
                       
                       {newPassword && (
@@ -715,7 +715,7 @@ export default function SettingsClient({ user }) {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         disabled={passwordLoading}
-                        style={{ background: 'rgba(13, 13, 11, 0.5)' }}
+                        style={{ background: 'rgba(var(--obsidian-rgb), 0.5)' }}
                       />
                       {confirmPassword && (
                         <div style={{
