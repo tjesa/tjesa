@@ -1076,7 +1076,27 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                 position: 'relative',
                 overflow: 'visible',
               }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gold-gradient)', borderTopLeftRadius: '18px', borderTopRightRadius: '18px' }} />
+                {/* Decorative wrapper to clip the top golden line to the card's rounded borders */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-1px',
+                  left: '-1px',
+                  right: '-1px',
+                  height: '18px',
+                  overflow: 'hidden',
+                  borderTopLeftRadius: '18px',
+                  borderTopRightRadius: '18px',
+                  pointerEvents: 'none',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: 'var(--gold-gradient)',
+                  }} />
+                </div>
 
                 {waitlistSuccess ? (
                   <div style={{ animation: 'fadeSlideUp 0.4s ease both', padding: '16px 0', textAlign: 'center' }}>
