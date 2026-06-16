@@ -4,6 +4,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import { createClient } from '@/lib/supabase/client';
+import {
+  playHoverSound,
+  playClickSound,
+  playSuccessSound,
+  playErrorSound,
+  playPortalSound,
+  setSfxEnabled,
+  setSfxVolume
+} from '@/lib/audio';
 import { 
   QrCode, 
   BarChart3, 
@@ -55,7 +64,7 @@ const TABS = [
   },
   {
     id: 'appearance',
-    label: 'Appearance',
+    label: 'Appearance & Sounds',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3" />
@@ -190,6 +199,8 @@ export default function SettingsClient({ user }) {
   const [disconnecting, setDisconnecting] = useState(null);
   const [theme, setTheme] = useState('obsidian');
   const [brightness, setBrightness] = useState('dark');
+  const [sfxEnabledState, setSfxEnabledState] = useState(true);
+  const [sfxVolumeState, setSfxVolumeState] = useState(0.5);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
@@ -268,10 +279,13 @@ export default function SettingsClient({ user }) {
     }
   };
 
-  // Load theme from localStorage
+  // Load theme and sound settings from localStorage
   useEffect(() => {
     setTheme(localStorage.getItem('tjesa_theme') || 'obsidian');
     setBrightness(localStorage.getItem('tjesa_brightness') || 'dark');
+    setSfxEnabledState(localStorage.getItem('tjesa_sfx_enabled') !== 'false');
+    const savedVol = localStorage.getItem('tjesa_sfx_volume');
+    setSfxVolumeState(savedVol !== null ? parseFloat(savedVol) : 0.5);
   }, []);
 
   // Fetch accounts
@@ -306,6 +320,21 @@ export default function SettingsClient({ user }) {
     localStorage.setItem('tjesa_brightness', newBrightness);
     document.body.setAttribute('data-brightness', newBrightness);
     showToast(`Switched to ${newBrightness} mode`, 'success');
+  };
+
+  const handleToggleSfx = (e) => {
+    const enabled = e.target.checked;
+    setSfxEnabledState(enabled);
+    setSfxEnabled(enabled);
+    if (enabled) {
+      setTimeout(() => playClickSound(), 50);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const vol = parseFloat(e.target.value);
+    setSfxVolumeState(vol);
+    setSfxVolume(vol);
   };
 
   const handleDisconnect = async (tool) => {
@@ -978,6 +1007,116 @@ export default function SettingsClient({ user }) {
                 <p style={{ fontSize: '11px', color: 'var(--sand-dark)', marginTop: '12px', fontFamily: 'var(--font-body)' }}>
                   Your preference is saved automatically and persists across sessions.
                 </p>
+              </SectionCard>
+
+              <SectionCard title="Sound Effects (SFX)" subtitle="Enable and configure synthesized Pharaonic workspace audio.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Enable sound checkbox */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      id="sfx-enabled-toggle"
+                      type="checkbox"
+                      checked={sfxEnabledState}
+                      onChange={handleToggleSfx}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        accentColor: 'var(--gold)',
+                        cursor: 'pointer',
+                      }}
+                    />
+                    <label
+                      htmlFor="sfx-enabled-toggle"
+                      style={{
+                        fontSize: '13px',
+                        color: 'var(--sand-light)',
+                        fontFamily: 'var(--font-headings)',
+                        letterSpacing: '0.04em',
+                        cursor: 'pointer',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Enable Sacred SFX
+                    </label>
+                  </div>
+
+                  {/* Volume Slider */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', opacity: sfxEnabledState ? 1 : 0.4, transition: 'opacity 0.2s ease' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--sand-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        SFX Volume
+                      </span>
+                      <span style={{ fontSize: '12px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                        {Math.round(sfxVolumeState * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={sfxVolumeState}
+                      onChange={handleVolumeChange}
+                      onMouseUp={() => { if (sfxEnabledState) playClickSound(); }}
+                      onTouchEnd={() => { if (sfxEnabledState) playClickSound(); }}
+                      disabled={!sfxEnabledState}
+                      style={{
+                        width: '100%',
+                        accentColor: 'var(--gold)',
+                        cursor: sfxEnabledState ? 'pointer' : 'not-allowed',
+                      }}
+                    />
+                  </div>
+
+                  {/* Live Preview / Test Chimes */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px', opacity: sfxEnabledState ? 1 : 0.4, transition: 'opacity 0.2s ease' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--sand-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      Test Chimes & Drones
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playHoverSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Nile Breeze (Hover)
+                      </button>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playClickSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Tomb Tap (Click)
+                      </button>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playSuccessSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Temple Chime (Success)
+                      </button>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playErrorSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Tomb Curse (Error)
+                      </button>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playPortalSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Stone Portal (Gate)
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </SectionCard>
             </div>
           )}

@@ -3,6 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  playHoverSound,
+  playClickSound,
+  playSuccessSound,
+  playPortalSound
+} from '@/lib/audio';
 import { 
   Landmark, 
   QrCode, 
@@ -47,6 +53,7 @@ export default function DashboardLayout({ children }) {
     setTheme(newTheme);
     localStorage.setItem('tjesa_theme', newTheme);
     document.body.setAttribute('data-theme', newTheme);
+    playSuccessSound();
   };
 
   const toggleBrightness = () => {
@@ -54,6 +61,7 @@ export default function DashboardLayout({ children }) {
     setBrightness(newBrightness);
     localStorage.setItem('tjesa_brightness', newBrightness);
     document.body.setAttribute('data-brightness', newBrightness);
+    playClickSound();
   };
 
   useEffect(() => {
@@ -79,6 +87,7 @@ export default function DashboardLayout({ children }) {
 
   const handleSignOut = async () => {
     try {
+      playClickSound();
       const response = await fetch('/api/auth/signout', { method: 'POST' });
       if (response.ok) {
         router.push('/');
@@ -191,7 +200,7 @@ export default function DashboardLayout({ children }) {
       <aside className={`dashboard-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
         {/* Sidebar Logo Header */}
         <div className="sidebar-logo-container">
-          <Link href="/dashboard" className="sidebar-logo-link" onClick={() => setIsMobileOpen(false)}>
+          <Link href="/dashboard" className="sidebar-logo-link" onClick={() => { playClickSound(); setIsMobileOpen(false); }} onMouseEnter={playHoverSound}>
             <svg width="32" height="32" viewBox="0 0 52 52" fill="none" style={{ filter: 'drop-shadow(0 0 6px var(--gold-glow))' }}>
               <rect x="4" y="4" width="20" height="20" rx="3" fill="none" stroke="var(--gold)" strokeWidth="1.5" />
               <rect x="28" y="4" width="20" height="20" rx="3" fill="none" stroke="var(--gold)" strokeWidth="1.5" />
@@ -215,7 +224,8 @@ export default function DashboardLayout({ children }) {
             href="/dashboard"
             className={`sidebar-link ${pathname === '/dashboard' ? 'active' : ''}`}
             data-tooltip="Hall of Instruments"
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => { playClickSound(); setIsMobileOpen(false); }}
+            onMouseEnter={playHoverSound}
           >
             <span className="sidebar-icon-wrap">
               <Landmark size={18} strokeWidth={1.5} />
@@ -242,9 +252,11 @@ export default function DashboardLayout({ children }) {
                   className={`sidebar-link ${isLinkActive ? 'active' : ''}`}
                   data-tooltip={isLocked ? `${inst.name} — Coming Soon` : inst.name}
                   onClick={(e) => {
-                    if (isLocked) { e.preventDefault(); return; }
+                    if (isLocked) { e.preventDefault(); playErrorSound(); return; }
+                    playClickSound();
                     setIsMobileOpen(false);
                   }}
+                  onMouseEnter={playHoverSound}
                   style={isLocked ? { opacity: 0.4, cursor: 'not-allowed', pointerEvents: 'all' } : {}}
                 >
                   <span className="sidebar-icon-wrap">
@@ -283,7 +295,8 @@ export default function DashboardLayout({ children }) {
                 href="/dashboard/admin" 
                 className={`sidebar-link ${pathname === '/dashboard/admin' ? 'active' : ''}`}
                 data-tooltip="Admin Sanctum"
-                onClick={() => setIsMobileOpen(false)}
+                onClick={() => { playClickSound(); setIsMobileOpen(false); }}
+                onMouseEnter={playHoverSound}
               >
                 <span className="sidebar-icon-wrap">
                   <ShieldAlert size={18} strokeWidth={1.5} />
@@ -302,7 +315,8 @@ export default function DashboardLayout({ children }) {
             href="/dashboard/settings"
             className={`sidebar-link ${pathname === '/dashboard/settings' ? 'active' : ''}`}
             data-tooltip="Settings"
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => { playClickSound(); setIsMobileOpen(false); }}
+            onMouseEnter={playHoverSound}
           >
             <span className="sidebar-icon-wrap">
               <Settings size={18} strokeWidth={1.5} />
@@ -330,6 +344,7 @@ export default function DashboardLayout({ children }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={toggleBrightness}
+                onMouseEnter={playHoverSound}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -354,6 +369,7 @@ export default function DashboardLayout({ children }) {
 
               <button
                 onClick={() => toggleTheme('obsidian')}
+                onMouseEnter={playHoverSound}
                 style={{
                   width: '16px',
                   height: '16px',
@@ -369,6 +385,7 @@ export default function DashboardLayout({ children }) {
               />
               <button
                 onClick={() => toggleTheme('lapis')}
+                onMouseEnter={playHoverSound}
                 style={{
                   width: '16px',
                   height: '16px',
@@ -384,6 +401,7 @@ export default function DashboardLayout({ children }) {
               />
               <button
                 onClick={() => toggleTheme('emerald')}
+                onMouseEnter={playHoverSound}
                 style={{
                   width: '16px',
                   height: '16px',

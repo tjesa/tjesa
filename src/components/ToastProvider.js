@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { playSuccessSound, playErrorSound, playClickSound } from '@/lib/audio';
 
 // ─── Context ───────────────────────────────────────────────────────────────────
 const ToastContext = createContext(null);
@@ -191,6 +192,18 @@ export function ToastProvider({ children }) {
 
   const showToast = useCallback((message, type = 'info', duration = 3500) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    
+    // Play thematic synthesized sound
+    if (type === 'success') {
+      playSuccessSound();
+    } else if (type === 'error') {
+      playErrorSound();
+    } else if (type === 'warning') {
+      playErrorSound();
+    } else {
+      playClickSound();
+    }
+
     setToasts(prev => {
       // Keep max 5, drop oldest if over limit
       const next = [...prev, { id, message, type, duration }];

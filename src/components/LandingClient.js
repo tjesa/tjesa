@@ -4,6 +4,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import GlowingCard from './GlowingCard';
+import {
+  playHoverSound,
+  playClickSound,
+  playSuccessSound,
+  playErrorSound,
+  playPortalSound
+} from '@/lib/audio';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 import CustomSelect from './CustomSelect';
 
@@ -37,9 +44,7 @@ import {
   History,
   Key,
   MessageCircle,
-  Download,
-  Volume2,
-  VolumeX
+  Download
 } from 'lucide-react';
 
 function InstrumentIcon({ id, size = 24 }) {
@@ -69,6 +74,47 @@ function InstrumentIcon({ id, size = 24 }) {
     default: return <Zap size={size} />;
   }
 }
+
+// Helper to format uppercase subtitles/descriptions into clean title-cased names
+const formatToolDescriptionName = (subtitle) => {
+  if (!subtitle) return '';
+  const specialMap = {
+    'whatsapp': 'WhatsApp',
+    'crm': 'CRM',
+    'cms': 'CMS',
+    'sms': 'SMS',
+    'pdf': 'PDF',
+    'qr': 'QR',
+    'ai': 'AI',
+    'kb': 'KB',
+  };
+  
+  return subtitle.toLowerCase().split(' ').map((word, index) => {
+    const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+    if (specialMap[cleanWord]) {
+      return word.replace(cleanWord, specialMap[cleanWord]);
+    }
+    
+    const lowerCases = ['and', 'from', 'to', 'with', 'for', 'a', 'an', 'the', 'in', 'of', 'or', 'at', 'by', 'but', 'nor'];
+    if (lowerCases.includes(cleanWord) && index !== 0) {
+      return word;
+    }
+    
+    if (word.includes('-')) {
+      return word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-');
+    }
+    
+    if (word.includes('/')) {
+      return word.split('/').map(part => {
+        const cleanPart = part.trim().toLowerCase();
+        if (specialMap[cleanPart]) return specialMap[cleanPart];
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      }).join(' / ');
+    }
+    
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+};
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const INSTRUMENTS = [
@@ -292,45 +338,6 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
     }
   }, []);
 
-  // Audio
-  const audioRef = useRef(null);
-  const fadingRef = useRef(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-
-  const toggleMusic = useCallback(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio('/audio/mystic-ambient.mp3');
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0;
-    }
-    if (fadingRef.current) clearInterval(fadingRef.current);
-
-    if (isMusicPlaying) {
-      let vol = audioRef.current.volume;
-      fadingRef.current = setInterval(() => {
-        vol = Math.max(0, vol - 0.02);
-        audioRef.current.volume = vol;
-        if (vol <= 0) { clearInterval(fadingRef.current); audioRef.current.pause(); }
-      }, 40);
-      setIsMusicPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
-      let vol = 0;
-      fadingRef.current = setInterval(() => {
-        vol = Math.min(0.45, vol + 0.015);
-        audioRef.current.volume = vol;
-        if (vol >= 0.45) clearInterval(fadingRef.current);
-      }, 40);
-      setIsMusicPlaying(true);
-    }
-  }, [isMusicPlaying]);
-
-  useEffect(() => {
-    return () => {
-      if (fadingRef.current) clearInterval(fadingRef.current);
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    };
-  }, []);
 
   // Portal Modal States
   const [portalOpen, setPortalOpen] = useState(false);
@@ -356,6 +363,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   }, []);
 
   const handleLogoClick = () => {
+    playClickSound();
     setLogoClicks(prev => {
       const next = prev + 1;
       if (next >= 5) { triggerBypass(); return 0; }
@@ -366,9 +374,17 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
   const triggerBypass = async () => {
     try {
       const response = await fetch('/api/auth/bypass', { method: 'POST' });
-      if (response.ok) router.push('/dashboard');
-      else setPortalOpen(true);
-    } catch { setPortalOpen(true); }
+      if (response.ok) {
+        playSuccessSound();
+        router.push('/dashboard/admin');
+      } else {
+        playPortalSound();
+        setPortalOpen(true);
+      }
+    } catch {
+      playPortalSound();
+      setPortalOpen(true);
+    }
   };
 
   const handleWaitlistSubmit = async (e) => {
@@ -390,12 +406,13 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
       });
       const data = await response.json();
       if (response.ok) { 
+        playSuccessSound();
         setWaitlistSuccess(true); 
         setWaitlistCount(prev => prev + 1);
         setEmail(''); 
         setName('');
         setExcitedTool('');
-
+ 
         // Trigger Meta Pixel Lead event
         if (typeof window !== 'undefined' && window.fbq) {
           window.fbq('track', 'Lead', {
@@ -404,8 +421,14 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           });
         }
       }
-      else setWaitlistError(data.error || 'Failed to join waitlist.');
-    } catch { setWaitlistError('An ancient curse disrupted the connection. Try again.'); }
+      else {
+        playErrorSound();
+        setWaitlistError(data.error || 'Failed to join waitlist.');
+      }
+    } catch {
+      playErrorSound();
+      setWaitlistError('An ancient curse disrupted the connection. Try again.');
+    }
     finally { setWaitlistLoading(false); }
   };
 
@@ -420,9 +443,19 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
         body: JSON.stringify({ token }),
       });
       const data = await response.json();
-      if (response.ok) { setPortalOpen(false); router.push('/dashboard'); }
-      else setError(data.error || 'Failed to bind token.');
-    } catch { setError('Connection disrupted. Please try again.'); }
+      if (response.ok) {
+        playSuccessSound();
+        setPortalOpen(false);
+        router.push('/dashboard');
+      }
+      else {
+        playErrorSound();
+        setError(data.error || 'Failed to bind token.');
+      }
+    } catch {
+      playErrorSound();
+      setError('Connection disrupted. Please try again.');
+    }
     finally { setIsLoading(false); }
   };
 
@@ -652,42 +685,26 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           {/* Center nav links */}
           <div className="nav-links-desktop" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
             {NAV_LINKS.map(link => (
-              <button key={link.id} className={`nav-link${activeSection === link.id ? ' active' : ''}`} onClick={() => scrollTo(link.id)}>
+              <button
+                key={link.id}
+                className={`nav-link${activeSection === link.id ? ' active' : ''}`}
+                onClick={() => { playClickSound(); scrollTo(link.id); }}
+                onMouseEnter={playHoverSound}
+              >
                 {link.label}
               </button>
             ))}
           </div>
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {/* Music toggle */}
             <button
-              onClick={toggleMusic}
-              title={isMusicPlaying ? 'Silence the chamber' : 'Awaken the ambient'}
-              style={{
-                position: 'relative',
-                width: '34px', height: '34px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: isMusicPlaying ? 'rgba(212,175,55,0.12)' : 'transparent',
-                border: `1px solid ${isMusicPlaying ? 'rgba(212,175,55,0.4)' : 'rgba(212,175,55,0.18)'}`,
-                borderRadius: '8px', cursor: 'pointer',
-                color: isMusicPlaying ? 'var(--gold)' : 'var(--sand-dark)',
-                transition: 'all 0.25s ease',
-              }}
+              onClick={() => { playClickSound(); scrollTo('waitlist-section'); }}
+              onMouseEnter={playHoverSound}
+              className="landing-cta-primary"
+              style={{ padding: '8px 18px', fontSize: '11px' }}
             >
-              {isMusicPlaying
-                ? <Volume2 size={15} />
-                : <VolumeX size={15} />
-              }
-              {isMusicPlaying && (
-                <span style={{
-                  position: 'absolute', inset: 0, borderRadius: '8px',
-                  border: '1px solid rgba(212,175,55,0.5)',
-                  animation: 'musicRipple 1.8s ease-out infinite',
-                  pointerEvents: 'none',
-                }}/>
-              )}
+              Join Waitlist
             </button>
-            <button onClick={() => scrollTo('waitlist-section')} className="landing-cta-primary" style={{ padding: '8px 18px', fontSize: '11px' }}>Join Waitlist</button>
           </div>
         </nav>
 
@@ -751,11 +768,20 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
 
             {/* CTAs */}
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => scrollTo('waitlist-section')} className="landing-cta-primary" style={{ fontSize: '14px', padding: '15px 36px' }}>
+              <button
+                onClick={() => { playClickSound(); scrollTo('waitlist-section'); }}
+                onMouseEnter={playHoverSound}
+                className="landing-cta-primary"
+                style={{ fontSize: '14px', padding: '15px 36px' }}
+              >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 17 18 12 13 7" /><polyline points="6 17 11 12 6 7" /></svg>
                 Join Waitlist — Reserve Seat
               </button>
-              <button onClick={() => scrollTo('features')} className="landing-cta-secondary">
+              <button
+                onClick={() => { playClickSound(); scrollTo('features'); }}
+                onMouseEnter={playHoverSound}
+                className="landing-cta-secondary"
+              >
                 Explore Instruments
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               </button>
@@ -785,7 +811,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             position: 'absolute', bottom: '28px', left: '50%',
             transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
             animation: 'scrollBounce 2s ease-in-out infinite', opacity: 0.35, cursor: 'pointer',
-          }} onClick={() => scrollTo('features')}>
+          }} onClick={() => { playClickSound(); scrollTo('features'); }} onMouseEnter={playHoverSound}>
             <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: 'var(--gold)', fontFamily: 'var(--font-headings)' }}>SCROLL</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
           </div>
@@ -976,7 +1002,8 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
               {/* Toggle vault button */}
               <div style={{ display: 'flex', marginTop: '16px' }}>
                 <button
-                  onClick={() => setShowAllTools(prev => !prev)}
+                  onClick={() => { playClickSound(); setShowAllTools(prev => !prev); }}
+                  onMouseEnter={playHoverSound}
                   className="landing-cta-secondary"
                   style={{
                     display: 'inline-flex',
@@ -1121,10 +1148,13 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                         </label>
                         <CustomSelect
                           id="waitlist-excited-tool"
-                          options={INSTRUMENTS.map(inst => ({
-                            value: inst.name,
-                            label: `${inst.name} (${inst.status === 'live' ? 'Live' : 'Soon'})`
-                          }))}
+                          options={INSTRUMENTS.map(inst => {
+                            const descName = formatToolDescriptionName(inst.subtitle);
+                            return {
+                              value: descName,
+                              label: `${descName} (${inst.status === 'live' ? 'Live' : 'Soon'})`
+                            };
+                          })}
                           value={excitedTool}
                           onChange={setExcitedTool}
                           placeholder="Select a tool →"
@@ -1140,6 +1170,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
 
                     <button
                       type="submit"
+                      onMouseEnter={playHoverSound}
                       className="landing-cta-primary"
                       disabled={waitlistLoading || !email || !name || !excitedTool}
                       style={{
@@ -1203,7 +1234,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                 { label: 'Instruments', action: () => scrollTo('features') },
                 { label: 'Waitlist', action: () => scrollTo('waitlist-section') },
               ].map(link => (
-                <button key={link.label} onClick={link.action} style={{ display: 'block', background: 'none', border: 'none', color: 'var(--sand-dark)', cursor: 'pointer', fontSize: '12px', fontFamily: 'var(--font-body)', padding: '0 0 8px', textAlign: 'left', transition: 'color 0.2s ease' }}
+                <button key={link.label} onClick={() => { playClickSound(); link.action(); }} onMouseEnter={playHoverSound} style={{ display: 'block', background: 'none', border: 'none', color: 'var(--sand-dark)', cursor: 'pointer', fontSize: '12px', fontFamily: 'var(--font-body)', padding: '0 0 8px', textAlign: 'left', transition: 'color 0.2s ease' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--gold)'} onMouseOut={e => e.currentTarget.style.color = 'var(--sand-dark)'}>
                   {link.label}
                 </button>
@@ -1220,7 +1251,8 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
               ].map(item => (
                 <button
                   key={item.label}
-                  onClick={() => router.push(item.path)}
+                  onClick={() => { playClickSound(); router.push(item.path); }}
+                  onMouseEnter={playHoverSound}
                   style={{
                     display: 'block',
                     background: 'none',
@@ -1277,7 +1309,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
             position: 'relative', overflow: 'hidden', animation: 'scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1)',
           }}>
             <div style={{ height: '4px', background: 'var(--gold-gradient)' }} />
-            <button onClick={() => setPortalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--sand-dim)', fontSize: '18px', cursor: 'pointer' }}>✕</button>
+            <button onClick={() => { playClickSound(); setPortalOpen(false); }} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--sand-dim)', fontSize: '18px', cursor: 'pointer' }}>✕</button>
             <div style={{ padding: '32px 24px' }}>
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '22px', color: 'var(--gold)', fontFamily: 'var(--font-headings)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Architect Portal Gateway</h3>
@@ -1289,7 +1321,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                   <GlowingCard title="The Golden Portal" subtitle="Official OAuth 2.0 gateway linkage">
                     <p style={{ marginBottom: '24px', fontSize: '13px', lineHeight: 1.5, color: 'var(--sand-dim)', fontFamily: 'var(--font-body)' }}>Connect your workspaces officially via Notion OAuth.</p>
-                    <a href={oauthUrl} className="kemet-btn" style={{ width: '100%', justifyContent: 'center', padding: '10px 0', fontSize: '12px', textDecoration: 'none' }}>
+                    <a href={oauthUrl} onClick={playClickSound} onMouseEnter={playHoverSound} className="kemet-btn" style={{ width: '100%', justifyContent: 'center', padding: '10px 0', fontSize: '12px', textDecoration: 'none' }}>
                       Open OAuth Gateway
                     </a>
                   </GlowingCard>
@@ -1301,7 +1333,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
                         <input id="secret-token" className="kemet-input" type="password" placeholder="secret_HzLx..." value={token} onChange={(e) => setToken(e.target.value)} />
                       </div>
                       {error && (<div style={{ padding: '10px', background: 'rgba(168,36,36,0.08)', border: '1px solid var(--scarab-red)', borderRadius: '6px', color: '#FF7F7F', fontSize: '12px', marginBottom: '16px' }}>{error}</div>)}
-                      <button type="submit" className="kemet-btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', padding: '9px 0', fontSize: '12px' }} disabled={!token}>Bind Secret Key</button>
+                      <button type="submit" onMouseEnter={playHoverSound} className="kemet-btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', padding: '9px 0', fontSize: '12px' }} disabled={!token}>Bind Secret Key</button>
                     </form>
                   </GlowingCard>
                 </div>

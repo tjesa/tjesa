@@ -8,6 +8,11 @@ import EyeOfHorusLoader from '../EyeOfHorusLoader';
 import CustomSelect from '../CustomSelect';
 import { useToast } from '@/hooks/useToast';
 import { Link, Zap, Palette, Lightbulb, CheckCircle } from 'lucide-react';
+import {
+  playHoverSound,
+  playClickSound,
+  playPortalSound
+} from '@/lib/audio';
 
 export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl }) {
   const router = useRouter();
@@ -440,7 +445,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                             className="kemet-btn"
                             style={{ padding: '6px 14px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
                             disabled={isSyncing}
-                            onClick={() => handleSync(config)}
+                            onClick={() => { playClickSound(); handleSync(config); }}
+                            onMouseEnter={playHoverSound}
                           >
                             Sync Now
                           </button>
@@ -448,7 +454,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                             className="kemet-btn-secondary"
                             style={{ padding: '6px 14px', fontSize: '11px' }}
                             disabled={isSyncing}
-                            onClick={() => isEditing ? closeEditor() : setEditingDbId(db.id)}
+                            onClick={() => { playClickSound(); isEditing ? closeEditor() : setEditingDbId(db.id); }}
+                            onMouseEnter={playHoverSound}
                           >
                             {isEditing ? 'Close' : 'Configure'}
                           </button>
@@ -458,12 +465,14 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                             style={{ padding: '6px 14px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
                             disabled={isSyncing}
                             onClick={(e) => {
+                              playClickSound();
                               const url = `${window.location.origin}/api/tools/qr/webhook?config_id=${config.id}`;
                               navigator.clipboard.writeText(url);
                               const btn = e.currentTarget;
                               btn.innerText = 'Copied!';
                               setTimeout(() => { btn.innerHTML = 'Webhook'; }, 2000);
                             }}
+                            onMouseEnter={playHoverSound}
                           >
                             Webhook
                           </button>
@@ -472,9 +481,11 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                             style={{ padding: '6px 14px', fontSize: '11px', borderColor: 'var(--scarab-red)', color: '#FF7F7F' }}
                             disabled={isSyncing}
                             onClick={() => {
+                              playPortalSound();
                               setConfigToDelete(config);
                               setDeleteConfirmOpen(true);
                             }}
+                            onMouseEnter={playHoverSound}
                           >
                             Delete
                           </button>
@@ -484,7 +495,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                           className="kemet-btn"
                           style={{ padding: '6px 16px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
                           disabled={isSyncing}
-                          onClick={() => isEditing ? closeEditor() : setEditingDbId(db.id)}
+                          onClick={() => { playClickSound(); isEditing ? closeEditor() : setEditingDbId(db.id); }}
+                          onMouseEnter={playHoverSound}
                         >
                           {isEditing ? 'Cancel Setup' : 'Setup QR Generator'}
                         </button>
@@ -856,7 +868,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                             <button
                               className="kemet-btn-secondary"
                               style={{ padding: '6px 16px', fontSize: '11px' }}
-                              onClick={() => closeEditor()}
+                              onClick={() => { playClickSound(); closeEditor(); }}
+                              onMouseEnter={playHoverSound}
                               disabled={isSyncing || isSavingSettings}
                             >
                               Cancel
@@ -865,7 +878,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                               className="kemet-btn-secondary"
                               style={{ padding: '6px 16px', fontSize: '11px', borderColor: 'rgba(212,175,55,0.5)', color: 'var(--gold)' }}
                               disabled={isSyncing || isSavingSettings || !sourceColumn || !targetColumn}
-                              onClick={() => handleSaveSettings()}
+                              onClick={() => { playClickSound(); handleSaveSettings(); }}
+                              onMouseEnter={playHoverSound}
                             >
                               {isSavingSettings ? 'Saving...' : 'Save Settings'}
                             </button>
@@ -873,7 +887,8 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                               className="kemet-btn"
                               style={{ padding: '6px 16px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
                               disabled={isSyncing || isSavingSettings || !sourceColumn || !targetColumn}
-                              onClick={() => handleSync()}
+                              onClick={() => { playClickSound(); handleSync(); }}
+                              onMouseEnter={playHoverSound}
                             >
                               {isSyncing ? 'Carving Glyphs...' : 'Save & Sync Now'}
                             </button>
@@ -1026,9 +1041,11 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                     className="kemet-btn-secondary"
                     style={{ flex: 1, justifyContent: 'center', padding: '10px 20px', fontSize: '11px', borderColor: 'rgba(212, 175, 55, 0.4)', color: 'var(--sand-dim)', height: 'auto', minHeight: 'unset' }}
                     onClick={() => {
+                      playClickSound();
                       setDeleteConfirmOpen(false);
                       setConfigToDelete(null);
                     }}
+                    onMouseEnter={playHoverSound}
                   >
                     Keep Active
                   </button>
@@ -1036,11 +1053,13 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                     className="kemet-btn"
                     style={{ flex: 1, justifyContent: 'center', padding: '10px 20px', fontSize: '11px', background: 'linear-gradient(135deg, #A82424 0%, #7A1919 100%)', boxShadow: '0 4px 15px rgba(168, 36, 36, 0.2)', color: '#FFF', height: 'auto', minHeight: 'unset' }}
                     onClick={async () => {
+                      playClickSound();
                       if (configToDelete) {
                         try {
                           const res = await fetch(`/api/configs?id=${configToDelete.id}`, { method: 'DELETE' });
                           if (res.ok) {
                             setConfigs(prev => prev.filter(c => c.id !== configToDelete.id));
+                            showToast('Sacred binding deleted', 'info');
                           }
                         } catch (err) {
                           console.error('Failed to delete config:', err);
@@ -1050,6 +1069,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                         }
                       }
                     }}
+                    onMouseEnter={playHoverSound}
                   >
                     Delete Sync
                   </button>
