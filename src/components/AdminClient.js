@@ -48,6 +48,9 @@ export default function AdminClient({ account }) {
   const [feedbackSearch, setFeedbackSearch] = useState('');
   const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('All');
   const [expandedFeedbackId, setExpandedFeedbackId] = useState(null);
+  const [ticketStatusFilter, setTicketStatusFilter] = useState('All');
+  const [ticketSavingId, setTicketSavingId] = useState(null);
+  const [ticketDraftNotes, setTicketDraftNotes] = useState({});
 
   // Invite loading state map
   const [isInvitingId, setIsInvitingId] = useState(null);
@@ -298,7 +301,30 @@ export default function AdminClient({ account }) {
     }
   };
 
-  // 8. Export CSV Helper
+  // 8. Update ticket (status / priority / admin_notes)
+  const handleTicketUpdate = async (id, field, value) => {
+    setTicketSavingId(id + field);
+    try {
+      const res = await fetch('/api/admin/feedback', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, [field]: value }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback(prev => prev.map(f => f.id === id ? { ...f, ...data.ticket } : f));
+        if (field === 'admin_notes') {
+          setTicketDraftNotes(prev => { const n = { ...prev }; delete n[id]; return n; });
+        }
+      }
+    } catch (err) {
+      console.error('[TicketUpdate]', err);
+    } finally {
+      setTicketSavingId(null);
+    }
+  };
+
+  // 9. Export CSV Helper
   const handleExportCSV = () => {
     if (emails.length === 0) return;
 
@@ -1334,9 +1360,11 @@ export default function AdminClient({ account }) {
             {activeTab === 'feedback' && (() => {
               const CATEGORIES = ['All', 'Bug Report', 'Feature Request', 'General Feedback', 'Account Issue'];
               const STATUSES = ['All', 'open', 'in_progress', 'resolved'];
-              const [statusFilter, setStatusFilter] = React.useState('All');
-              const [savingId, setSavingId] = React.useState(null);
-              const [draftNotes, setDraftNotes] = React.useState({});
+              const statusFilter = ticketStatusFilter;
+              const setStatusFilter = setTicketStatusFilter;
+              const savingId = ticketSavingId;
+              const draftNotes = ticketDraftNotes;
+              const setDraftNotes = setTicketDraftNotes;
 
               const STATUS_META = {
                 open:        { label: 'Open',        bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   text: '#FCA5A5' },
@@ -1375,28 +1403,6 @@ export default function AdminClient({ account }) {
                 const matchesStatus = statusFilter === 'All' || f.status === statusFilter;
                 return matchesSearch && matchesCat && matchesStatus;
               });
-
-              const handleTicketUpdate = async (id, field, value) => {
-                setSavingId(id + field);
-                try {
-                  const res = await fetch('/api/admin/feedback', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, [field]: value }),
-                  });
-                  const data = await res.json();
-                  if (res.ok && data.success) {
-                    setFeedback(prev => prev.map(f => f.id === id ? { ...f, ...data.ticket } : f));
-                    if (field === 'admin_notes') {
-                      setDraftNotes(prev => { const n = { ...prev }; delete n[id]; return n; });
-                    }
-                  }
-                } catch (err) {
-                  console.error('[TicketUpdate]', err);
-                } finally {
-                  setSavingId(null);
-                }
-              };
 
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
