@@ -1330,13 +1330,41 @@ export default function AdminClient({ account }) {
               </div>
             )}
 
-            {/* TAB 4: FEEDBACK INBOX */}
+            {/* TAB 4: TICKETING SYSTEM */}
             {activeTab === 'feedback' && (() => {
               const CATEGORIES = ['All', 'Bug Report', 'Feature Request', 'General Feedback', 'Account Issue'];
-              const categoryCounts = {};
-              feedback.forEach(f => {
-                categoryCounts[f.category] = (categoryCounts[f.category] || 0) + 1;
-              });
+              const STATUSES = ['All', 'open', 'in_progress', 'resolved'];
+              const [statusFilter, setStatusFilter] = React.useState('All');
+              const [savingId, setSavingId] = React.useState(null);
+              const [draftNotes, setDraftNotes] = React.useState({});
+
+              const STATUS_META = {
+                open:        { label: 'Open',        bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   text: '#FCA5A5' },
+                in_progress: { label: 'In Progress', bg: 'rgba(251,146,60,0.1)',  border: 'rgba(251,146,60,0.3)',  text: '#FB923C' },
+                resolved:    { label: 'Resolved',    bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.25)', text: '#34D399' },
+              };
+              const PRIORITY_META = {
+                low:    { label: 'Low',    color: '#6B7280' },
+                medium: { label: 'Medium', color: '#F59E0B' },
+                high:   { label: 'High',   color: '#EF4444' },
+                urgent: { label: 'Urgent', color: '#DC2626' },
+              };
+              const CATEGORY_COLORS = {
+                'Bug Report':        { bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.25)',  text: '#FCA5A5' },
+                'Feature Request':   { bg: 'rgba(212,175,55,0.08)', border: 'rgba(212,175,55,0.25)', text: 'var(--gold)' },
+                'General Feedback':  { bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.25)', text: '#34D399' },
+                'Account Issue':     { bg: 'rgba(251,146,60,0.08)', border: 'rgba(251,146,60,0.25)', text: '#FB923C' },
+              };
+
+              const formatDate = (d) => {
+                if (!d) return '—';
+                return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              };
+              const ticketId = (id) => `TKT-${(id || '').slice(0, 6).toUpperCase()}`;
+
+              const openCount = feedback.filter(f => f.status === 'open').length;
+              const inProgressCount = feedback.filter(f => f.status === 'in_progress').length;
+              const resolvedCount = feedback.filter(f => f.status === 'resolved').length;
 
               const filtered = feedback.filter(f => {
                 const matchesSearch = !feedbackSearch ||
@@ -1344,187 +1372,283 @@ export default function AdminClient({ account }) {
                   f.message?.toLowerCase().includes(feedbackSearch.toLowerCase()) ||
                   f.user_email?.toLowerCase().includes(feedbackSearch.toLowerCase());
                 const matchesCat = feedbackCategoryFilter === 'All' || f.category === feedbackCategoryFilter;
-                return matchesSearch && matchesCat;
+                const matchesStatus = statusFilter === 'All' || f.status === statusFilter;
+                return matchesSearch && matchesCat && matchesStatus;
               });
 
-              const formatDate = (d) => {
-                if (!d) return '—';
-                return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-              };
-
-              const CATEGORY_COLORS = {
-                'Bug Report': { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', text: '#FCA5A5' },
-                'Feature Request': { bg: 'rgba(212,175,55,0.08)', border: 'rgba(212,175,55,0.25)', text: 'var(--gold)' },
-                'General Feedback': { bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.25)', text: '#34D399' },
-                'Account Issue': { bg: 'rgba(251,146,60,0.08)', border: 'rgba(251,146,60,0.25)', text: '#FB923C' },
+              const handleTicketUpdate = async (id, field, value) => {
+                setSavingId(id + field);
+                try {
+                  const res = await fetch('/api/admin/feedback', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, [field]: value }),
+                  });
+                  const data = await res.json();
+                  if (res.ok && data.success) {
+                    setFeedback(prev => prev.map(f => f.id === id ? { ...f, ...data.ticket } : f));
+                    if (field === 'admin_notes') {
+                      setDraftNotes(prev => { const n = { ...prev }; delete n[id]; return n; });
+                    }
+                  }
+                } catch (err) {
+                  console.error('[TicketUpdate]', err);
+                } finally {
+                  setSavingId(null);
+                }
               };
 
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                   {/* Stats Row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '10px' }}>
-                    <GlowingCard title="Total Submissions" subtitle="All feedback received">
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '90px' }}>
-                        <div style={{ fontSize: '46px', fontFamily: 'var(--font-headings)', color: 'var(--gold)', letterSpacing: '0.05em', fontWeight: 'bold' }}>
-                          {feedback.length}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                    {[
+                      { label: 'Total Tickets', value: feedback.length, color: 'var(--gold)' },
+                      { label: 'Open', value: openCount, color: '#FCA5A5' },
+                      { label: 'In Progress', value: inProgressCount, color: '#FB923C' },
+                      { label: 'Resolved', value: resolvedCount, color: '#34D399' },
+                    ].map(stat => (
+                      <GlowingCard key={stat.label} title={stat.label} subtitle="">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '70px' }}>
+                          <div style={{ fontSize: '40px', fontFamily: 'var(--font-headings)', color: stat.color, fontWeight: 'bold', letterSpacing: '0.05em' }}>
+                            {stat.value}
+                          </div>
                         </div>
-                      </div>
-                    </GlowingCard>
-
-                    <GlowingCard title="By Category" subtitle="Breakdown of submission types">
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '90px', justifyContent: 'center' }}>
-                        {Object.keys(categoryCounts).length === 0 ? (
-                          <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center' }}>No submissions yet.</div>
-                        ) : Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([cat, count]) => {
-                          const col = CATEGORY_COLORS[cat] || {};
-                          return (
-                            <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                              <span style={{ color: col.text || 'var(--sand)', padding: '1px 6px', background: col.bg, border: `1px solid ${col.border}`, borderRadius: '4px', fontSize: '10px' }}>{cat}</span>
-                              <span style={{ color: 'var(--gold-dim)', fontWeight: 'bold' }}>{count}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </GlowingCard>
+                      </GlowingCard>
+                    ))}
                   </div>
 
-                  {/* Search & Category Filter */}
+                  {/* Filters */}
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <div style={{ flex: 1, minWidth: '240px' }}>
+                    <div style={{ flex: 1, minWidth: '220px' }}>
                       <input
                         className="kemet-input"
                         type="text"
                         placeholder="Search subject, message, or email…"
                         value={feedbackSearch}
                         onChange={e => setFeedbackSearch(e.target.value)}
-                        style={{ padding: '10px 14px', fontSize: '13px' }}
+                        style={{ padding: '9px 14px', fontSize: '13px' }}
                       />
                     </div>
+
+                    {/* Status filter */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {STATUSES.map(s => {
+                        const meta = STATUS_META[s];
+                        return (
+                          <button key={s} onClick={() => setStatusFilter(s)} style={{
+                            padding: '6px 12px', borderRadius: '6px', fontSize: '11px',
+                            fontFamily: 'var(--font-headings)', cursor: 'pointer', letterSpacing: '0.04em',
+                            border: statusFilter === s ? `1px solid ${meta?.border || 'rgba(212,175,55,0.4)'}` : '1px solid rgba(212,175,55,0.12)',
+                            background: statusFilter === s ? (meta?.bg || 'rgba(212,175,55,0.1)') : 'transparent',
+                            color: statusFilter === s ? (meta?.text || 'var(--gold)') : 'var(--sand-dark)',
+                          }}>
+                            {meta?.label || 'All'}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Category filter */}
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {CATEGORIES.map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => setFeedbackCategoryFilter(cat)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            border: feedbackCategoryFilter === cat
-                              ? '1px solid rgba(212,175,55,0.4)'
-                              : '1px solid rgba(212,175,55,0.12)',
-                            background: feedbackCategoryFilter === cat ? 'rgba(212,175,55,0.1)' : 'transparent',
-                            color: feedbackCategoryFilter === cat ? 'var(--gold)' : 'var(--sand-dark)',
-                            fontSize: '11px',
-                            fontFamily: 'var(--font-headings)',
-                            cursor: 'pointer',
-                            letterSpacing: '0.04em',
-                          }}
-                        >
+                        <button key={cat} onClick={() => setFeedbackCategoryFilter(cat)} style={{
+                          padding: '6px 10px', borderRadius: '6px', fontSize: '10px',
+                          fontFamily: 'var(--font-headings)', cursor: 'pointer', letterSpacing: '0.04em',
+                          border: feedbackCategoryFilter === cat ? '1px solid rgba(212,175,55,0.4)' : '1px solid rgba(212,175,55,0.08)',
+                          background: feedbackCategoryFilter === cat ? 'rgba(212,175,55,0.08)' : 'transparent',
+                          color: feedbackCategoryFilter === cat ? 'var(--gold)' : 'var(--sand-dark)',
+                        }}>
                           {cat}
-                          {cat !== 'All' && categoryCounts[cat] ? ` (${categoryCounts[cat]})` : ''}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Feedback Cards */}
-                  <GlowingCard title="Feedback Submissions" subtitle={`${filtered.length} of ${feedback.length} showing`}>
+                  {/* Ticket List */}
+                  <GlowingCard title="Support Tickets" subtitle={`${filtered.length} of ${feedback.length} tickets`}>
                     {isFeedbackLoading ? (
                       <div style={{ padding: '24px 0', textAlign: 'center' }}>
-                        <EyeOfHorusLoader size={40} text="Opening feedback scrolls…" />
+                        <EyeOfHorusLoader size={40} text="Opening ticket scrolls…" />
                       </div>
                     ) : filtered.length === 0 ? (
                       <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--sand-dark)', padding: '32px 0', margin: 0 }}>
-                        {feedback.length === 0 ? 'No feedback submissions yet.' : 'No results match your filter.'}
+                        {feedback.length === 0 ? 'No tickets submitted yet.' : 'No tickets match your filters.'}
                       </p>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filtered.map((item, idx) => {
-                          const col = CATEGORY_COLORS[item.category] || { bg: 'rgba(212,175,55,0.06)', border: 'rgba(212,175,55,0.12)', text: 'var(--gold-dim)' };
+                          const catCol = CATEGORY_COLORS[item.category] || { bg: 'rgba(212,175,55,0.06)', border: 'rgba(212,175,55,0.12)', text: 'var(--gold-dim)' };
+                          const statusMeta = STATUS_META[item.status] || STATUS_META.open;
+                          const priorityMeta = PRIORITY_META[item.priority || 'medium'];
                           const isExpanded = expandedFeedbackId === item.id;
+                          const notesDraft = draftNotes[item.id] !== undefined ? draftNotes[item.id] : (item.admin_notes || '');
+                          const notesDirty = notesDraft !== (item.admin_notes || '');
+
                           return (
-                            <div
-                              key={item.id || idx}
-                              style={{
-                                border: '1px solid rgba(212,175,55,0.1)',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                transition: 'border-color 0.2s ease',
-                              }}
-                              onMouseOver={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.2)'}
-                              onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.1)'}
-                            >
-                              {/* Row header — always visible */}
+                            <div key={item.id || idx} style={{
+                              border: `1px solid ${isExpanded ? 'rgba(212,175,55,0.25)' : 'rgba(212,175,55,0.1)'}`,
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              transition: 'border-color 0.2s ease',
+                            }}>
+                              {/* Header row */}
                               <div
                                 onClick={() => setExpandedFeedbackId(isExpanded ? null : item.id)}
                                 style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '12px',
-                                  padding: '12px 16px',
-                                  cursor: 'pointer',
-                                  background: isExpanded ? 'rgba(212,175,55,0.04)' : 'transparent',
-                                  flexWrap: 'wrap',
+                                  display: 'flex', alignItems: 'center', gap: '12px',
+                                  padding: '13px 16px', cursor: 'pointer', flexWrap: 'wrap',
+                                  background: isExpanded ? 'rgba(212,175,55,0.03)' : 'transparent',
                                 }}
                               >
-                                {/* Category badge */}
+                                {/* Ticket ID */}
+                                <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--gold-dim)', flexShrink: 0 }}>
+                                  {ticketId(item.id)}
+                                </span>
+
+                                {/* Status badge */}
                                 <span style={{
-                                  padding: '2px 8px',
-                                  borderRadius: '4px',
-                                  fontSize: '10px',
-                                  fontFamily: 'var(--font-headings)',
-                                  letterSpacing: '0.06em',
-                                  flexShrink: 0,
-                                  background: col.bg,
-                                  border: `1px solid ${col.border}`,
-                                  color: col.text,
+                                  padding: '2px 8px', borderRadius: '4px', fontSize: '10px',
+                                  fontFamily: 'var(--font-headings)', letterSpacing: '0.06em', flexShrink: 0,
+                                  background: statusMeta.bg, border: `1px solid ${statusMeta.border}`, color: statusMeta.text,
+                                }}>
+                                  {statusMeta.label}
+                                </span>
+
+                                {/* Priority dot */}
+                                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: priorityMeta.color, flexShrink: 0, boxShadow: `0 0 5px ${priorityMeta.color}` }} title={`Priority: ${priorityMeta.label}`} />
+
+                                {/* Category */}
+                                <span style={{
+                                  padding: '2px 7px', borderRadius: '4px', fontSize: '10px',
+                                  fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', flexShrink: 0,
+                                  background: catCol.bg, border: `1px solid ${catCol.border}`, color: catCol.text,
                                 }}>
                                   {item.category}
                                 </span>
 
                                 {/* Subject */}
-                                <span style={{ flex: 1, fontSize: '13px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)', letterSpacing: '0.02em', minWidth: '120px' }}>
+                                <span style={{ flex: 1, fontSize: '13px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)', minWidth: '100px' }}>
                                   {item.subject}
                                 </span>
 
-                                {/* From */}
-                                <span style={{ fontSize: '11px', color: 'var(--sand-dark)', flexShrink: 0 }}>
-                                  {item.user_email}
-                                </span>
+                                {/* From + date */}
+                                <span style={{ fontSize: '11px', color: 'var(--sand-dark)', flexShrink: 0 }}>{item.user_email}</span>
+                                <span style={{ fontSize: '10px', color: 'var(--sand-dark)', flexShrink: 0, fontFamily: 'monospace' }}>{formatDate(item.submitted_at)}</span>
 
-                                {/* Date */}
-                                <span style={{ fontSize: '10px', color: 'var(--sand-dark)', flexShrink: 0, fontFamily: 'monospace' }}>
-                                  {formatDate(item.submitted_at)}
-                                </span>
-
-                                {/* Expand chevron */}
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="var(--gold-dim)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
-                                >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold-dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                  style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
                                   <polyline points="6 9 12 15 18 9" />
                                 </svg>
                               </div>
 
-                              {/* Expanded message */}
+                              {/* Expanded panel */}
                               {isExpanded && (
-                                <div style={{
-                                  padding: '0 16px 16px',
-                                  borderTop: '1px solid rgba(212,175,55,0.06)',
-                                }}>
-                                  <div style={{ marginTop: '14px', fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.7, fontFamily: 'var(--font-body)', whiteSpace: 'pre-wrap' }}>
-                                    {item.message}
+                                <div style={{ borderTop: '1px solid rgba(212,175,55,0.08)', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                                  {/* Message */}
+                                  <div>
+                                    <div style={{ fontSize: '10px', color: 'var(--gold-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                                      Message
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.7, fontFamily: 'var(--font-body)', whiteSpace: 'pre-wrap', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid rgba(212,175,55,0.06)' }}>
+                                      {item.message}
+                                    </div>
                                   </div>
-                                  <div style={{ marginTop: '12px', display: 'flex', gap: '16px', fontSize: '11px', color: 'var(--sand-dark)', fontFamily: 'monospace' }}>
+
+                                  {/* Controls row */}
+                                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+
+                                    {/* Status */}
+                                    <div style={{ flex: 1, minWidth: '160px' }}>
+                                      <div style={{ fontSize: '10px', color: 'var(--gold-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>Status</div>
+                                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                        {Object.entries(STATUS_META).map(([val, meta]) => (
+                                          <button
+                                            key={val}
+                                            disabled={savingId === item.id + 'status'}
+                                            onClick={(e) => { e.stopPropagation(); handleTicketUpdate(item.id, 'status', val); }}
+                                            style={{
+                                              padding: '5px 12px', borderRadius: '5px', fontSize: '11px',
+                                              fontFamily: 'var(--font-headings)', cursor: 'pointer', letterSpacing: '0.04em',
+                                              border: item.status === val ? `1px solid ${meta.border}` : '1px solid rgba(212,175,55,0.1)',
+                                              background: item.status === val ? meta.bg : 'transparent',
+                                              color: item.status === val ? meta.text : 'var(--sand-dark)',
+                                              opacity: savingId === item.id + 'status' ? 0.5 : 1,
+                                            }}
+                                          >
+                                            {meta.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Priority */}
+                                    <div style={{ flex: 1, minWidth: '160px' }}>
+                                      <div style={{ fontSize: '10px', color: 'var(--gold-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>Priority</div>
+                                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                        {Object.entries(PRIORITY_META).map(([val, meta]) => (
+                                          <button
+                                            key={val}
+                                            disabled={savingId === item.id + 'priority'}
+                                            onClick={(e) => { e.stopPropagation(); handleTicketUpdate(item.id, 'priority', val); }}
+                                            style={{
+                                              padding: '5px 10px', borderRadius: '5px', fontSize: '11px',
+                                              fontFamily: 'var(--font-headings)', cursor: 'pointer', letterSpacing: '0.04em',
+                                              border: (item.priority || 'medium') === val ? `1px solid ${meta.color}55` : '1px solid rgba(212,175,55,0.1)',
+                                              background: (item.priority || 'medium') === val ? `${meta.color}18` : 'transparent',
+                                              color: (item.priority || 'medium') === val ? meta.color : 'var(--sand-dark)',
+                                              opacity: savingId === item.id + 'priority' ? 0.5 : 1,
+                                            }}
+                                          >
+                                            {meta.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Admin Notes */}
+                                  <div>
+                                    <div style={{ fontSize: '10px', color: 'var(--gold-dim)', fontFamily: 'var(--font-headings)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                                      Admin Notes (internal)
+                                    </div>
+                                    <textarea
+                                      value={notesDraft}
+                                      onChange={e => setDraftNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
+                                      onClick={e => e.stopPropagation()}
+                                      placeholder="Add internal notes about this ticket…"
+                                      rows={3}
+                                      style={{
+                                        width: '100%', boxSizing: 'border-box',
+                                        background: 'rgba(0,0,0,0.25)', border: notesDirty ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(212,175,55,0.1)',
+                                        borderRadius: '6px', padding: '10px 12px', color: 'var(--sand-dim)',
+                                        fontFamily: 'var(--font-body)', fontSize: '13px', lineHeight: 1.6,
+                                        resize: 'vertical', minHeight: '72px', outline: 'none',
+                                      }}
+                                    />
+                                    {notesDirty && (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleTicketUpdate(item.id, 'admin_notes', notesDraft); }}
+                                        disabled={savingId === item.id + 'admin_notes'}
+                                        style={{
+                                          marginTop: '8px', padding: '6px 16px', borderRadius: '6px', fontSize: '11px',
+                                          fontFamily: 'var(--font-headings)', letterSpacing: '0.06em', cursor: 'pointer',
+                                          background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.3)', color: 'var(--gold)',
+                                        }}
+                                      >
+                                        {savingId === item.id + 'admin_notes' ? 'Saving…' : 'Save Notes'}
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  {/* Meta footer */}
+                                  <div style={{ display: 'flex', gap: '20px', fontSize: '10px', color: 'var(--sand-dark)', fontFamily: 'monospace', paddingTop: '8px', borderTop: '1px solid rgba(212,175,55,0.05)', flexWrap: 'wrap' }}>
                                     <span>ID: {item.id}</span>
-                                    {item.user_id && <span>User: {item.user_id}</span>}
+                                    {item.user_id && <span>User ID: {item.user_id}</span>}
+                                    {item.resolved_at && <span>Resolved: {formatDate(item.resolved_at)}</span>}
+                                    {item.updated_at && <span>Updated: {formatDate(item.updated_at)}</span>}
                                   </div>
                                 </div>
                               )}

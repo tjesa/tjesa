@@ -224,6 +224,9 @@ export default function SettingsClient({ user }) {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
+  const [myTickets, setMyTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [supportView, setSupportView] = useState('new'); // 'new' | 'history'
 
   const getPasswordStrength = () => {
     if (!newPassword) return { score: 0, label: '', color: 'transparent' };
@@ -391,6 +394,21 @@ export default function SettingsClient({ user }) {
     }
   };
 
+  const fetchMyTickets = useCallback(async () => {
+    setTicketsLoading(true);
+    try {
+      const res = await fetch('/api/support/tickets');
+      if (res.ok) {
+        const data = await res.json();
+        setMyTickets(data.tickets || []);
+      }
+    } catch (err) {
+      console.error('[Settings] fetchMyTickets error:', err);
+    } finally {
+      setTicketsLoading(false);
+    }
+  }, []);
+
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!feedbackCategory || !feedbackSubject.trim() || !feedbackMessage.trim()) {
@@ -411,6 +429,7 @@ export default function SettingsClient({ user }) {
         setFeedbackCategory('');
         setFeedbackSubject('');
         setFeedbackMessage('');
+        fetchMyTickets();
       } else {
         showToast(data.error || 'Submission failed. Try again.', 'error');
       }
@@ -628,7 +647,11 @@ export default function SettingsClient({ user }) {
               <button
                 key={tab.id}
                 className={`settings-tab-btn${activeTab === tab.id ? ' active' : ''}${tab.id === 'danger' ? ' danger-tab' : ''}`}
-                onClick={() => { setActiveTab(tab.id); if (tab.id !== 'support') setFeedbackDone(false); }}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === 'support') { fetchMyTickets(); }
+                  else { setFeedbackDone(false); setSupportView('new'); }
+                }}
                 id={`settings-tab-${tab.id}`}
               >
                 {tab.icon}
@@ -1167,8 +1190,100 @@ export default function SettingsClient({ user }) {
           )}
 
           {/* ══ SUPPORT & FEEDBACK TAB ═══════════════════════════ */}
-          {activeTab === 'support' && (
+          {activeTab === 'support' && (() => {
+            const STATUS_META = {
+              open:        { label: 'Open',        bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   text: '#FCA5A5' },
+              in_progress: { label: 'In Progress', bg: 'rgba(251,146,60,0.1)',  border: 'rgba(251,146,60,0.3)',  text: '#FB923C' },
+              resolved:    { label: 'Resolved',    bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.25)', text: '#34D399' },
+            };
+            const formatDate = (d) => {
+              if (!d) return '—';
+              return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            };
+            const ticketId = (id) => `TKT-${(id || '').slice(0, 6).toUpperCase()}`;
+
+            return (
             <div>
+              {/* View toggle */}
+              <div style={{ display: 'flex', gap: '0', marginBottom: '20px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(212,175,55,0.12)', borderRadius: '8px', overflow: 'hidden', width: 'fit-content' }}>
+                {[{ id: 'new', label: 'New Ticket' }, { id: 'history', label: `My Tickets${myTickets.length ? ` (${myTickets.length})` : ''}` }].map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setSupportView(v.id)}
+                    style={{
+                      padding: '8px 20px', border: 'none', cursor: 'pointer',
+                      fontFamily: 'var(--font-headings)', fontSize: '12px', letterSpacing: '0.06em',
+                      background: supportView === v.id ? 'var(--gold-gradient)' : 'transparent',
+                      color: supportView === v.id ? '#0D0D0B' : 'var(--sand-dim)',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+
+              {supportView === 'history' ? (
+                /* ── MY TICKETS HISTORY ── */
+                <SectionCard title="My Tickets" subtitle="Track the status of your submitted tickets.">
+                  {ticketsLoading ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '20px 0', color: 'var(--sand-dark)', fontSize: '13px' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+                        <path d="M21 12a9 9 0 0 0-9-9" strokeLinecap="round" />
+                      </svg>
+                      Loading your tickets…
+                    </div>
+                  ) : myTickets.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--sand-dark)', margin: '0 0 16px' }}>
+                        You haven't submitted any tickets yet.
+                      </p>
+                      <button
+                        onClick={() => setSupportView('new')}
+                        style={{
+                          background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)',
+                          borderRadius: '8px', color: 'var(--gold)', padding: '8px 20px',
+                          fontSize: '12px', fontFamily: 'var(--font-headings)', letterSpacing: '0.08em', cursor: 'pointer',
+                        }}
+                      >
+                        Submit a Ticket
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {myTickets.map((t, idx) => {
+                        const meta = STATUS_META[t.status] || STATUS_META.open;
+                        return (
+                          <div key={t.id || idx} style={{
+                            display: 'flex', alignItems: 'center', gap: '12px',
+                            padding: '12px 14px', background: 'rgba(212,175,55,0.02)',
+                            border: '1px solid rgba(212,175,55,0.08)', borderRadius: '8px', flexWrap: 'wrap',
+                          }}>
+                            <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--gold-dim)', flexShrink: 0 }}>
+                              {ticketId(t.id)}
+                            </span>
+                            <span style={{
+                              padding: '2px 8px', borderRadius: '4px', fontSize: '10px',
+                              fontFamily: 'var(--font-headings)', letterSpacing: '0.06em', flexShrink: 0,
+                              background: meta.bg, border: `1px solid ${meta.border}`, color: meta.text,
+                            }}>
+                              {meta.label}
+                            </span>
+                            <span style={{ flex: 1, fontSize: '13px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)', minWidth: '100px' }}>
+                              {t.subject}
+                            </span>
+                            <span style={{ fontSize: '10px', color: 'var(--sand-dark)', fontFamily: 'monospace', flexShrink: 0 }}>
+                              {formatDate(t.submitted_at)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </SectionCard>
+              ) : (
+                /* ── NEW TICKET FORM ── */
+                <>
               {feedbackDone ? (
                 <SectionCard title="Message Received" subtitle="Your scroll has been delivered to the temple scribes.">
                   <div style={{ textAlign: 'center', padding: '32px 0' }}>
@@ -1396,8 +1511,11 @@ export default function SettingsClient({ user }) {
                   </SectionCard>
                 </>
               )}
+              </>
+              )}
             </div>
-          )}
+            );
+          })()}
 
           {/* ══ DANGER ZONE TAB ══════════════════════════════════ */}
           {activeTab === 'danger' && (

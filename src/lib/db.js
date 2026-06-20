@@ -540,7 +540,7 @@ export async function saveUtmLink(utmLink) {
 }
 
 // ---------------------------------------------------------------------------
-// Feedback
+// Feedback / Ticketing System
 // Required Supabase table:
 //   CREATE TABLE feedback (
 //     id TEXT PRIMARY KEY,
@@ -550,8 +550,18 @@ export async function saveUtmLink(utmLink) {
 //     subject TEXT NOT NULL,
 //     message TEXT NOT NULL,
 //     status TEXT DEFAULT 'open',
+//     priority TEXT DEFAULT 'medium',
+//     admin_notes TEXT DEFAULT '',
+//     resolved_at TIMESTAMPTZ,
+//     updated_at TIMESTAMPTZ DEFAULT now(),
 //     submitted_at TIMESTAMPTZ DEFAULT now()
 //   );
+// Migration for existing table:
+//   ALTER TABLE feedback
+//     ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'medium',
+//     ADD COLUMN IF NOT EXISTS admin_notes TEXT DEFAULT '',
+//     ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ,
+//     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 // ---------------------------------------------------------------------------
 
 export async function saveFeedback(entry) {
@@ -599,6 +609,76 @@ export async function getFeedback() {
     if (!merged.some(m => m.id === row.id)) merged.push(row);
   });
   return merged;
+}
+
+export async function getFeedbackForUser(userId) {
+  const local = (readLocalDb().feedback || []).filter(f => f.user_id === userId);
+  if (userId === '00000000-0000-0000-0000-000000000000') return local;
+
+  const { data, error } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('user_id', userId)
+    .order('submitted_at', { ascending: false });
+  if (error) { console.error('[db] getFeedbackForUser error:', error); return local; }
+
+  const merged = [...(data || [])];
+  local.forEach(row => {
+    if (!merged.some(m => m.id === row.id)) merged.push(row);
+  });
+  return merged;
+}
+
+export async function updateFeedback(id, updates) {
+  const bypass = await isBypassActive();
+  const payload = { ...updates, updated_at: new Date().toISOString() };
+  if (updates.status === 'resolved' && !updates.resolved_at) {
+    payload.resolved_at = new Date().toISOString();
+  }
+  if (updates.status !== 'resolved') {
+    payload.resolved_at = null;
+  }
+
+  if (bypass) {
+    const db = readLocalDb();
+    db.feedback = db.feedback || [];
+    const idx = db.feedback.findIndex(f => f.id === id);
+    if (idx >= 0) {
+      db.feedback[idx] = { ...db.feedback[idx], ...payload };
+      writeLocalDb(db);
+      return db.feedback[idx];
+    }
+    throw new Error('Ticket not found');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+    if (!error && data) {
+      const db = readLocalDb();
+      db.feedback = db.feedback || [];
+      const idx = db.feedback.findIndex(f => f.id === id);
+      if (idx >= 0) { db.feedback[idx] = { ...db.feedback[idx], ...payload }; writeLocalDb(db); }
+      return data;
+    }
+    if (error) throw error;
+  } catch (err) {
+    console.warn('[db] Supabase updateFeedback failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  const db = readLocalDb();
+  db.feedback = db.feedback || [];
+  const idx = db.feedback.findIndex(f => f.id === id);
+  if (idx >= 0) {
+    db.feedback[idx] = { ...db.feedback[idx], ...payload };
+    writeLocalDb(db);
+    return db.feedback[idx];
+  }
+  throw new Error('Ticket not found');
 }
 
 /**
