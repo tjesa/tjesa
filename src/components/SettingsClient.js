@@ -73,6 +73,15 @@ const TABS = [
     ),
   },
   {
+    id: 'support',
+    label: 'Support & Feedback',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
     id: 'danger',
     label: 'Danger Zone',
     icon: (
@@ -209,6 +218,12 @@ export default function SettingsClient({ user }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [feedbackCategory, setFeedbackCategory] = useState('');
+  const [feedbackSubject, setFeedbackSubject] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackDone, setFeedbackDone] = useState(false);
 
   const getPasswordStrength = () => {
     if (!newPassword) return { score: 0, label: '', color: 'transparent' };
@@ -373,6 +388,36 @@ export default function SettingsClient({ user }) {
     } catch {
       showToast('Network error during sign out.', 'error');
       setSignOutLoading(false);
+    }
+  };
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedbackCategory || !feedbackSubject.trim() || !feedbackMessage.trim()) {
+      showToast('Please fill in all fields.', 'error');
+      return;
+    }
+    setFeedbackLoading(true);
+    try {
+      const res = await fetch('/api/support/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: feedbackCategory, subject: feedbackSubject, message: feedbackMessage }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        playSuccessSound();
+        setFeedbackDone(true);
+        setFeedbackCategory('');
+        setFeedbackSubject('');
+        setFeedbackMessage('');
+      } else {
+        showToast(data.error || 'Submission failed. Try again.', 'error');
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -583,7 +628,7 @@ export default function SettingsClient({ user }) {
               <button
                 key={tab.id}
                 className={`settings-tab-btn${activeTab === tab.id ? ' active' : ''}${tab.id === 'danger' ? ' danger-tab' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => { setActiveTab(tab.id); if (tab.id !== 'support') setFeedbackDone(false); }}
                 id={`settings-tab-${tab.id}`}
               >
                 {tab.icon}
@@ -1118,6 +1163,239 @@ export default function SettingsClient({ user }) {
                   </div>
                 </div>
               </SectionCard>
+            </div>
+          )}
+
+          {/* ══ SUPPORT & FEEDBACK TAB ═══════════════════════════ */}
+          {activeTab === 'support' && (
+            <div>
+              {feedbackDone ? (
+                <SectionCard title="Message Received" subtitle="Your scroll has been delivered to the temple scribes.">
+                  <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                    <div style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      background: 'rgba(52,211,153,0.1)',
+                      border: '1px solid rgba(52,211,153,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 16px',
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                    <h3 style={{ fontSize: '16px', color: '#34D399', fontFamily: 'var(--font-headings)', letterSpacing: '0.08em', margin: '0 0 8px' }}>
+                      Submission Received
+                    </h3>
+                    <p style={{ fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.6, margin: '0 0 24px' }}>
+                      Thank you for reaching out. We review all feedback and will follow up at your registered email if needed.
+                    </p>
+                    <button
+                      onClick={() => setFeedbackDone(false)}
+                      style={{
+                        background: 'rgba(212,175,55,0.08)',
+                        border: '1px solid rgba(212,175,55,0.2)',
+                        borderRadius: '8px',
+                        color: 'var(--gold)',
+                        padding: '8px 20px',
+                        fontSize: '12px',
+                        fontFamily: 'var(--font-headings)',
+                        letterSpacing: '0.08em',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Send Another
+                    </button>
+                  </div>
+                </SectionCard>
+              ) : (
+                <>
+                  <SectionCard title="Support & Feedback" subtitle="Send a message to the Tjesa team. We read every submission.">
+                    <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+                      {/* Category */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', color: 'var(--sand-dim)', marginBottom: '6px', fontFamily: 'var(--font-headings)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                          Category
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {['Bug Report', 'Feature Request', 'General Feedback', 'Account Issue'].map(cat => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setFeedbackCategory(cat)}
+                              style={{
+                                padding: '7px 14px',
+                                borderRadius: '6px',
+                                border: feedbackCategory === cat
+                                  ? '1px solid rgba(212,175,55,0.5)'
+                                  : '1px solid rgba(212,175,55,0.12)',
+                                background: feedbackCategory === cat
+                                  ? 'rgba(212,175,55,0.1)'
+                                  : 'transparent',
+                                color: feedbackCategory === cat ? 'var(--gold-bright)' : 'var(--sand-dark)',
+                                fontSize: '12px',
+                                fontFamily: 'var(--font-headings)',
+                                letterSpacing: '0.04em',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Subject */}
+                      <div>
+                        <label className="kemet-label" htmlFor="feedback-subject" style={{ display: 'block', fontSize: '11px', color: 'var(--sand-dim)', marginBottom: '6px' }}>
+                          SUBJECT
+                        </label>
+                        <input
+                          id="feedback-subject"
+                          type="text"
+                          className="kemet-input"
+                          placeholder="Brief summary of your message…"
+                          value={feedbackSubject}
+                          onChange={e => setFeedbackSubject(e.target.value)}
+                          maxLength={120}
+                          disabled={feedbackLoading}
+                          style={{ background: 'rgba(var(--obsidian-rgb), 0.5)' }}
+                        />
+                      </div>
+
+                      {/* Message */}
+                      <div>
+                        <label className="kemet-label" htmlFor="feedback-message" style={{ display: 'block', fontSize: '11px', color: 'var(--sand-dim)', marginBottom: '6px' }}>
+                          MESSAGE
+                        </label>
+                        <textarea
+                          id="feedback-message"
+                          className="kemet-input"
+                          placeholder="Describe your issue, idea, or feedback in detail…"
+                          value={feedbackMessage}
+                          onChange={e => setFeedbackMessage(e.target.value)}
+                          disabled={feedbackLoading}
+                          rows={6}
+                          maxLength={2000}
+                          style={{
+                            background: 'rgba(var(--obsidian-rgb), 0.5)',
+                            resize: 'vertical',
+                            minHeight: '120px',
+                            fontFamily: 'var(--font-body)',
+                            lineHeight: 1.6,
+                          }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                          <span style={{ fontSize: '10px', color: 'var(--sand-dark)', fontFamily: 'var(--font-body)' }}>
+                            {feedbackMessage.length < 10 && feedbackMessage.length > 0 ? 'At least 10 characters required' : ''}
+                          </span>
+                          <span style={{ fontSize: '10px', color: 'var(--sand-dark)', fontFamily: 'monospace' }}>
+                            {feedbackMessage.length}/2000
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* From */}
+                      <div style={{
+                        padding: '10px 14px',
+                        background: 'rgba(212,175,55,0.03)',
+                        border: '1px solid rgba(212,175,55,0.08)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                      }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold-dim)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span style={{ fontSize: '11px', color: 'var(--sand-dark)', fontFamily: 'var(--font-body)' }}>
+                          Sending as <strong style={{ color: 'var(--sand-dim)' }}>{user?.email}</strong>
+                        </span>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="kemet-btn"
+                        disabled={feedbackLoading || !feedbackCategory || !feedbackSubject.trim() || feedbackMessage.trim().length < 10}
+                        style={{ padding: '9px 22px', fontSize: '12px', alignSelf: 'flex-start', height: 'auto', minHeight: 'unset' }}
+                      >
+                        {feedbackLoading ? (
+                          <>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: 'spin 1s linear infinite' }}>
+                              <path d="M21 12a9 9 0 0 0-9-9" strokeLinecap="round" />
+                            </svg>
+                            Sending…
+                          </>
+                        ) : 'Send Message'}
+                      </button>
+                    </form>
+                  </SectionCard>
+
+                  <SectionCard title="Other Ways to Reach Us" subtitle="Additional channels if you need faster support.">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {[
+                        {
+                          icon: (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
+                            </svg>
+                          ),
+                          label: 'Email Support',
+                          value: 'support@tjesa.com',
+                          note: 'General inquiries & account help',
+                        },
+                        {
+                          icon: (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                          ),
+                          label: 'Response Time',
+                          value: 'Within 24–48 hours',
+                          note: 'We reply to all messages',
+                        },
+                      ].map(item => (
+                        <div key={item.label} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '14px',
+                          padding: '12px 14px',
+                          background: 'rgba(212,175,55,0.03)',
+                          border: '1px solid rgba(212,175,55,0.08)',
+                          borderRadius: '8px',
+                        }}>
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            background: 'rgba(212,175,55,0.06)',
+                            border: '1px solid rgba(212,175,55,0.12)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
+                            {item.icon}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '12px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', marginBottom: '2px' }}>
+                              {item.value}
+                            </div>
+                            <div style={{ fontSize: '10px', color: 'var(--sand-dark)', fontFamily: 'var(--font-body)' }}>
+                              {item.note}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </SectionCard>
+                </>
+              )}
             </div>
           )}
 

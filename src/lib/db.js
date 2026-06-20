@@ -539,6 +539,68 @@ export async function saveUtmLink(utmLink) {
   return utmLink;
 }
 
+// ---------------------------------------------------------------------------
+// Feedback
+// Required Supabase table:
+//   CREATE TABLE feedback (
+//     id TEXT PRIMARY KEY,
+//     user_id UUID,
+//     user_email TEXT NOT NULL,
+//     category TEXT NOT NULL,
+//     subject TEXT NOT NULL,
+//     message TEXT NOT NULL,
+//     status TEXT DEFAULT 'open',
+//     submitted_at TIMESTAMPTZ DEFAULT now()
+//   );
+// ---------------------------------------------------------------------------
+
+export async function saveFeedback(entry) {
+  const bypass = await isBypassActive();
+  if (!entry.id) entry.id = Math.random().toString(36).substring(2, 9);
+  if (!entry.submitted_at) entry.submitted_at = new Date().toISOString();
+
+  if (bypass) {
+    const db = readLocalDb();
+    db.feedback = db.feedback || [];
+    db.feedback.push(entry);
+    writeLocalDb(db);
+    return entry;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .insert(entry)
+      .select()
+      .single();
+    if (!error && data) return data;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('[db] Supabase insert feedback failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  const db = readLocalDb();
+  db.feedback = db.feedback || [];
+  db.feedback.push(entry);
+  writeLocalDb(db);
+  return entry;
+}
+
+export async function getFeedback() {
+  const local = readLocalDb().feedback || [];
+  const { data, error } = await supabase
+    .from('feedback')
+    .select('*')
+    .order('submitted_at', { ascending: false });
+  if (error) { console.error('[db] getFeedback error:', error); return local; }
+
+  const merged = [...(data || [])];
+  local.forEach(row => {
+    if (!merged.some(m => m.id === row.id)) merged.push(row);
+  });
+  return merged;
+}
+
 /**
  * Delete a UTM link by ID
  */

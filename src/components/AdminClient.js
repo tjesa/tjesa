@@ -16,7 +16,7 @@ export default function AdminClient({ account }) {
   const [error, setError] = useState('');
 
   // Tabs
-  const [activeTab, setActiveTab] = useState('waitlist'); // 'waitlist', 'utm', or 'workspaces'
+  const [activeTab, setActiveTab] = useState('waitlist'); // 'waitlist', 'utm', 'workspaces', or 'feedback'
 
   // UTM Links State
   const [utmLinks, setUtmLinks] = useState([]);
@@ -41,6 +41,13 @@ export default function AdminClient({ account }) {
   const [workspacesError, setWorkspacesError] = useState('');
   const [workspaceSearch, setWorkspaceSearch] = useState('');
   const [isDisconnectingId, setIsDisconnectingId] = useState(null);
+
+  // Feedback State
+  const [feedback, setFeedback] = useState([]);
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(true);
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('All');
+  const [expandedFeedbackId, setExpandedFeedbackId] = useState(null);
 
   // Invite loading state map
   const [isInvitingId, setIsInvitingId] = useState(null);
@@ -143,8 +150,23 @@ export default function AdminClient({ account }) {
       }
     }
 
+    async function loadFeedback() {
+      try {
+        const response = await fetch('/api/admin/feedback');
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setFeedback(data.submissions || []);
+        }
+      } catch (err) {
+        console.error('[AdminClient] loadFeedback error:', err);
+      } finally {
+        setIsFeedbackLoading(false);
+      }
+    }
+
     loadUtmRegistry();
     loadWorkspaces();
+    loadFeedback();
   }, []);
 
   // 3. Dynamic URL generator
@@ -428,7 +450,8 @@ export default function AdminClient({ account }) {
           {[
             { id: 'waitlist', label: 'Waitlist Ledger' },
             { id: 'utm', label: 'UTM Campaign Chamber' },
-            { id: 'workspaces', label: 'Notion Workspaces Gateway' }
+            { id: 'workspaces', label: 'Notion Workspaces Gateway' },
+            { id: 'feedback', label: 'Feedback Inbox' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -1306,6 +1329,215 @@ export default function AdminClient({ account }) {
 
               </div>
             )}
+
+            {/* TAB 4: FEEDBACK INBOX */}
+            {activeTab === 'feedback' && (() => {
+              const CATEGORIES = ['All', 'Bug Report', 'Feature Request', 'General Feedback', 'Account Issue'];
+              const categoryCounts = {};
+              feedback.forEach(f => {
+                categoryCounts[f.category] = (categoryCounts[f.category] || 0) + 1;
+              });
+
+              const filtered = feedback.filter(f => {
+                const matchesSearch = !feedbackSearch ||
+                  f.subject?.toLowerCase().includes(feedbackSearch.toLowerCase()) ||
+                  f.message?.toLowerCase().includes(feedbackSearch.toLowerCase()) ||
+                  f.user_email?.toLowerCase().includes(feedbackSearch.toLowerCase());
+                const matchesCat = feedbackCategoryFilter === 'All' || f.category === feedbackCategoryFilter;
+                return matchesSearch && matchesCat;
+              });
+
+              const formatDate = (d) => {
+                if (!d) return '—';
+                return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              };
+
+              const CATEGORY_COLORS = {
+                'Bug Report': { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', text: '#FCA5A5' },
+                'Feature Request': { bg: 'rgba(212,175,55,0.08)', border: 'rgba(212,175,55,0.25)', text: 'var(--gold)' },
+                'General Feedback': { bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.25)', text: '#34D399' },
+                'Account Issue': { bg: 'rgba(251,146,60,0.08)', border: 'rgba(251,146,60,0.25)', text: '#FB923C' },
+              };
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                  {/* Stats Row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '10px' }}>
+                    <GlowingCard title="Total Submissions" subtitle="All feedback received">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '90px' }}>
+                        <div style={{ fontSize: '46px', fontFamily: 'var(--font-headings)', color: 'var(--gold)', letterSpacing: '0.05em', fontWeight: 'bold' }}>
+                          {feedback.length}
+                        </div>
+                      </div>
+                    </GlowingCard>
+
+                    <GlowingCard title="By Category" subtitle="Breakdown of submission types">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '90px', justifyContent: 'center' }}>
+                        {Object.keys(categoryCounts).length === 0 ? (
+                          <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center' }}>No submissions yet.</div>
+                        ) : Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([cat, count]) => {
+                          const col = CATEGORY_COLORS[cat] || {};
+                          return (
+                            <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                              <span style={{ color: col.text || 'var(--sand)', padding: '1px 6px', background: col.bg, border: `1px solid ${col.border}`, borderRadius: '4px', fontSize: '10px' }}>{cat}</span>
+                              <span style={{ color: 'var(--gold-dim)', fontWeight: 'bold' }}>{count}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </GlowingCard>
+                  </div>
+
+                  {/* Search & Category Filter */}
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ flex: 1, minWidth: '240px' }}>
+                      <input
+                        className="kemet-input"
+                        type="text"
+                        placeholder="Search subject, message, or email…"
+                        value={feedbackSearch}
+                        onChange={e => setFeedbackSearch(e.target.value)}
+                        style={{ padding: '10px 14px', fontSize: '13px' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {CATEGORIES.map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => setFeedbackCategoryFilter(cat)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: feedbackCategoryFilter === cat
+                              ? '1px solid rgba(212,175,55,0.4)'
+                              : '1px solid rgba(212,175,55,0.12)',
+                            background: feedbackCategoryFilter === cat ? 'rgba(212,175,55,0.1)' : 'transparent',
+                            color: feedbackCategoryFilter === cat ? 'var(--gold)' : 'var(--sand-dark)',
+                            fontSize: '11px',
+                            fontFamily: 'var(--font-headings)',
+                            cursor: 'pointer',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {cat}
+                          {cat !== 'All' && categoryCounts[cat] ? ` (${categoryCounts[cat]})` : ''}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Feedback Cards */}
+                  <GlowingCard title="Feedback Submissions" subtitle={`${filtered.length} of ${feedback.length} showing`}>
+                    {isFeedbackLoading ? (
+                      <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                        <EyeOfHorusLoader size={40} text="Opening feedback scrolls…" />
+                      </div>
+                    ) : filtered.length === 0 ? (
+                      <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--sand-dark)', padding: '32px 0', margin: 0 }}>
+                        {feedback.length === 0 ? 'No feedback submissions yet.' : 'No results match your filter.'}
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {filtered.map((item, idx) => {
+                          const col = CATEGORY_COLORS[item.category] || { bg: 'rgba(212,175,55,0.06)', border: 'rgba(212,175,55,0.12)', text: 'var(--gold-dim)' };
+                          const isExpanded = expandedFeedbackId === item.id;
+                          return (
+                            <div
+                              key={item.id || idx}
+                              style={{
+                                border: '1px solid rgba(212,175,55,0.1)',
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                transition: 'border-color 0.2s ease',
+                              }}
+                              onMouseOver={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.2)'}
+                              onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.1)'}
+                            >
+                              {/* Row header — always visible */}
+                              <div
+                                onClick={() => setExpandedFeedbackId(isExpanded ? null : item.id)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  padding: '12px 16px',
+                                  cursor: 'pointer',
+                                  background: isExpanded ? 'rgba(212,175,55,0.04)' : 'transparent',
+                                  flexWrap: 'wrap',
+                                }}
+                              >
+                                {/* Category badge */}
+                                <span style={{
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '10px',
+                                  fontFamily: 'var(--font-headings)',
+                                  letterSpacing: '0.06em',
+                                  flexShrink: 0,
+                                  background: col.bg,
+                                  border: `1px solid ${col.border}`,
+                                  color: col.text,
+                                }}>
+                                  {item.category}
+                                </span>
+
+                                {/* Subject */}
+                                <span style={{ flex: 1, fontSize: '13px', color: 'var(--sand-light)', fontFamily: 'var(--font-headings)', letterSpacing: '0.02em', minWidth: '120px' }}>
+                                  {item.subject}
+                                </span>
+
+                                {/* From */}
+                                <span style={{ fontSize: '11px', color: 'var(--sand-dark)', flexShrink: 0 }}>
+                                  {item.user_email}
+                                </span>
+
+                                {/* Date */}
+                                <span style={{ fontSize: '10px', color: 'var(--sand-dark)', flexShrink: 0, fontFamily: 'monospace' }}>
+                                  {formatDate(item.submitted_at)}
+                                </span>
+
+                                {/* Expand chevron */}
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="var(--gold-dim)"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+                                >
+                                  <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                              </div>
+
+                              {/* Expanded message */}
+                              {isExpanded && (
+                                <div style={{
+                                  padding: '0 16px 16px',
+                                  borderTop: '1px solid rgba(212,175,55,0.06)',
+                                }}>
+                                  <div style={{ marginTop: '14px', fontSize: '13px', color: 'var(--sand-dim)', lineHeight: 1.7, fontFamily: 'var(--font-body)', whiteSpace: 'pre-wrap' }}>
+                                    {item.message}
+                                  </div>
+                                  <div style={{ marginTop: '12px', display: 'flex', gap: '16px', fontSize: '11px', color: 'var(--sand-dark)', fontFamily: 'monospace' }}>
+                                    <span>ID: {item.id}</span>
+                                    {item.user_id && <span>User: {item.user_id}</span>}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </GlowingCard>
+
+                </div>
+              );
+            })()}
 
           </div>
         )}
