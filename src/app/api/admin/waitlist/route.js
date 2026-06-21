@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/supabase/server';
 export async function GET(request) {
   const user = await getCurrentUser();
 
-  if (!user || !(user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com'))) {
+  if (!user || !(user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com'))) {
     return NextResponse.json({ error: 'Unauthorized: Admin portal closed' }, { status: 403 });
   }
 

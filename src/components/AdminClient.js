@@ -7,6 +7,7 @@ import Header from './Header';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 import { createClient } from '@/lib/supabase/client';
+import { playSanctumSound } from '@/lib/audio';
 
 export default function AdminClient({ account }) {
   const router = useRouter();
@@ -14,6 +15,11 @@ export default function AdminClient({ account }) {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Play admin sanctum join sound on mount
+  useEffect(() => {
+    playSanctumSound();
+  }, []);
 
   // Tabs
   const [activeTab, setActiveTab] = useState('waitlist'); // 'waitlist', 'utm', 'workspaces', or 'feedback'

@@ -9,7 +9,8 @@ import {
   playClickSound,
   playSuccessSound,
   playErrorSound,
-  playPortalSound
+  playPortalSound,
+  playSanctumSound
 } from '@/lib/audio';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 import CustomSelect from './CustomSelect';
@@ -375,7 +376,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
     try {
       const response = await fetch('/api/auth/bypass', { method: 'POST' });
       if (response.ok) {
-        playSuccessSound();
+        playSanctumSound();
         router.push('/dashboard/admin');
       } else {
         playPortalSound();

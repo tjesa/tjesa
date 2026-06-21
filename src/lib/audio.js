@@ -307,6 +307,102 @@ export function playPortalSound() {
   });
 }
 
+/**
+ * Admin Sanctum Entrance (Join Admin) - Mystical stone portal opening followed by golden chime.
+ * Low rumbling bandpass-filtered noise mixed with a sub-bass oscillator, followed by a bright, mystical ascending chime.
+ */
+export function playSanctumSound() {
+  playSound((ctx) => {
+    const now = ctx.currentTime;
+    
+    // Part 1: Deep Stone Slide (Duration 1.0s)
+    const rumbleDuration = 1.0;
+    
+    const noise = ctx.createBufferSource();
+    noise.buffer = getNoiseBuffer(ctx, 2.0);
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.Q.value = 4.0;
+    noiseFilter.frequency.setValueAtTime(280, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(110, now + rumbleDuration);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.001, now);
+    noiseGain.gain.linearRampToValueAtTime(sfxVolume * 0.25, now + 0.15);
+    noiseGain.gain.linearRampToValueAtTime(sfxVolume * 0.18, now + 0.6);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + rumbleDuration);
+
+    const subOsc = ctx.createOscillator();
+    subOsc.type = 'triangle';
+    subOsc.frequency.setValueAtTime(55, now);
+    subOsc.frequency.linearRampToValueAtTime(32, now + rumbleDuration);
+
+    const subGain = ctx.createGain();
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(sfxVolume * 0.35, now + 0.1);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + rumbleDuration);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+
+    noise.start(now);
+    noise.stop(now + rumbleDuration);
+
+    subOsc.start(now);
+    subOsc.stop(now + rumbleDuration);
+
+    // Part 2: Mystical Golden Chime (Overlapping, starting at 0.45s)
+    const chimeStart = now + 0.45;
+    const chimeNotes = [
+      { freq: 523.25, delay: 0.0 },  // C5
+      { freq: 659.25, delay: 0.12 }, // E5
+      { freq: 783.99, delay: 0.24 }, // G5
+      { freq: 987.77, delay: 0.36 }, // B5 (Mysterious Major 7th feel)
+      { freq: 1174.66, delay: 0.48 } // D6
+    ];
+
+    chimeNotes.forEach((note) => {
+      const noteTime = chimeStart + note.delay;
+      const duration = 0.9;
+
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(note.freq, noteTime);
+
+      const ringOsc = ctx.createOscillator();
+      ringOsc.type = 'triangle';
+      ringOsc.frequency.setValueAtTime(note.freq * 1.5, noteTime); // Mystical fifth harmonic
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1500, noteTime);
+      filter.frequency.exponentialRampToValueAtTime(300, noteTime + duration);
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0.001, noteTime);
+      gainNode.gain.linearRampToValueAtTime(sfxVolume * 0.15, noteTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, noteTime + duration);
+
+      osc.connect(filter);
+      ringOsc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      osc.start(noteTime);
+      osc.stop(noteTime + duration);
+
+      ringOsc.start(noteTime);
+      ringOsc.stop(noteTime + duration);
+    });
+  });
+}
+
+
 // --- Configuration Management ---
 
 export function isSfxEnabled() {

@@ -7,7 +7,8 @@ import {
   playHoverSound,
   playClickSound,
   playSuccessSound,
-  playPortalSound
+  playPortalSound,
+  playSanctumSound
 } from '@/lib/audio';
 import { 
   Landmark, 
@@ -100,7 +101,7 @@ export default function DashboardLayout({ children }) {
     }
   };
 
-  const isUserAdmin = user && (user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com'));
+  const isUserAdmin = user && (user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com'));
 
   const instruments = [
     {
@@ -417,6 +418,22 @@ export default function DashboardLayout({ children }) {
                   padding: 0
                 }}
                 title="Emerald Green"
+              />
+              <button
+                onClick={() => toggleTheme('carnelian')}
+                onMouseEnter={playHoverSound}
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '50%',
+                  background: '#E05A47',
+                  border: theme === 'carnelian' ? '2px solid var(--sand-light)' : '1px solid rgba(255,255,255,0.2)',
+                  cursor: 'pointer',
+                  boxShadow: theme === 'carnelian' ? '0 0 8px #E05A47' : 'none',
+                  transition: 'transform 0.2s ease',
+                  padding: 0
+                }}
+                title="Carnelian Red"
               />
             </div>
           </div>

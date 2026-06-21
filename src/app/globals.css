@@ -116,6 +116,38 @@ body[data-theme='emerald'] {
   --sidebar-link-active-border: rgba(16, 185, 129, 0.25);
 }
 
+body[data-theme='carnelian'] {
+  --obsidian: #140505;          /* Very deep red-black */
+  --obsidian-rgb: 20, 5, 5;
+  --obsidian-mid: #1F0A0A;      /* Deep reddish brown-black */
+  --obsidian-mid-rgb: 31, 10, 10;
+  --obsidian-light: #331414;    /* Warm dark carnelian */
+  --obsidian-light-rgb: 51, 20, 20;
+  --obsidian-card: rgba(31, 10, 10, 0.75);
+  
+  --gold: #E05A47;              /* Rich carnelian reddish-orange */
+  --gold-glow: rgba(224, 90, 71, 0.45);
+  --gold-dim: #A83624;          /* Burned ochre / carnelian dim */
+  --gold-bright: #FFA494;       /* Terracotta orange light */
+  --gold-gradient: linear-gradient(135deg, #E05A47 0%, #A83624 50%, #FFA494 100%);
+  
+  --sand: #F2C299;              /* Warm sandy peach */
+  --sand-dim: #C29672;
+  --sand-dark: #5C3D24;
+  --sand-light: #FCECE0;
+  --spotlight-color: rgba(224, 90, 71, 0.15);
+
+  /* Connected Card Carnelian variables */
+  --card-connected-start: rgba(31, 10, 10, 0.85);
+  --card-connected-end: rgba(51, 20, 20, 0.95);
+  --card-connected-border: rgba(224, 90, 71, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(224, 90, 71, 0.05);
+
+  --sidebar-link-hover-bg: rgba(224, 90, 71, 0.05);
+  --sidebar-link-active-bg: rgba(224, 90, 71, 0.08);
+  --sidebar-link-active-border: rgba(224, 90, 71, 0.25);
+}
+
 /* Light Mode Variables & Adjustments */
 body[data-brightness='light'] {
   --obsidian: #FAF6EE;
@@ -218,6 +250,38 @@ body[data-brightness='light'][data-theme='emerald'] {
   --sidebar-link-hover-bg: rgba(10, 108, 68, 0.05);
   --sidebar-link-active-bg: rgba(10, 108, 68, 0.08);
   --sidebar-link-active-border: rgba(10, 108, 68, 0.25);
+}
+
+body[data-brightness='light'][data-theme='carnelian'] {
+  --obsidian: #FAF2EE;
+  --obsidian-rgb: 250, 242, 238;
+  --obsidian-mid: #F5EAE4;
+  --obsidian-mid-rgb: 245, 234, 228;
+  --obsidian-light: #EBDAD0;
+  --obsidian-light-rgb: 235, 218, 208;
+  --sand-light: #1A0D08;
+  --sand-dim: #5C3D24;
+  --sand-dark: #C29672;
+
+  /* Carnelian High Contrast Light Accent Colors (Deep Crimson/Red Ochre) */
+  --gold: #A83624;
+  --gold-glow: rgba(168, 54, 36, 0.2);
+  --gold-dim: #7A2214;
+  --gold-bright: #D65A47;
+  --gold-gradient: linear-gradient(135deg, #A83624 0%, #7A2214 50%, #D65A47 100%);
+  
+  --border-gold: 1px solid rgba(168, 54, 36, 0.35);
+  --spotlight-color: rgba(168, 54, 36, 0.06);
+
+  /* Connected Card Carnelian Light Mode styles */
+  --card-connected-start: rgba(255, 255, 255, 0.9);
+  --card-connected-end: rgba(245, 234, 228, 0.95);
+  --card-connected-border: rgba(168, 54, 36, 0.4);
+  --card-connected-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), 0 0 15px rgba(168, 54, 36, 0.05);
+
+  --sidebar-link-hover-bg: rgba(168, 54, 36, 0.05);
+  --sidebar-link-active-bg: rgba(168, 54, 36, 0.08);
+  --sidebar-link-active-border: rgba(168, 54, 36, 0.25);
 }
 
 /* Specific elements styles for light mode */

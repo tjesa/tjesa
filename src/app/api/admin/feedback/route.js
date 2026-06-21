@@ -3,7 +3,7 @@ import { getFeedback, updateFeedback } from '@/lib/db';
 import { getCurrentUser } from '@/lib/supabase/server';
 
 function isAdmin(user) {
-  return user && (user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com'));
+  return user && (user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com'));
 }
 
 export async function GET() {

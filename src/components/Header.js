@@ -81,7 +81,7 @@ export default function Header({ account, onDisconnect }) {
               <span className="header-user-email" style={{ fontSize: '12px', color: 'var(--sand-dim)' }}>
                 {user.email}
               </span>
-              {user && (user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com')) && (
+              {user && (user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com')) && (
                 <Link
                   href="/dashboard/admin"
                   className="kemet-btn-secondary"

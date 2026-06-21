@@ -89,7 +89,7 @@ export default function CookiesPage() {
               3. Preference Cookies
             </h2>
             <p style={{ margin: 0 }}>
-              We store local configuration files in your browser&apos;s local storage (such as <code>tjesa_theme</code> and <code>tjesa_brightness</code>) to remember your dark/light brightness modes and Egyptian color palette preferences (Obsidian Gold, Lapis Blue, Emerald Green).
+              We store local configuration files in your browser&apos;s local storage (such as <code>tjesa_theme</code> and <code>tjesa_brightness</code>) to remember your dark/light brightness modes and Egyptian color palette preferences (Obsidian Gold, Lapis Blue, Emerald Green, Carnelian Red).
             </p>
           </div>
 

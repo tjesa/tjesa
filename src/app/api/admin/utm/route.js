@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/supabase/server';
 // Helper to verify admin privileges
 async function verifyAdmin() {
   const user = await getCurrentUser();
-  if (!user || !(user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com'))) {
+  if (!user || !(user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com'))) {
     return false;
   }
   return true;

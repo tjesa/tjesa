@@ -11,7 +11,7 @@ export default async function AdminPage() {
     redirect('/login');
   }
 
-  const isAdmin = user.email === 'developer@tjesa.com' || user.email?.endsWith('@tjesa.com');
+  const isAdmin = user.email === 'developer@tjesa.com' || user.email === 'hazemyasser911@gmail.com' || user.email?.endsWith('@tjesa.com');
   if (!isAdmin) {
     redirect('/dashboard');
   }

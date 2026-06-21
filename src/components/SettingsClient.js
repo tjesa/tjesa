@@ -10,6 +10,7 @@ import {
   playSuccessSound,
   playErrorSound,
   playPortalSound,
+  playSanctumSound,
   setSfxEnabled,
   setSfxVolume
 } from '@/lib/audio';
@@ -129,6 +130,14 @@ const THEMES = [
     accent: '#10B981',
     bg: '#05100B',
     preview: ['#05100B', '#0A1C14', '#10B981'],
+  },
+  {
+    id: 'carnelian',
+    name: 'Carnelian Red',
+    subtitle: 'Royal amulet · Carnelian & Ochre',
+    accent: '#E05A47',
+    bg: '#140505',
+    preview: ['#140505', '#1F0A0A', '#E05A47'],
   },
 ];
 
@@ -1187,6 +1196,14 @@ export default function SettingsClient({ user }) {
                         style={{ padding: '6px 12px', fontSize: '11px' }}
                       >
                         Stone Portal (Gate)
+                      </button>
+                      <button
+                        className="kemet-btn-secondary"
+                        onClick={playSanctumSound}
+                        disabled={!sfxEnabledState}
+                        style={{ padding: '6px 12px', fontSize: '11px' }}
+                      >
+                        Sanctum Gate (Admin Join)
                       </button>
                     </div>
                   </div>
