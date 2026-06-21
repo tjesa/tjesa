@@ -31,13 +31,17 @@ export default function LoginPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('verified') === '1') {
-        setSuccessBanner('Your email has been confirmed! You may now sign in.');
-      }
+      const verified = params.get('verified') === '1';
       const err = params.get('error');
-      if (err) {
-        setError(decodeURIComponent(err));
-      }
+      
+      setTimeout(() => {
+        if (verified) {
+          setSuccessBanner('Your email has been confirmed! You may now sign in.');
+        }
+        if (err) {
+          setError(decodeURIComponent(err));
+        }
+      }, 0);
     }
   }, []);
 

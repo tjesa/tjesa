@@ -87,7 +87,7 @@ export default async function FormsPage() {
               Connect with Notion
             </a>
             <p style={{ fontSize: '11px', color: 'var(--sand-dark)', margin: 0 }}>
-              You'll be redirected to Notion to authorize access. This is separate from other tool connections.
+              You&apos;ll be redirected to Notion to authorize access. This is separate from other tool connections.
             </p>
           </div>
         </div>

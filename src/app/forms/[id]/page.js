@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import PublicFormClient from '@/components/tools/PublicFormClient';
 import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
@@ -68,7 +69,7 @@ export default async function PublicFormPage({ params }) {
           <p style={{ color: '#C2A67D', fontSize: '14px', lineHeight: 1.6 }}>
             The Nile Scribe cannot locate this document scroll. It may have been retracted by the scribe or the sanctuary gate has closed.
           </p>
-          <a 
+          <Link 
             href="/" 
             style={{ 
               display: 'inline-block', 
@@ -86,7 +87,7 @@ export default async function PublicFormPage({ params }) {
             }}
           >
             Return to Sanctuary
-          </a>
+          </Link>
         </div>
       </main>
     );

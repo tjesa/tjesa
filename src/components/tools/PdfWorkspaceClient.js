@@ -39,6 +39,15 @@ export default function PdfWorkspaceClient({ account, initialConfigs, oauthUrl }
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setPdfTitle('');
+    setPdfPageSize('A4');
+    setPdfMargins('standard');
+    setPdfOrientation('portrait');
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -62,11 +71,6 @@ export default function PdfWorkspaceClient({ account, initialConfigs, oauthUrl }
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
     if (!editingDbId) {
-      setDbDetails(null);
-      setPdfTitle('');
-      setPdfPageSize('A4');
-      setPdfMargins('standard');
-      setPdfOrientation('portrait');
       return;
     }
 
@@ -183,7 +187,7 @@ export default function PdfWorkspaceClient({ account, initialConfigs, oauthUrl }
 
         // Close editor panel after a slight delay
         setTimeout(() => {
-          setEditingDbId(null);
+          closeEditor();
         }, 1200);
       } else {
         setError(data.error || 'Failed to save PDF configuration.');
@@ -381,7 +385,7 @@ export default function PdfWorkspaceClient({ account, initialConfigs, oauthUrl }
                     </button>
                     <button 
                       className="kemet-btn-secondary" 
-                      onClick={() => setEditingDbId(null)}
+                      onClick={closeEditor}
                       disabled={isSaving}
                     >
                       Cancel

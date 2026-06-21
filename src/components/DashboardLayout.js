@@ -41,12 +41,15 @@ export default function DashboardLayout({ children }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('tjesa_theme') || 'obsidian';
-    setTheme(savedTheme);
-    document.body.setAttribute('data-theme', savedTheme);
-    
     const savedBrightness = localStorage.getItem('tjesa_brightness') || 'dark';
-    setBrightness(savedBrightness);
+    
+    document.body.setAttribute('data-theme', savedTheme);
     document.body.setAttribute('data-brightness', savedBrightness);
+    
+    setTimeout(() => {
+      setTheme(savedTheme);
+      setBrightness(savedBrightness);
+    }, 0);
   }, []);
 
   const toggleTheme = (newTheme) => {

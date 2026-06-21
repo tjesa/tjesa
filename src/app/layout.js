@@ -63,8 +63,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${outfit.variable}`}>
-      <body>
+    <html lang="en" className={`${cinzel.variable} ${outfit.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         {/* Google tag (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-3WY9Z105HJ"

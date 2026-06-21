@@ -33,7 +33,6 @@ export default function AdminClient({ account }) {
   const [utmCampaign, setUtmCampaign] = useState('');
   const [utmTerm, setUtmTerm] = useState('');
   const [utmContent, setUtmContent] = useState('');
-  const [generatedUrl, setGeneratedUrl] = useState('');
 
   // Notion Workspaces State
   const [workspaces, setWorkspaces] = useState([]);
@@ -116,7 +115,9 @@ export default function AdminClient({ account }) {
   // 2. Fetch UTM registry & Notion Workspaces on mount and handle site URL defaults
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setBaseUrl(window.location.origin);
+      setTimeout(() => {
+        setBaseUrl(window.location.origin);
+      }, 0);
     }
 
     async function loadUtmRegistry() {
@@ -172,12 +173,9 @@ export default function AdminClient({ account }) {
     loadFeedback();
   }, []);
 
-  // 3. Dynamic URL generator
-  useEffect(() => {
-    if (!baseUrl) {
-      setGeneratedUrl('');
-      return;
-    }
+  // 3. Dynamic URL calculation during rendering
+  let generatedUrl = '';
+  if (baseUrl) {
     try {
       const urlObj = new URL(baseUrl);
       if (utmSource) urlObj.searchParams.set('utm_source', utmSource.trim());
@@ -185,11 +183,11 @@ export default function AdminClient({ account }) {
       if (utmCampaign) urlObj.searchParams.set('utm_campaign', utmCampaign.trim());
       if (utmTerm) urlObj.searchParams.set('utm_term', utmTerm.trim());
       if (utmContent) urlObj.searchParams.set('utm_content', utmContent.trim());
-      setGeneratedUrl(urlObj.toString());
+      generatedUrl = urlObj.toString();
     } catch (_) {
-      setGeneratedUrl('');
+      generatedUrl = '';
     }
-  }, [baseUrl, utmSource, utmMedium, utmCampaign, utmTerm, utmContent]);
+  }
 
   // 4. Save UTM link
   const handleSaveUtmLink = async (e) => {

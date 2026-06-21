@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import PublicChartClient from '@/components/tools/PublicChartClient';
 import SphinxGateClient from '@/components/tools/SphinxGateClient';
 import { getConfig } from '@/lib/db';
@@ -67,7 +68,7 @@ export default async function PublicChartPage({ params }) {
           <p style={{ color: '#C2A67D', fontSize: '14px', lineHeight: 1.6 }}>
             The Aten Gazer cannot align with this observatory scroll. It may have been dissolved by the architect or access permissions have expired.
           </p>
-          <a 
+          <Link 
             href="/" 
             style={{ 
               display: 'inline-block', 
@@ -85,7 +86,7 @@ export default async function PublicChartPage({ params }) {
             }}
           >
             Return to Sanctuary
-          </a>
+          </Link>
         </div>
       </main>
     );

@@ -51,6 +51,20 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setWebhookUrl('');
+    setUseSandbox(true);
+    setColumnCaption('');
+    setColumnImage('');
+    setColumnTrigger('');
+    setColumnPublish('');
+    setColumnDate('');
+    setTriggerValue('Ready');
+    setStatusPublishedValue('Published');
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -73,19 +87,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
 
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
-    if (!editingDbId) {
-      setDbDetails(null);
-      setWebhookUrl('');
-      setUseSandbox(true);
-      setColumnCaption('');
-      setColumnImage('');
-      setColumnTrigger('');
-      setColumnPublish('');
-      setColumnDate('');
-      setTriggerValue('Ready');
-      setStatusPublishedValue('Published');
-      return;
-    }
+    if (!editingDbId) return;
 
     async function loadDbSchema() {
       setIsFetchingSchema(true);
@@ -228,7 +230,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
 
         // Close editor panel after a slight delay
         setTimeout(() => {
-          setEditingDbId(null);
+          closeEditor();
         }, 1200);
       } else {
         setError(data.error || 'Failed to save configuration settings.');
@@ -553,7 +555,7 @@ export default function SocialWorkspaceClient({ account, initialConfigs, oauthUr
                     </button>
                     <button 
                       className="kemet-btn-secondary" 
-                      onClick={() => setEditingDbId(null)}
+                      onClick={closeEditor}
                       disabled={isSaving}
                     >
                       Cancel

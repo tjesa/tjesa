@@ -619,7 +619,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                   <span style={{ color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', fontFamily: 'var(--font-headings)' }}>
                                     <Zap size={14} fill="currentColor" /> BUTTON WEBHOOK MODE ACTIVE
                                   </span>
-                                  This mode stops background polling. QR codes will only be generated when a <strong>Notion Button</strong> sends a POST request to this configuration's unique webhook URL.
+                                  This mode stops background polling. QR codes will only be generated when a <strong>Notion Button</strong> sends a POST request to this configuration&apos;s unique webhook URL.
                                 </div>
 
                                 {config ? (
@@ -846,7 +846,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                                   </div>
                                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                                     <span style={{ fontSize: '10px', color: 'var(--sand-dark)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                      Previewing "https://tjesa.com" · ECL: {errorCorrectionLevel} ·
+                                      Previewing &quot;https://tjesa.com&quot; · ECL: {errorCorrectionLevel} ·
                                     </span>
                                     <a
                                       href={`/api/tools/qr/image?data=${encodeURIComponent('https://tjesa.com')}&fg=${foregroundColor.replace('#', '')}&bg=${backgroundColor.replace('#', '')}&margin=${margin}&ecl=${errorCorrectionLevel}&size=400`}
@@ -1033,7 +1033,7 @@ export default function QrWorkspaceClient({ account, initialConfigs, oauthUrl })
                 </h3>
 
                 <p style={{ fontSize: '14px', color: 'var(--sand-dim)', lineHeight: '1.5', marginBottom: '24px' }}>
-                  Are you sure you want to stop QR Code generation for the database <strong style={{ color: 'var(--sand-light)' }}>"{configToDelete?.database_name}"</strong>? This will permanently delete the configuration.
+                  Are you sure you want to stop QR Code generation for the database <strong style={{ color: 'var(--sand-light)' }}>&quot;{configToDelete?.database_name}&quot;</strong>? This will permanently delete the configuration.
                 </p>
 
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>

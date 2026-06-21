@@ -57,6 +57,24 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setSmtpHost('');
+    setSmtpPort('587');
+    setSmtpUser('');
+    setSmtpPass('');
+    setSmtpFromEmail('');
+    setSmtpFromName('');
+    setUseSandbox(true);
+    setColumnEmail('');
+    setColumnName('');
+    setColumnStatus('');
+    setStatusSentValue('Sent');
+    setEmailSubject('');
+    setEmailBody('');
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -80,20 +98,6 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
     if (!editingDbId) {
-      setDbDetails(null);
-      setSmtpHost('');
-      setSmtpPort('587');
-      setSmtpUser('');
-      setSmtpPass('');
-      setSmtpFromEmail('');
-      setSmtpFromName('');
-      setUseSandbox(true);
-      setColumnEmail('');
-      setColumnName('');
-      setColumnStatus('');
-      setStatusSentValue('Sent');
-      setEmailSubject('');
-      setEmailBody('');
       return;
     }
 
@@ -251,7 +255,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
 
         // Close editor panel after a slight delay
         setTimeout(() => {
-          setEditingDbId(null);
+          closeEditor();
         }, 1200);
       } else {
         setError(data.error || 'Failed to save configuration settings.');
@@ -567,7 +571,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                       </div>
                       {columnStatus && (
                         <div>
-                          <label className="kemet-label">Status "Sent" Value</label>
+                          <label className="kemet-label">Status &quot;Sent&quot; Value</label>
                           <input 
                             type="text" 
                             className="kemet-input"
@@ -627,7 +631,7 @@ export default function MailWorkspaceClient({ account, initialConfigs, oauthUrl 
                     </button>
                     <button 
                       className="kemet-btn-secondary" 
-                      onClick={() => setEditingDbId(null)}
+                      onClick={closeEditor}
                       disabled={isSaving}
                     >
                       Cancel

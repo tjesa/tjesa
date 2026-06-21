@@ -44,6 +44,19 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setChartTitle('');
+    setChartType('bar');
+    setGroupByColumn('');
+    setAggregateOp('count');
+    setAggregateColumn('');
+    setColorPalette('egyptian_gold');
+    setPreviewData(null);
+    setPreviewError('');
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -66,18 +79,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
 
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
-    if (!editingDbId) {
-      setDbDetails(null);
-      setChartTitle('');
-      setChartType('bar');
-      setGroupByColumn('');
-      setAggregateOp('count');
-      setAggregateColumn('');
-      setColorPalette('egyptian_gold');
-      setPreviewData(null);
-      setPreviewError('');
-      return;
-    }
+    if (!editingDbId) return;
 
     async function loadDbSchema() {
       setIsFetchingSchema(true);
@@ -225,7 +227,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
         });
 
         // Close config panel
-        setEditingDbId(null);
+        closeEditor();
       } else {
         setError(data.error || 'Failed to save chart configuration.');
         showToast(data.error || 'Failed to save chart configuration.', 'error');
@@ -603,7 +605,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                   <button 
                     className="kemet-btn-secondary" 
                     style={{ padding: '6px 16px', fontSize: '11px' }}
-                    onClick={() => setEditingDbId(null)}
+                    onClick={closeEditor}
                   >
                     ◄ Back to List
                   </button>
@@ -710,7 +712,7 @@ export default function ChartsWorkspaceClient({ account, initialConfigs, oauthUr
                           className="kemet-btn-secondary" 
                           style={{ padding: '8px 24px' }}
                           disabled={isSaving}
-                          onClick={() => setEditingDbId(null)}
+                          onClick={closeEditor}
                         >
                           Cancel
                         </button>

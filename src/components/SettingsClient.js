@@ -299,11 +299,17 @@ export default function SettingsClient({ user }) {
 
   // Load theme and sound settings from localStorage
   useEffect(() => {
-    setTheme(localStorage.getItem('tjesa_theme') || 'obsidian');
-    setBrightness(localStorage.getItem('tjesa_brightness') || 'dark');
-    setSfxEnabledState(localStorage.getItem('tjesa_sfx_enabled') !== 'false');
+    const savedTheme = localStorage.getItem('tjesa_theme') || 'obsidian';
+    const savedBrightness = localStorage.getItem('tjesa_brightness') || 'dark';
+    const savedSfx = localStorage.getItem('tjesa_sfx_enabled') !== 'false';
     const savedVol = localStorage.getItem('tjesa_sfx_volume');
-    setSfxVolumeState(savedVol !== null ? parseFloat(savedVol) : 0.5);
+
+    setTimeout(() => {
+      setTheme(savedTheme);
+      setBrightness(savedBrightness);
+      setSfxEnabledState(savedSfx);
+      setSfxVolumeState(savedVol !== null ? parseFloat(savedVol) : 0.5);
+    }, 0);
   }, []);
 
   // Fetch accounts
@@ -1236,7 +1242,7 @@ export default function SettingsClient({ user }) {
                   ) : myTickets.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '32px 0' }}>
                       <p style={{ fontSize: '13px', color: 'var(--sand-dark)', margin: '0 0 16px' }}>
-                        You haven't submitted any tickets yet.
+                        You haven&apos;t submitted any tickets yet.
                       </p>
                       <button
                         onClick={() => setSupportView('new')}

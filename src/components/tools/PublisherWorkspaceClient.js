@@ -44,6 +44,18 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setSiteTitle('');
+    setSiteDescription('');
+    setStatusColumn('');
+    setStatusValue('Published');
+    setDateColumn('');
+    setSlugColumn('');
+    setTheme('egyptian_dark');
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -66,17 +78,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
 
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
-    if (!editingDbId) {
-      setDbDetails(null);
-      setSiteTitle('');
-      setSiteDescription('');
-      setStatusColumn('');
-      setStatusValue('Published');
-      setDateColumn('');
-      setSlugColumn('');
-      setTheme('egyptian_dark');
-      return;
-    }
+    if (!editingDbId) return;
 
     async function loadDbSchema() {
       setIsFetchingSchema(true);
@@ -233,7 +235,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
 
         // Close editor panel after a slight delay
         setTimeout(() => {
-          setEditingDbId(null);
+          closeEditor();
         }, 1200);
       } else {
         setError(data.error || 'Failed to save CMS configuration.');
@@ -474,7 +476,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                     </button>
                     <button 
                       className="kemet-btn-secondary" 
-                      onClick={() => setEditingDbId(null)}
+                      onClick={closeEditor}
                       disabled={isSaving}
                     >
                       Cancel
@@ -612,7 +614,7 @@ export default function PublisherWorkspaceClient({ account, initialConfigs, oaut
                                 <div style={{ fontSize: '12px', color: '#F87171' }}>{postsError}</div>
                               ) : posts.length === 0 ? (
                                 <div style={{ fontSize: '12px', color: 'var(--sand-dark)', fontStyle: 'italic' }}>
-                                  No posts matching publishing status ({cfg.settings?.status_column} = "{cfg.settings?.status_value}") were found.
+                                  No posts matching publishing status ({cfg.settings?.status_column} = &quot;{cfg.settings?.status_value}&quot;) were found.
                                 </div>
                               ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>

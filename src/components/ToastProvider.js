@@ -74,7 +74,7 @@ function ToastItem({ toast, onDismiss }) {
   const [exiting, setExiting] = useState(false);
   const [progress, setProgress] = useState(100);
   const intervalRef = useRef(null);
-  const startRef = useRef(Date.now());
+  const startRef = useRef(null);
 
   const dismiss = useCallback(() => {
     setExiting(true);
@@ -82,6 +82,9 @@ function ToastItem({ toast, onDismiss }) {
   }, [id, onDismiss]);
 
   useEffect(() => {
+    if (startRef.current === null) {
+      startRef.current = Date.now();
+    }
     const tick = 50;
     intervalRef.current = setInterval(() => {
       const elapsed = Date.now() - startRef.current;

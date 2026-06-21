@@ -34,6 +34,14 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
 
+  const closeEditor = () => {
+    setEditingDbId(null);
+    setDbDetails(null);
+    setFormTitle('');
+    setFormDescription('');
+    setFormFields([]);
+  };
+
   // 1. Fetch user's shared Notion databases on mount
   useEffect(() => {
     async function loadDatabases() {
@@ -56,13 +64,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
 
   // 2. Fetch schema when a database is selected for configuration
   useEffect(() => {
-    if (!editingDbId) {
-      setDbDetails(null);
-      setFormTitle('');
-      setFormDescription('');
-      setFormFields([]);
-      return;
-    }
+    if (!editingDbId) return;
 
     async function loadDbSchema() {
       setIsFetchingSchema(true);
@@ -190,7 +192,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
           return [data.config, ...prev];
         });
 
-        setEditingDbId(null);
+        closeEditor();
       } else {
         setError(data.error || 'Failed to save form configuration.');
         showToast(data.error || 'Failed to save form configuration.', 'error');
@@ -505,7 +507,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                   <button 
                     className="kemet-btn-secondary" 
                     style={{ padding: '6px 16px', fontSize: '11px' }}
-                    onClick={() => setEditingDbId(null)}
+                    onClick={closeEditor}
                   >
                     ◄ Back to List
                   </button>
@@ -635,7 +637,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                           className="kemet-btn-secondary" 
                           style={{ padding: '8px 24px' }}
                           disabled={isSaving}
-                          onClick={() => setEditingDbId(null)}
+                          onClick={closeEditor}
                         >
                           Cancel
                         </button>
@@ -830,7 +832,7 @@ export default function FormWorkspaceClient({ account, initialConfigs, oauthUrl 
                 lineHeight: '1.5',
                 marginBottom: '24px'
               }}>
-                Are you sure you want to stop collecting forms responses for database <strong style={{ color: 'var(--sand-light)' }}>"{configToDelete?.database_name}"</strong>? The public form page will cease to exist.
+                Are you sure you want to stop collecting forms responses for database <strong style={{ color: 'var(--sand-light)' }}>&quot;{configToDelete?.database_name}&quot;</strong>? The public form page will cease to exist.
               </p>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
