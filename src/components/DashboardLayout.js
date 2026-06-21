@@ -25,7 +25,8 @@ import {
   Sun, 
   Moon, 
   LogOut, 
-  Zap 
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
@@ -315,6 +316,23 @@ export default function DashboardLayout({ children }) {
 
           {/* Settings Section */}
           <span className="sidebar-section-title">Temple Config</span>
+          
+          <Link
+            href="/feedback"
+            className={`sidebar-link ${pathname === '/feedback' ? 'active' : ''}`}
+            data-tooltip="Feedback & Roadmap"
+            onClick={() => { playClickSound(); setIsMobileOpen(false); }}
+            onMouseEnter={playHoverSound}
+          >
+            <span className="sidebar-icon-wrap">
+              <MessageSquare size={18} strokeWidth={1.5} />
+            </span>
+            <div className="sidebar-link-text">
+              <span className="sidebar-label">Feedback & Roadmap</span>
+              <span className="sidebar-sub">Suggestions & Portal</span>
+            </div>
+          </Link>
+
           <Link
             href="/dashboard/settings"
             className={`sidebar-link ${pathname === '/dashboard/settings' ? 'active' : ''}`}
