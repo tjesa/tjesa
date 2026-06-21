@@ -831,6 +831,65 @@ export async function updateFeedback(id, updates) {
   throw new Error('Ticket not found');
 }
 
+export async function voteFeedback(id, val) {
+  const bypass = await isBypassActive();
+  
+  if (bypass) {
+    const db = readLocalDb();
+    db.feedback = db.feedback || [];
+    const idx = db.feedback.findIndex(f => f.id === id);
+    if (idx >= 0) {
+      const votes = (db.feedback[idx].votes || 0) + val;
+      db.feedback[idx].votes = Math.max(0, votes);
+      writeLocalDb(db);
+      return db.feedback[idx];
+    }
+    throw new Error('Feedback not found');
+  }
+
+  try {
+    const { data: current, error: getErr } = await supabase
+      .from('feedback')
+      .select('votes')
+      .eq('id', id)
+      .maybeSingle();
+    if (getErr) throw getErr;
+
+    const currentVotes = current?.votes || 0;
+    const { data, error } = await supabase
+      .from('feedback')
+      .update({ votes: Math.max(0, currentVotes + val) })
+      .eq('id', id)
+      .select()
+      .single();
+    if (!error && data) {
+      const db = readLocalDb();
+      db.feedback = db.feedback || [];
+      const idx = db.feedback.findIndex(f => f.id === id);
+      if (idx >= 0) {
+        db.feedback[idx] = { ...db.feedback[idx], votes: data.votes };
+        writeLocalDb(db);
+      }
+      return data;
+    }
+    if (error) throw error;
+  } catch (err) {
+    console.warn('[db] Supabase voteFeedback failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  const db = readLocalDb();
+  db.feedback = db.feedback || [];
+  const idx = db.feedback.findIndex(f => f.id === id);
+  if (idx >= 0) {
+    const votes = (db.feedback[idx].votes || 0) + val;
+    db.feedback[idx].votes = Math.max(0, votes);
+    writeLocalDb(db);
+    return db.feedback[idx];
+  }
+  throw new Error('Feedback not found');
+}
+
+
 /**
  * Delete a UTM link by ID
  */

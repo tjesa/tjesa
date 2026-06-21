@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import NextLink from 'next/link';
 import { useToast } from '@/hooks/useToast';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -1353,6 +1354,48 @@ export default function SettingsClient({ user }) {
                 <>
                   <SectionCard title="Support & Feedback" subtitle="Send a message to the Tjesa team. We read every submission.">
                     <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+                      {/* Public Feedback Board Link */}
+                      <div style={{
+                        padding: '12px 14px',
+                        background: 'rgba(212,175,55,0.04)',
+                        border: '1px solid rgba(212,175,55,0.15)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '4px'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '11px', color: 'var(--gold-bright)', fontFamily: 'var(--font-headings)', letterSpacing: '0.04em', fontWeight: 'bold' }}>
+                            PUBLIC FEEDBACK & ROADMAP
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--sand-dim)', marginTop: '2px', fontFamily: 'var(--font-body)' }}>
+                            Browse suggestions, upvote requested features, or check the product roadmap.
+                          </div>
+                        </div>
+                        <NextLink
+                          href="/feedback"
+                          className="kemet-btn-secondary"
+                          style={{
+                            padding: '6px 14px',
+                            fontSize: '11px',
+                            height: 'auto',
+                            minHeight: 'unset',
+                            whiteSpace: 'nowrap',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          View Board
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </NextLink>
+                      </div>
 
                       {/* Category */}
                       <div>

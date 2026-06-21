@@ -81,5 +81,24 @@ alter table waitlist add column if not exists referrer text default 'Direct / Or
 -- 7. Add title column to utm_links
 alter table utm_links add column if not exists title text;
 
+-- 8. Create feedback table and disable RLS
+create table if not exists feedback (
+  id text primary key,
+  user_id uuid,
+  user_email text not null,
+  category text not null,
+  subject text not null,
+  message text not null,
+  status text default 'open',
+  priority text default 'medium',
+  admin_notes text default '',
+  resolved_at timestamptz,
+  updated_at timestamptz default now(),
+  submitted_at timestamptz default now(),
+  votes int default 0
+);
+alter table feedback disable row level security;
+
+
 
 
