@@ -309,6 +309,7 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
     utm_medium: '',
     utm_campaign: ''
   });
+  const [referrer, setReferrer] = useState('Direct / Organic');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -317,25 +318,73 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
       const utm_medium = urlParams.get('utm_medium') || '';
       const utm_campaign = urlParams.get('utm_campaign') || '';
 
+      // Determine Referrer
+      let activeReferrer = 'Direct / Organic';
+      if (document.referrer) {
+        try {
+          const refUrl = new URL(document.referrer);
+          if (refUrl.hostname !== window.location.hostname) {
+            activeReferrer = refUrl.hostname;
+          }
+        } catch (_) {
+          activeReferrer = document.referrer;
+        }
+      }
+
+      // Check if we need to update/save UTM params
+      let finalUtmParams = { utm_source: '', utm_medium: '', utm_campaign: '' };
+      let finalReferrer = 'Direct / Organic';
+
       if (utm_source) {
-        const params = { utm_source, utm_medium, utm_campaign };
-        localStorage.setItem('tjesa_utm', JSON.stringify(params));
-        setTimeout(() => {
-          setUtmParams(params);
-        }, 0);
+        finalUtmParams = { utm_source, utm_medium, utm_campaign };
+        localStorage.setItem('tjesa_utm', JSON.stringify(finalUtmParams));
+        setUtmParams(finalUtmParams);
+
+        finalReferrer = activeReferrer;
+        localStorage.setItem('tjesa_referrer', finalReferrer);
+        setReferrer(finalReferrer);
       } else {
-        const saved = localStorage.getItem('tjesa_utm');
-        if (saved) {
+        const savedUtm = localStorage.getItem('tjesa_utm');
+        if (savedUtm) {
           try {
-            const parsed = JSON.parse(saved);
-            setTimeout(() => {
-              setUtmParams(parsed);
-            }, 0);
+            finalUtmParams = JSON.parse(savedUtm);
+            setUtmParams(finalUtmParams);
           } catch (e) {
             console.error('[UTM Error]', e);
           }
         }
+
+        const savedReferrer = localStorage.getItem('tjesa_referrer');
+        if (savedReferrer) {
+          finalReferrer = savedReferrer;
+          setReferrer(finalReferrer);
+        } else {
+          finalReferrer = activeReferrer;
+          localStorage.setItem('tjesa_referrer', finalReferrer);
+          setReferrer(finalReferrer);
+        }
       }
+
+      // Record pageview hit!
+      const recordHit = async () => {
+        try {
+          await fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: window.location.pathname,
+              referrer: finalReferrer,
+              utm_source: finalUtmParams.utm_source,
+              utm_medium: finalUtmParams.utm_medium,
+              utm_campaign: finalUtmParams.utm_campaign
+            })
+          });
+        } catch (err) {
+          console.error('[Tracking Pageview Failed]', err);
+        }
+      };
+
+      recordHit();
     }
   }, []);
 
@@ -402,7 +451,8 @@ export default function LandingClient({ oauthUrl, initialWaitlistCount = 0 }) {
           excitedTool,
           utm_source: utmParams.utm_source,
           utm_medium: utmParams.utm_medium,
-          utm_campaign: utmParams.utm_campaign
+          utm_campaign: utmParams.utm_campaign,
+          referrer: referrer
         }),
       });
       const data = await response.json();

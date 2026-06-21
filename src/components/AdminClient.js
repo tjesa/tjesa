@@ -1,13 +1,245 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Download, Link as LinkIcon, Copy, Trash2, ExternalLink, Check, Plus, Users, ShieldAlert, Key } from 'lucide-react';
+import { AlertTriangle, Download, Link as LinkIcon, Copy, Trash2, ExternalLink, Check, Plus, Users, ShieldAlert, Key, TrendingUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Header from './Header';
 import GlowingCard from './GlowingCard';
 import EyeOfHorusLoader from './EyeOfHorusLoader';
 import { createClient } from '@/lib/supabase/client';
 import { playSanctumSound } from '@/lib/audio';
+
+function ViewsTrendChart({ data }) {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  // SVG dimensions
+  const width = 500;
+  const height = 150;
+  const paddingLeft = 40;
+  const paddingRight = 20;
+  const paddingTop = 15;
+  const paddingBottom = 25;
+
+  const chartWidth = width - paddingLeft - paddingRight;
+  const chartHeight = height - paddingTop - paddingBottom;
+
+  const maxViews = Math.max(...data.map(d => d.views), 5); // default max of at least 5 for scale
+  
+  // Calculate SVG coordinates
+  const points = data.map((d, index) => {
+    const x = paddingLeft + (index / (data.length - 1)) * chartWidth;
+    const y = paddingTop + chartHeight - (d.views / maxViews) * chartHeight;
+    return { x, y, ...d };
+  });
+
+  // Generate line path definition
+  let linePath = '';
+  let areaPath = '';
+  if (points.length > 0) {
+    linePath = `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+    areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`;
+  }
+
+  return (
+    <div style={{
+      background: 'var(--obsidian-card, #121210)',
+      border: '1px solid rgba(212, 175, 55, 0.15)',
+      borderRadius: '12px',
+      padding: '20px',
+      position: 'relative',
+      boxSizing: 'border-box',
+      width: '100%',
+      marginBottom: '24px'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <TrendingUp size={16} style={{ color: 'var(--gold)' }} />
+          <h4 style={{ margin: 0, fontSize: '14px', textTransform: 'uppercase', color: 'var(--gold)', fontFamily: 'var(--font-headings)', letterSpacing: '0.05em' }}>
+            Weekly Traffic Flow (Pageviews)
+          </h4>
+        </div>
+        <div style={{ fontSize: '11px', color: 'var(--sand-dim)', fontFamily: 'monospace' }}>
+          7-Day Trend
+        </div>
+      </div>
+
+      <div style={{ position: 'relative', width: '100%', height: `${height}px` }}>
+        <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" style={{ overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#8C6E2E" />
+              <stop offset="100%" stopColor="#C9A84C" />
+            </linearGradient>
+            
+            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#C9A84C" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Grid lines (horizontal) */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+            const y = paddingTop + chartHeight * ratio;
+            const labelValue = Math.round(maxViews * (1 - ratio));
+            return (
+              <g key={idx}>
+                <line 
+                  x1={paddingLeft} 
+                  y1={y} 
+                  x2={width - paddingRight} 
+                  y2={y} 
+                  stroke="rgba(255, 255, 255, 0.05)" 
+                  strokeDasharray="4 4" 
+                />
+                <text 
+                  x={paddingLeft - 8} 
+                  y={y + 4} 
+                  fill="var(--sand-dark)" 
+                  fontSize="9" 
+                  fontFamily="monospace"
+                  textAnchor="end"
+                >
+                  {labelValue}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Fill path under the line */}
+          {areaPath && (
+            <path d={areaPath} fill="url(#areaGradient)" />
+          )}
+
+          {/* Trend line */}
+          {linePath && (
+            <path 
+              d={linePath} 
+              fill="none" 
+              stroke="var(--gold, #C9A84C)" 
+              strokeWidth="2.5" 
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+
+          {/* Vertical indicator line for hovered point */}
+          {hoveredIndex !== null && points[hoveredIndex] && (
+            <line
+              x1={points[hoveredIndex].x}
+              y1={paddingTop}
+              x2={points[hoveredIndex].x}
+              y2={paddingTop + chartHeight}
+              stroke="rgba(212, 175, 55, 0.25)"
+              strokeWidth="1"
+              strokeDasharray="2 2"
+            />
+          )}
+
+          {/* Interactive circles */}
+          {points.map((p, idx) => (
+            <g key={idx}>
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r="12"
+                fill="transparent"
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={() => setHoveredIndex(idx)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              />
+              
+              {hoveredIndex === idx && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r="7"
+                  fill="none"
+                  stroke="var(--gold, #C9A84C)"
+                  strokeWidth="1.5"
+                  opacity="0.6"
+                />
+              )}
+
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={hoveredIndex === idx ? "4" : "3.5"}
+                fill={hoveredIndex === idx ? "var(--gold)" : "var(--obsidian-card, #121210)"}
+                stroke="var(--gold, #C9A84C)"
+                strokeWidth="2"
+                style={{ transition: 'r 0.15s ease, fill 0.15s ease' }}
+              />
+            </g>
+          ))}
+
+          {/* X axis labels (Dates) */}
+          {points.map((p, idx) => (
+            <text
+              key={idx}
+              x={p.x}
+              y={height - 5}
+              fill="var(--sand-dim)"
+              fontSize="9"
+              fontFamily="var(--font-headings)"
+              textAnchor="middle"
+            >
+              {p.displayDate}
+            </text>
+          ))}
+
+          {/* SVG Tooltip */}
+          {hoveredIndex !== null && points[hoveredIndex] && (() => {
+            const p = points[hoveredIndex];
+            const isTop = p.y - 45 < 0;
+            const rectY = isTop ? p.y + 12 : p.y - 46;
+            const dateY = isTop ? p.y + 24 : p.y - 34;
+            const viewsY = isTop ? p.y + 36 : p.y - 22;
+
+            return (
+              <g pointerEvents="none">
+                {/* Background Rect */}
+                <rect
+                  x={p.x - 45}
+                  y={rectY}
+                  width="90"
+                  height="34"
+                  rx="6"
+                  ry="6"
+                  fill="#0d0d0b"
+                  stroke="var(--gold, #C9A84C)"
+                  strokeWidth="1"
+                />
+                {/* Date text */}
+                <text
+                  x={p.x}
+                  y={dateY}
+                  fill="var(--sand-dark)"
+                  fontSize="8"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                >
+                  {p.displayDate.toUpperCase()}
+                </text>
+                {/* Views count */}
+                <text
+                  x={p.x}
+                  y={viewsY}
+                  fill="var(--gold, #C9A84C)"
+                  fontSize="10"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                  textAnchor="middle"
+                >
+                  {p.views} Views
+                </text>
+              </g>
+            );
+          })()}
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminClient({ account }) {
   const router = useRouter();
@@ -26,6 +258,7 @@ export default function AdminClient({ account }) {
 
   // UTM Links State
   const [utmLinks, setUtmLinks] = useState([]);
+  const [pageviews, setPageviews] = useState([]);
   const [isUtmLoading, setIsUtmLoading] = useState(true);
   const [isSavingUtm, setIsSavingUtm] = useState(false);
   const [utmError, setUtmError] = useState('');
@@ -33,6 +266,11 @@ export default function AdminClient({ account }) {
   const [copiedLinkId, setCopiedLinkId] = useState(null);
 
   // UTM Form States
+  const [isCreateLinkModalOpen, setIsCreateLinkModalOpen] = useState(false);
+  const [utmTitleInput, setUtmTitleInput] = useState('');
+  const [utmSlugInput, setUtmSlugInput] = useState('');
+  const [baseUrlInput, setBaseUrlInput] = useState('');
+
   const [baseUrl, setBaseUrl] = useState('');
   const [utmSource, setUtmSource] = useState('');
   const [utmMedium, setUtmMedium] = useState('');
@@ -132,6 +370,7 @@ export default function AdminClient({ account }) {
         const data = await response.json();
         if (response.ok && data.success) {
           setUtmLinks(data.links || []);
+          setPageviews(data.pageviews || []);
         } else {
           setUtmError(data.error || 'Failed to open UTM campaign registry.');
         }
@@ -196,9 +435,26 @@ export default function AdminClient({ account }) {
   }
 
   // 4. Save UTM link
+  const openCreateLinkModal = () => {
+    setUtmTitleInput('');
+    setUtmSlugInput(Math.random().toString(36).substring(2, 9));
+    setBaseUrlInput(window.location.origin);
+    setUtmSource('');
+    setUtmMedium('');
+    setUtmCampaign('');
+    setUtmTerm('');
+    setUtmContent('');
+    setUtmError('');
+    setIsCreateLinkModalOpen(true);
+  };
+
+  const regenerateSlug = () => {
+    setUtmSlugInput(Math.random().toString(36).substring(2, 9));
+  };
+
   const handleSaveUtmLink = async (e) => {
     e.preventDefault();
-    if (!baseUrl || !utmSource || !utmMedium || !utmCampaign) {
+    if (!baseUrlInput || !utmSource || !utmMedium || !utmCampaign) {
       setUtmError('Base URL, Source, Medium, and Campaign are mandatory.');
       return;
     }
@@ -209,7 +465,9 @@ export default function AdminClient({ account }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: baseUrl,
+          id: utmSlugInput.trim().toLowerCase() || Math.random().toString(36).substring(2, 9),
+          title: utmTitleInput.trim() || 'Untitled Link',
+          url: baseUrlInput,
           utm_source: utmSource,
           utm_medium: utmMedium,
           utm_campaign: utmCampaign,
@@ -220,9 +478,7 @@ export default function AdminClient({ account }) {
       const data = await response.json();
       if (response.ok && data.success) {
         setUtmLinks(prev => [data.link, ...prev]);
-        setUtmCampaign('');
-        setUtmTerm('');
-        setUtmContent('');
+        setIsCreateLinkModalOpen(false);
       } else {
         setUtmError(data.error || 'Failed to store UTM link.');
       }
@@ -360,6 +616,69 @@ export default function AdminClient({ account }) {
     document.body.removeChild(link);
   };
 
+  // Calculate last 7 days chart data
+  const getLast7DaysData = () => {
+    const dates = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().substring(0, 10)); // YYYY-MM-DD
+    }
+
+    const viewsByDate = {};
+    dates.forEach(dt => {
+      viewsByDate[dt] = 0;
+    });
+
+    pageviews.forEach(p => {
+      if (p.date && viewsByDate[p.date] !== undefined) {
+        viewsByDate[p.date] += (p.views || 0);
+      }
+    });
+
+    return dates.map(dt => {
+      const dateParts = dt.split('-');
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthStr = monthNames[parseInt(dateParts[1], 10) - 1] || '';
+      const dayStr = parseInt(dateParts[2], 10).toString();
+      return {
+        date: dt,
+        displayDate: `${monthStr} ${dayStr}`,
+        views: viewsByDate[dt]
+      };
+    });
+  };
+
+  const chartData = getLast7DaysData();
+
+  // Calculate pageviews metrics
+  let totalViews = 0;
+  const pageviewsByCampaign = {};
+  const pageviewsByMedium = {};
+  const pageviewsByReferrer = {};
+  const pageviewsByCountry = {};
+
+  pageviews.forEach(p => {
+    const views = p.views || 0;
+    totalViews += views;
+
+    const cmp = (p.utm_campaign || '').trim().toLowerCase();
+    if (cmp) {
+      pageviewsByCampaign[cmp] = (pageviewsByCampaign[cmp] || 0) + views;
+    }
+
+    const med = (p.utm_medium || '').trim().toLowerCase();
+    if (med) {
+      pageviewsByMedium[med] = (pageviewsByMedium[med] || 0) + views;
+    }
+
+    const ref = (p.referrer || 'Direct / Organic').trim();
+    pageviewsByReferrer[ref] = (pageviewsByReferrer[ref] || 0) + views;
+
+    const geo = (p.country || 'Unknown').trim();
+    pageviewsByCountry[geo] = (pageviewsByCountry[geo] || 0) + views;
+  });
+
   // Calculate metrics for waitlist
   const sourceCounts = {};
   const toolCounts = {};
@@ -367,10 +686,15 @@ export default function AdminClient({ account }) {
   const mediumCounts = {};
   let utmTrackedSignupsCount = 0;
 
+  const waitlistConversionsByReferrer = {};
+  const waitlistConversionsByCampaign = {};
+  const waitlistConversionsByMedium = {};
+
   emails.forEach(e => {
     const src = (e.utm_source || '').trim();
     const med = (e.utm_medium || '').trim();
     const cmp = (e.utm_campaign || '').trim();
+    const ref = (e.referrer || 'Direct / Organic').trim();
 
     const displaySrc = src || 'Direct / Organic';
     sourceCounts[displaySrc] = (sourceCounts[displaySrc] || 0) + 1;
@@ -378,15 +702,19 @@ export default function AdminClient({ account }) {
     const tool = (e.excited_tool || 'None').trim();
     toolCounts[tool] = (toolCounts[tool] || 0) + 1;
 
+    waitlistConversionsByReferrer[ref] = (waitlistConversionsByReferrer[ref] || 0) + 1;
+
     if (src || med || cmp) {
       utmTrackedSignupsCount++;
     }
 
     if (cmp) {
       campaignCounts[cmp] = (campaignCounts[cmp] || 0) + 1;
+      waitlistConversionsByCampaign[cmp.toLowerCase()] = (waitlistConversionsByCampaign[cmp.toLowerCase()] || 0) + 1;
     }
     if (med) {
       mediumCounts[med] = (mediumCounts[med] || 0) + 1;
+      waitlistConversionsByMedium[med.toLowerCase()] = (waitlistConversionsByMedium[med.toLowerCase()] || 0) + 1;
     }
   });
 
@@ -402,6 +730,33 @@ export default function AdminClient({ account }) {
       e.utm_campaign?.toLowerCase() === link.utm_campaign?.toLowerCase()
     ).length;
   };
+
+  const getViewsForLink = (link) => {
+    return pageviews
+      .filter(p => 
+        p.utm_source?.toLowerCase() === link.utm_source?.toLowerCase() &&
+        p.utm_medium?.toLowerCase() === link.utm_medium?.toLowerCase() &&
+        p.utm_campaign?.toLowerCase() === link.utm_campaign?.toLowerCase()
+      )
+      .reduce((sum, p) => sum + (p.views || 0), 0);
+  };
+
+  // Build Referrer analytics list
+  const referrerKeys = new Set([
+    ...Object.keys(pageviewsByReferrer),
+    ...Object.keys(waitlistConversionsByReferrer)
+  ]);
+  const referrerAnalytics = Array.from(referrerKeys).map(ref => {
+    const views = pageviewsByReferrer[ref] || 0;
+    const conversions = waitlistConversionsByReferrer[ref] || 0;
+    const rate = views > 0 ? ((conversions / views) * 100).toFixed(1) : conversions > 0 ? '100.0' : '0.0';
+    return { referrer: ref, views, conversions, rate: parseFloat(rate) };
+  }).sort((a, b) => b.views - a.views);
+
+  // Build Country analytics list
+  const countryAnalytics = Object.entries(pageviewsByCountry).map(([country, views]) => {
+    return { country, views };
+  }).sort((a, b) => b.views - a.views);
 
   const topCampaignName = sortedCampaigns[0]?.[0] || 'None';
 
@@ -659,6 +1014,7 @@ export default function AdminClient({ account }) {
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EMAIL ADDRESS</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>EXCITED TOOL</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>STATUS</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>REFERRER</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>UTM CAMPAIGN</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>UTM SOURCE</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>ACTION Trigger</th>
@@ -713,6 +1069,7 @@ export default function AdminClient({ account }) {
                                     {isInvited ? 'Invited' : 'Pending'}
                                   </span>
                                 </td>
+                                <td style={{ padding: '12px', color: 'var(--sand-dim)' }}>{item.referrer || 'Direct / Organic'}</td>
                                 <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.utm_campaign || <span style={{ color: 'var(--sand-dark)' }}>-</span>}</td>
                                 <td style={{ padding: '12px', color: 'var(--sand)' }}>{item.utm_source || <span style={{ color: 'var(--sand-dark)' }}>-</span>}</td>
                                 <td style={{ padding: '8px 12px', textAlign: 'right' }}>
@@ -746,290 +1103,180 @@ export default function AdminClient({ account }) {
 
               </div>
             )}
-
-            {/* TAB 2: UTM CAMPAIGN CHAMBER */}
+            {/* TAB 2: UTM Campaign Chamber */}
             {activeTab === 'utm' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 
-                {/* UTM Quick Metrics */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '10px' }}>
-                  
-                  {/* Metric 1: Total UTM Signups */}
-                  <GlowingCard title="Campaign Conversions" subtitle="Leads from active campaigns">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '110px' }}>
-                      <div style={{ fontSize: '46px', fontFamily: 'var(--font-headings)', color: 'var(--gold)', letterSpacing: '0.05em', fontWeight: 'bold' }}>
-                        {utmTrackedSignupsCount}
-                      </div>
-                    </div>
-                  </GlowingCard>
-
-                  {/* Metric 2: Active Registry Links */}
-                  <GlowingCard title="Active Marketing Scrolls" subtitle="Total campaigns generated">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '110px' }}>
-                      <div style={{ fontSize: '46px', fontFamily: 'var(--font-headings)', color: 'var(--gold)', letterSpacing: '0.05em', fontWeight: 'bold' }}>
-                        {utmLinks.length}
-                      </div>
-                    </div>
-                  </GlowingCard>
-
-                  {/* Metric 3: Top Campaign */}
-                  <GlowingCard title="Champion Campaign" subtitle="Highest generating cohort">
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '110px' }}>
-                      <div style={{ 
-                        fontSize: '24px', 
-                        fontFamily: 'var(--font-headings)', 
-                        color: 'var(--gold)', 
-                        letterSpacing: '0.02em', 
-                        fontWeight: 'bold', 
-                        textAlign: 'center',
-                        textTransform: 'uppercase',
-                        maxWidth: '260px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {topCampaignName}
-                      </div>
-                      {sortedCampaigns[0] && (
-                        <div style={{ fontSize: '12px', color: 'var(--sand-dim)', marginTop: '4px' }}>
-                          Generated {sortedCampaigns[0][1]} signups
-                        </div>
-                      )}
-                    </div>
-                  </GlowingCard>
-
-                </div>
-
-                {/* Workspace grid for Builder & Top Lists */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px' }}>
-                  
-                  {/* Left Column: UTM Link Builder */}
-                  <GlowingCard title="UTM Campaign Builder" subtitle="Carve UTM parameters into sharing links">
-                    <form onSubmit={handleSaveUtmLink} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      
-                      {/* Base URL */}
-                      <div>
-                        <label className="kemet-label">Base URL</label>
-                        <input
-                          type="url"
-                          required
-                          className="kemet-input"
-                          placeholder="e.g. https://tjesa.com"
-                          value={baseUrl}
-                          onChange={(e) => setBaseUrl(e.target.value)}
-                        />
-                      </div>
-
-                      {/* Source */}
-                      <div>
-                        <label className="kemet-label">Campaign Source (utm_source)</label>
-                        <input
-                          type="text"
-                          required
-                          className="kemet-input"
-                          placeholder="e.g. newsletter, twitter, producthunt"
-                          value={utmSource}
-                          onChange={(e) => setUtmSource(e.target.value)}
-                        />
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                          {['newsletter', 'twitter', 'linkedin', 'google', 'producthunt'].map(preset => (
-                            <button
-                              key={preset}
-                              type="button"
-                              onClick={() => setUtmSource(preset)}
-                              style={{
-                                fontSize: '10px',
-                                padding: '4px 8px',
-                                border: '1px solid rgba(212,175,55,0.25)',
-                                background: 'transparent',
-                                borderRadius: '4px',
-                                color: utmSource === preset ? 'var(--gold)' : 'var(--sand-dim)',
-                                cursor: 'pointer',
-                                background: utmSource === preset ? 'rgba(212,175,55,0.08)' : 'transparent',
-                              }}
-                            >
-                              {preset}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Medium */}
-                      <div>
-                        <label className="kemet-label">Campaign Medium (utm_medium)</label>
-                        <input
-                          type="text"
-                          required
-                          className="kemet-input"
-                          placeholder="e.g. email, social, cpc, referral"
-                          value={utmMedium}
-                          onChange={(e) => setUtmMedium(e.target.value)}
-                        />
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                          {['email', 'social', 'cpc', 'referral', 'banner'].map(preset => (
-                            <button
-                              key={preset}
-                              type="button"
-                              onClick={() => setUtmMedium(preset)}
-                              style={{
-                                fontSize: '10px',
-                                padding: '4px 8px',
-                                border: '1px solid rgba(212,175,55,0.25)',
-                                background: 'transparent',
-                                borderRadius: '4px',
-                                color: utmMedium === preset ? 'var(--gold)' : 'var(--sand-dim)',
-                                cursor: 'pointer',
-                                background: utmMedium === preset ? 'rgba(212,175,55,0.08)' : 'transparent',
-                              }}
-                            >
-                              {preset}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Campaign Name */}
-                      <div>
-                        <label className="kemet-label">Campaign Name (utm_campaign)</label>
-                        <input
-                          type="text"
-                          required
-                          className="kemet-input"
-                          placeholder="e.g. launch_june, summer_promo"
-                          value={utmCampaign}
-                          onChange={(e) => setUtmCampaign(e.target.value)}
-                        />
-                      </div>
-
-                      {/* Term & Content */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div>
-                          <label className="kemet-label">Campaign Term (Optional)</label>
-                          <input
-                            type="text"
-                            className="kemet-input"
-                            placeholder="e.g. notion_creators"
-                            value={utmTerm}
-                            onChange={(e) => setUtmTerm(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="kemet-label">Campaign Content (Optional)</label>
-                          <input
-                            type="text"
-                            className="kemet-input"
-                            placeholder="e.g. sidebar_logo"
-                            value={utmContent}
-                            onChange={(e) => setUtmContent(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Generated Preview */}
-                      {generatedUrl && (
-                        <div style={{
-                          marginTop: '8px',
-                          padding: '12px',
-                          background: 'rgba(13,13,11,0.5)',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(212,175,55,0.15)',
-                          wordBreak: 'break-all'
-                        }}>
-                          <div style={{ fontSize: '11px', color: 'var(--gold)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Generated Papyrus Scroll Link
-                          </div>
-                          <div style={{ fontSize: '13px', color: 'var(--sand-light)', fontFamily: 'monospace', marginBottom: '12px' }}>
-                            {generatedUrl}
-                          </div>
-
-                          <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(generatedUrl, true)}
-                              className="kemet-btn-secondary"
-                              style={{ padding: '8px 16px', fontSize: '11px', flex: 1, height: 'auto', minHeight: 'unset' }}
-                            >
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                {formCopied ? <Check size={12} /> : <Copy size={12} />}
-                                {formCopied ? 'Copied!' : 'Copy Link'}
-                              </span>
-                            </button>
-
-                            <button
-                              type="submit"
-                              disabled={isSavingUtm}
-                              className="kemet-btn"
-                              style={{ padding: '8px 16px', fontSize: '11px', flex: 1, height: 'auto', minHeight: 'unset' }}
-                            >
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                <Plus size={12} />
-                                {isSavingUtm ? 'Saving...' : 'Save & Track Link'}
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                    </form>
-                  </GlowingCard>
-
-                  {/* Right Column: UTM Stats & Performance */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    
-                    {/* Performance widget: Top Campaigns */}
-                    <GlowingCard title="Top Conversion Campaigns" subtitle="Signups generated by cohort name">
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '220px', overflowY: 'auto' }} className="sacred-scroll-list">
-                        {sortedCampaigns.length === 0 ? (
-                          <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No campaign signups recorded yet.</div>
-                        ) : (
-                          sortedCampaigns.map(([cmp, count]) => {
-                            const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
-                            return (
-                              <div key={cmp} style={{ fontSize: '12px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                  <span style={{ color: 'var(--sand)', fontWeight: '500', textTransform: 'uppercase' }}>{cmp}</span>
-                                  <span style={{ color: 'var(--gold-dim)' }}>{count} signups ({percentage}%)</span>
-                                </div>
-                                <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                  <div style={{ width: `${percentage}%`, height: '100%', background: 'var(--gold-gradient)', borderRadius: '10px' }} />
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </GlowingCard>
-
-                    {/* Performance widget: Top Mediums */}
-                    <GlowingCard title="Performance by Medium" subtitle="Performance by distribution medium">
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '220px', overflowY: 'auto' }} className="sacred-scroll-list">
-                        {sortedMediums.length === 0 ? (
-                          <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No medium stats recorded yet.</div>
-                        ) : (
-                          sortedMediums.map(([med, count]) => {
-                            const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
-                            return (
-                              <div key={med} style={{ fontSize: '12px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                  <span style={{ color: 'var(--sand)', fontWeight: '500', textTransform: 'capitalize' }}>{med}</span>
-                                  <span style={{ color: 'var(--gold-dim)' }}>{count} signups ({percentage}%)</span>
-                                </div>
-                                <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                  <div style={{ width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg, #8C6E2E, #C9A84C)', borderRadius: '10px' }} />
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </GlowingCard>
-
+                {/* Tab Header */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '16px',
+                  marginBottom: '12px'
+                }}>
+                  <div>
+                    <h3 style={{ fontSize: '20px', textTransform: 'uppercase', color: 'var(--gold)', fontFamily: 'var(--font-headings)', margin: 0 }}>
+                      Campaign Links & Traffic Chamber
+                    </h3>
+                    <p style={{ fontSize: '13px', color: 'var(--sand-dim)', margin: '4px 0 0 0' }}>
+                      Construct campaign redirections, track referral routes, and analyze real-time conversions.
+                    </p>
                   </div>
+                  <button 
+                    onClick={openCreateLinkModal} 
+                    className="kemet-btn" 
+                    style={{ padding: '10px 20px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', height: 'auto', minHeight: 'unset' }}
+                  >
+                    <Plus size={14} /> Create link
+                  </button>
+                </div>
+
+                {/* Pageviews Trend Chart */}
+                <ViewsTrendChart data={chartData} />
+
+                {/* Top Grid: Campaign Stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                  
+                  {/* Top Conversion Campaigns */}
+                  <GlowingCard title="Top Conversion Campaigns" subtitle="Signups generated by cohort name">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '220px', overflowY: 'auto' }} className="sacred-scroll-list">
+                      {sortedCampaigns.length === 0 ? (
+                        <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No campaign signups recorded yet.</div>
+                      ) : (
+                        sortedCampaigns.map(([cmp, count]) => {
+                          const cmpViews = pageviewsByCampaign[cmp.toLowerCase()] || 0;
+                          const cmpRate = cmpViews > 0 ? ((count / cmpViews) * 100).toFixed(1) : '0.0';
+                          const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
+                          return (
+                            <div key={cmp} style={{ fontSize: '12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span style={{ color: 'var(--sand)', fontWeight: '500', textTransform: 'uppercase' }}>{cmp}</span>
+                                <span style={{ color: 'var(--gold-dim)' }}>
+                                  {count} signups / {cmpViews} views ({cmpRate}% conv)
+                                </span>
+                              </div>
+                              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                <div style={{ width: `${percentage}%`, height: '100%', background: 'var(--gold-gradient)', borderRadius: '10px' }} />
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </GlowingCard>
+
+                  {/* Performance by Medium */}
+                  <GlowingCard title="Performance by Medium" subtitle="Performance by distribution medium">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '220px', overflowY: 'auto' }} className="sacred-scroll-list">
+                      {sortedMediums.length === 0 ? (
+                        <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No medium stats recorded yet.</div>
+                      ) : (
+                        sortedMediums.map(([med, count]) => {
+                          const medViews = pageviewsByMedium[med.toLowerCase()] || 0;
+                          const medRate = medViews > 0 ? ((count / medViews) * 100).toFixed(1) : '0.0';
+                          const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
+                          return (
+                            <div key={med} style={{ fontSize: '12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span style={{ color: 'var(--sand)', fontWeight: '500', textTransform: 'capitalize' }}>{med}</span>
+                                <span style={{ color: 'var(--gold-dim)' }}>
+                                  {count} signups / {medViews} views ({medRate}% conv)
+                                </span>
+                              </div>
+                              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                <div style={{ width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg, #8C6E2E, #C9A84C)', borderRadius: '10px' }} />
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </GlowingCard>
 
                 </div>
 
-                {/* Bottom Section: UTM Links Registry */}
-                <GlowingCard title="UTM Campaign Registry" subtitle="Active scrolls ledger history">
+                {/* Referrals & Geographic Locations Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                  
+                  {/* Referral Sources Table */}
+                  <GlowingCard title="Referral & Traffic Sources" subtitle="Visitor routes, views, and conversion rates">
+                    <div style={{ overflowY: 'auto', maxHeight: '350px' }} className="sacred-scroll-list">
+                      {referrerAnalytics.length === 0 ? (
+                        <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No referral traffic logged yet.</div>
+                      ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(212,175,55,0.15)', color: 'var(--gold)', fontFamily: 'var(--font-headings)' }}>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold' }}>SOURCE</th>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'right' }}>VIEWS</th>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'right' }}>SIGNUPS</th>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'right' }}>CONVERSION %</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {referrerAnalytics.map((item, idx) => {
+                              const percentage = totalViews > 0 ? Math.round((item.views / totalViews) * 100) : 0;
+                              return (
+                                <tr key={item.referrer || idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                  <td style={{ padding: '10px 4px', color: 'var(--sand)' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                      <span style={{ fontWeight: '500', wordBreak: 'break-all' }}>{item.referrer}</span>
+                                      <div style={{ width: '120px', height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${percentage}%`, height: '100%', background: 'var(--gold-gradient)' }} />
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '10px 4px', color: 'var(--sand)', textAlign: 'right', fontWeight: 'bold' }}>{item.views}</td>
+                                  <td style={{ padding: '10px 4px', color: 'var(--sand)', textAlign: 'right' }}>{item.conversions}</td>
+                                  <td style={{ padding: '10px 4px', color: 'var(--gold-dim)', textAlign: 'right', fontWeight: 'bold' }}>{item.rate}%</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </GlowingCard>
+
+                  {/* Geographic Locations Table */}
+                  <GlowingCard title="Geographic Visitor Locations" subtitle="Traffic distribution by origin country">
+                    <div style={{ overflowY: 'auto', maxHeight: '350px' }} className="sacred-scroll-list">
+                      {countryAnalytics.length === 0 ? (
+                        <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No location data recorded.</div>
+                      ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(212,175,55,0.15)', color: 'var(--gold)', fontFamily: 'var(--font-headings)' }}>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold' }}>COUNTRY</th>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'right' }}>VIEWS</th>
+                              <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'right' }}>PERCENTAGE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {countryAnalytics.map((item, idx) => {
+                              const percentage = totalViews > 0 ? Math.round((item.views / totalViews) * 100) : 0;
+                              return (
+                                <tr key={item.country || idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                  <td style={{ padding: '10px 4px', color: 'var(--sand)', fontWeight: '500' }}>
+                                    🌍 {item.country.toUpperCase()}
+                                  </td>
+                                  <td style={{ padding: '10px 4px', color: 'var(--sand)', textAlign: 'right', fontWeight: 'bold' }}>{item.views}</td>
+                                  <td style={{ padding: '10px 4px', color: 'var(--gold-dim)', textAlign: 'right', fontWeight: 'bold' }}>{percentage}%</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </GlowingCard>
+
+                </div>
+
+                {/* UTM Links Registry (Gumroad Style) */}
+                <GlowingCard title="UTM Redirection Registry" subtitle="Active pretty links and analytics">
                   {isUtmLoading ? (
                     <div style={{ padding: '24px 0', textAlign: 'center' }}>
                       <EyeOfHorusLoader size={40} text="Deciphering UTM campaign scrolls..." />
@@ -1048,18 +1295,23 @@ export default function AdminClient({ account }) {
                       }}>
                         <thead>
                           <tr style={{ borderBottom: '1px solid rgba(212,175,55,0.15)', color: 'var(--gold)', fontFamily: 'var(--font-headings)' }}>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>CAMPAIGN NAME</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>LINK</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>SOURCE</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>MEDIUM</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>SIGNUPS</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>BASE URL</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold' }}>CAMPAIGN</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>VIEWS</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>SIGNUPS</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>CONV %</th>
                             <th style={{ padding: '10px 12px', fontWeight: 'bold', textAlign: 'right' }}>ACTIONS</th>
                           </tr>
                         </thead>
                         <tbody>
                           {utmLinks.map((link, idx) => {
-                            const fullUrl = getFullGeneratedUrl(link);
                             const conversions = getConversionsForLink(link);
+                            const views = getViewsForLink(link);
+                            const conversionRate = views > 0 ? ((conversions / views) * 100).toFixed(1) + '%' : '0.0%';
+                            const shortRedirectUrl = `${baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')}/l/${link.id}`;
+
                             return (
                               <tr 
                                 key={link.id || idx}
@@ -1071,8 +1323,18 @@ export default function AdminClient({ account }) {
                                 onMouseOver={e => e.currentTarget.style.background = 'rgba(212,175,55,0.04)'}
                                 onMouseOut={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}
                               >
-                                <td style={{ padding: '12px', color: 'var(--sand)', fontWeight: 'bold' }}>
-                                  {link.utm_campaign}
+                                <td style={{ padding: '12px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <span style={{ color: 'var(--sand)', fontWeight: 'bold', fontSize: '14px' }}>
+                                      {link.title || 'Untitled Link'}
+                                    </span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--sand-dark)' }}>
+                                      <span>Redirect: <span style={{ color: 'var(--gold-dim)', fontFamily: 'monospace' }}>/l/{link.id}</span></span>
+                                      <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '280px' }}>
+                                        Destination: {link.url}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </td>
                                 <td style={{ padding: '12px', color: 'var(--sand)' }}>
                                   <span style={{
@@ -1089,18 +1351,24 @@ export default function AdminClient({ account }) {
                                 <td style={{ padding: '12px', color: 'var(--sand)' }}>
                                   {link.utm_medium}
                                 </td>
-                                <td style={{ padding: '12px', color: 'var(--gold)', fontWeight: 'bold' }}>
+                                <td style={{ padding: '12px', color: 'var(--sand)' }}>
+                                  {link.utm_campaign}
+                                </td>
+                                <td style={{ padding: '12px', color: 'var(--sand)', textAlign: 'right', fontWeight: 'bold' }}>
+                                  {views}
+                                </td>
+                                <td style={{ padding: '12px', color: 'var(--gold)', textAlign: 'right', fontWeight: 'bold' }}>
                                   {conversions}
                                 </td>
-                                <td style={{ padding: '12px', color: 'var(--sand-dim)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {link.url}
+                                <td style={{ padding: '12px', color: 'var(--gold-dim)', textAlign: 'right', fontWeight: 'bold' }}>
+                                  {conversionRate}
                                 </td>
                                 <td style={{ padding: '12px', textAlign: 'right' }}>
                                   <div style={{ display: 'inline-flex', gap: '8px' }}>
                                     
                                     <button
-                                      title="Copy full campaign URL"
-                                      onClick={() => copyToClipboard(fullUrl, false, link.id)}
+                                      title="Copy pretty redirect short URL"
+                                      onClick={() => copyToClipboard(shortRedirectUrl, false, link.id)}
                                       style={{
                                         background: 'transparent',
                                         border: 'none',
@@ -1115,10 +1383,10 @@ export default function AdminClient({ account }) {
                                     </button>
 
                                     <a
-                                      href={fullUrl}
+                                      href={shortRedirectUrl}
                                       target="_blank"
                                       rel="noreferrer"
-                                      title="Open campaign link"
+                                      title="Open pretty redirect link"
                                       style={{
                                         color: 'var(--sand-dim)',
                                         display: 'flex',
@@ -1673,6 +1941,291 @@ export default function AdminClient({ account }) {
               );
             })()}
 
+          </div>
+        )}
+
+        {/* MODAL LINK CREATOR OVERLAY */}
+        {isCreateLinkModalOpen && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            backdropFilter: 'blur(10px)',
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '580px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: 'var(--obsidian-card, #121210)',
+              border: '1px solid rgba(212, 175, 55, 0.25)',
+              borderRadius: '12px',
+              padding: '28px',
+              color: 'var(--sand)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px'
+            }} className="sacred-scroll-list">
+              
+              {/* Modal Title */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212, 175, 55, 0.15)', paddingBottom: '12px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', textTransform: 'uppercase', color: 'var(--gold)', fontFamily: 'var(--font-headings)', letterSpacing: '0.05em' }}>
+                  Create Redirection & Campaign Link
+                </h3>
+                <button 
+                  onClick={() => setIsCreateLinkModalOpen(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--sand-dark)',
+                    cursor: 'pointer',
+                    fontSize: '18px'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.color = 'var(--gold)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'var(--sand-dark)'}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveUtmLink} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                
+                {/* Link Title */}
+                <div>
+                  <label className="kemet-label" style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                    Link Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="kemet-input"
+                    placeholder="e.g. Product Hunt Launch, Twitter Bio link"
+                    value={utmTitleInput}
+                    onChange={(e) => setUtmTitleInput(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Destination URL */}
+                <div>
+                  <label className="kemet-label" style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                    Destination URL (Base URL)
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    className="kemet-input"
+                    placeholder="e.g. https://tjesa.com"
+                    value={baseUrlInput}
+                    onChange={(e) => setBaseUrlInput(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Custom Redirect Slug */}
+                <div>
+                  <label className="kemet-label" style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                    Custom Short Slug (/l/[slug])
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      required
+                      className="kemet-input"
+                      placeholder="e.g. promo2026"
+                      value={utmSlugInput}
+                      onChange={(e) => setUtmSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))}
+                      style={{ flex: 1, boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={regenerateSlug}
+                      className="kemet-btn-secondary"
+                      style={{ padding: '10px 14px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
+                    >
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live Pretty Link Preview */}
+                <div style={{
+                  padding: '12px',
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(212, 175, 55, 0.15)',
+                  borderRadius: '8px',
+                  fontSize: '12px'
+                }}>
+                  <div style={{ color: 'var(--gold-dim)', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em' }}>
+                    Live Pretty Link Preview
+                  </div>
+                  <div style={{ fontFamily: 'monospace', color: 'var(--sand-light)', wordBreak: 'break-all' }}>
+                    {baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')}/l/{utmSlugInput || '[slug]'}
+                  </div>
+                </div>
+
+                {/* Parameters Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  
+                  {/* Source */}
+                  <div>
+                    <label className="kemet-label" style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                      UTM Source
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="kemet-input"
+                      placeholder="e.g. twitter, newsletter"
+                      value={utmSource}
+                      onChange={(e) => setUtmSource(e.target.value)}
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+                      {['twitter', 'newsletter', 'producthunt', 'youtube'].map(preset => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setUtmSource(preset)}
+                          style={{
+                            fontSize: '9px',
+                            padding: '2px 6px',
+                            border: '1px solid rgba(212,175,55,0.2)',
+                            background: utmSource === preset ? 'rgba(212,175,55,0.1)' : 'transparent',
+                            borderRadius: '4px',
+                            color: utmSource === preset ? 'var(--gold)' : 'var(--sand-dark)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Medium */}
+                  <div>
+                    <label className="kemet-label" style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                      UTM Medium
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="kemet-input"
+                      placeholder="e.g. social, email, referral"
+                      value={utmMedium}
+                      onChange={(e) => setUtmMedium(e.target.value)}
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+                      {['social', 'email', 'cpc', 'referral'].map(preset => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setUtmMedium(preset)}
+                          style={{
+                            fontSize: '9px',
+                            padding: '2px 6px',
+                            border: '1px solid rgba(212,175,55,0.2)',
+                            background: utmMedium === preset ? 'rgba(212,175,55,0.1)' : 'transparent',
+                            borderRadius: '4px',
+                            color: utmMedium === preset ? 'var(--gold)' : 'var(--sand-dark)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Campaign Name */}
+                <div>
+                  <label className="kemet-label" style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 'bold', color: 'var(--gold-dim)' }}>
+                    UTM Campaign
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="kemet-input"
+                    placeholder="e.g. launch_2026, discount_june"
+                    value={utmCampaign}
+                    onChange={(e) => setUtmCampaign(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Optional Parameters */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <label className="kemet-label" style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--sand-dim)' }}>
+                      UTM Term (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      className="kemet-input"
+                      placeholder="e.g. bio_link"
+                      value={utmTerm}
+                      onChange={(e) => setUtmTerm(e.target.value)}
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="kemet-label" style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--sand-dim)' }}>
+                      UTM Content (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      className="kemet-input"
+                      placeholder="e.g. logo_v2"
+                      value={utmContent}
+                      onChange={(e) => setUtmContent(e.target.value)}
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Error message */}
+                {utmError && (
+                  <div style={{ color: '#FF7F7F', fontSize: '12px', border: '1px solid var(--scarab-red)', background: 'rgba(168,36,36,0.1)', padding: '8px 12px', borderRadius: '6px' }}>
+                    {utmError}
+                  </div>
+                )}
+
+                {/* Form Buttons */}
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateLinkModalOpen(false)}
+                    className="kemet-btn-secondary"
+                    style={{ padding: '10px 20px', fontSize: '12px', height: 'auto', minHeight: 'unset' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingUtm}
+                    className="kemet-btn"
+                    style={{ padding: '10px 20px', fontSize: '12px', height: 'auto', minHeight: 'unset' }}
+                  >
+                    {isSavingUtm ? 'Saving...' : 'Add link'}
+                  </button>
+                </div>
+
+              </form>
+            </div>
           </div>
         )}
 

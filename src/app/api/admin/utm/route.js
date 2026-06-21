@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUtmLinks, saveUtmLink, deleteUtmLink } from '@/lib/db';
+import { getUtmLinks, saveUtmLink, deleteUtmLink, getPageviewAnalytics } from '@/lib/db';
 import { getCurrentUser } from '@/lib/supabase/server';
 
 // Helper to verify admin privileges
@@ -19,13 +19,15 @@ export async function GET(request) {
 
   try {
     const links = await getUtmLinks();
+    const pageviews = await getPageviewAnalytics();
     return NextResponse.json({
       success: true,
-      links
+      links,
+      pageviews
     });
   } catch (error) {
-    console.error('Error fetching UTM links:', error);
-    return NextResponse.json({ error: 'Failed to retrieve UTM links: ' + error.message }, { status: 500 });
+    console.error('Error fetching UTM links and analytics:', error);
+    return NextResponse.json({ error: 'Failed to retrieve UTM links and analytics: ' + error.message }, { status: 500 });
   }
 }
 
@@ -37,7 +39,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { url, utm_source, utm_medium, utm_campaign, utm_term = '', utm_content = '' } = body;
+    const { url, utm_source, utm_medium, utm_campaign, utm_term = '', utm_content = '', title = '' } = body;
 
     // Validation
     if (!url || !utm_source || !utm_medium || !utm_campaign) {
@@ -51,6 +53,7 @@ export async function POST(request) {
     }
 
     const utmLink = {
+      title: title.trim() || `Link-${Math.random().toString(36).substring(2, 5)}`,
       url: url.trim(),
       utm_source: utm_source.trim(),
       utm_medium: utm_medium.trim(),

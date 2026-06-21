@@ -364,7 +364,7 @@ export async function getConfig(id) {
 /**
  * Save an email registration to the waitlist
  */
-export async function saveWaitlist(email, name = '', excitedTool = '', utmSource = '', utmMedium = '', utmCampaign = '') {
+export async function saveWaitlist(email, name = '', excitedTool = '', utmSource = '', utmMedium = '', utmCampaign = '', referrer = 'Direct / Organic') {
   const bypass = await isBypassActive();
   if (bypass) {
     const db = readLocalDb();
@@ -379,6 +379,7 @@ export async function saveWaitlist(email, name = '', excitedTool = '', utmSource
       utm_source: utmSource.trim(),
       utm_medium: utmMedium.trim(),
       utm_campaign: utmCampaign.trim(),
+      referrer: referrer.trim(),
       registered_at: new Date().toISOString() 
     };
     db.waitlist.push(entry);
@@ -402,6 +403,7 @@ export async function saveWaitlist(email, name = '', excitedTool = '', utmSource
     utm_source: utmSource.trim(),
     utm_medium: utmMedium.trim(),
     utm_campaign: utmCampaign.trim(),
+    referrer: referrer.trim(),
     registered_at: new Date().toISOString() 
   };
 
@@ -414,7 +416,7 @@ export async function saveWaitlist(email, name = '', excitedTool = '', utmSource
       .single();
     if (!error && data) return data;
   } catch (err) {
-    console.warn('[db] Supabase insert with name/excited_tool/UTMs failed, falling back to email only. Error:', err.message || err);
+    console.warn('[db] Supabase insert with name/excited_tool/UTMs/referrer failed, falling back to email only. Error:', err.message || err);
   }
 
   const fallbackEntry = { email: email.trim(), registered_at: entry.registered_at };
@@ -537,6 +539,154 @@ export async function saveUtmLink(utmLink) {
   }
   writeLocalDb(db);
   return utmLink;
+}
+
+// ---------------------------------------------------------------------------
+// Pageview Aggregates & Hit Tracking
+// ---------------------------------------------------------------------------
+
+/**
+ * Record a pageview in daily aggregate form
+ */
+export async function recordPageview({ referrer, utmSource, utmMedium, utmCampaign, country }) {
+  const bypass = await isBypassActive();
+  const date = new Date().toISOString().substring(0, 10); // YYYY-MM-DD
+  const ref = (referrer || 'Direct / Organic').trim();
+  const src = (utmSource || '').trim();
+  const med = (utmMedium || '').trim();
+  const cmp = (utmCampaign || '').trim();
+  const geo = (country || 'Unknown').trim();
+
+  if (bypass) {
+    const db = readLocalDb();
+    db.pageview_aggregates = db.pageview_aggregates || [];
+    const index = db.pageview_aggregates.findIndex(p => 
+      p.date === date &&
+      p.referrer.toLowerCase() === ref.toLowerCase() &&
+      p.utm_source.toLowerCase() === src.toLowerCase() &&
+      p.utm_medium.toLowerCase() === med.toLowerCase() &&
+      p.utm_campaign.toLowerCase() === cmp.toLowerCase() &&
+      p.country.toLowerCase() === geo.toLowerCase()
+    );
+
+    if (index >= 0) {
+      db.pageview_aggregates[index].views += 1;
+    } else {
+      db.pageview_aggregates.push({
+        id: Date.now() + Math.random().toString(36).substring(2, 5),
+        date,
+        referrer: ref,
+        utm_source: src,
+        utm_medium: med,
+        utm_campaign: cmp,
+        country: geo,
+        views: 1
+      });
+    }
+    writeLocalDb(db);
+    return;
+  }
+
+  try {
+    // Check if matching row exists
+    const { data, error: selectError } = await supabase
+      .from('pageview_aggregates')
+      .select('*')
+      .eq('date', date)
+      .ilike('referrer', ref)
+      .ilike('utm_source', src)
+      .ilike('utm_medium', med)
+      .ilike('utm_campaign', cmp)
+      .ilike('country', geo)
+      .maybeSingle();
+
+    if (!selectError) {
+      if (data) {
+        // Row exists, increment views
+        const { error: updateError } = await supabase
+          .from('pageview_aggregates')
+          .update({ views: data.views + 1 })
+          .eq('id', data.id);
+        if (!updateError) return;
+      } else {
+        // Row does not exist, insert it
+        const { error: insertError } = await supabase
+          .from('pageview_aggregates')
+          .insert({
+            date,
+            referrer: ref,
+            utm_source: src,
+            utm_medium: med,
+            utm_campaign: cmp,
+            country: geo,
+            views: 1
+          });
+        if (!insertError) return;
+      }
+    }
+  } catch (err) {
+    console.warn('[db] Supabase recordPageview failed, falling back to local DB. Error:', err.message || err);
+  }
+
+  // Fallback to local db.json if database write fails
+  const db = readLocalDb();
+  db.pageview_aggregates = db.pageview_aggregates || [];
+  const index = db.pageview_aggregates.findIndex(p => 
+    p.date === date &&
+    p.referrer.toLowerCase() === ref.toLowerCase() &&
+    p.utm_source.toLowerCase() === src.toLowerCase() &&
+    p.utm_medium.toLowerCase() === med.toLowerCase() &&
+    p.utm_campaign.toLowerCase() === cmp.toLowerCase() &&
+    p.country.toLowerCase() === geo.toLowerCase()
+  );
+
+  if (index >= 0) {
+    db.pageview_aggregates[index].views += 1;
+  } else {
+    db.pageview_aggregates.push({
+      id: Date.now() + Math.random().toString(36).substring(2, 5),
+      date,
+      referrer: ref,
+      utm_source: src,
+      utm_medium: med,
+      utm_campaign: cmp,
+      country: geo,
+      views: 1
+    });
+  }
+  writeLocalDb(db);
+}
+
+/**
+ * Retrieve pageview aggregates
+ */
+export async function getPageviewAnalytics() {
+  const local = readLocalDb().pageview_aggregates || [];
+  const { data, error } = await supabase
+    .from('pageview_aggregates')
+    .select('*')
+    .order('date', { ascending: false });
+  if (error) {
+    console.error('[db] getPageviewAnalytics error:', error);
+    return local;
+  }
+  
+  // Merge, prioritizing Supabase database
+  const merged = [...(data || [])];
+  local.forEach(row => {
+    const exists = merged.some(m => 
+      m.date === row.date &&
+      m.referrer.toLowerCase() === row.referrer.toLowerCase() &&
+      m.utm_source.toLowerCase() === row.utm_source.toLowerCase() &&
+      m.utm_medium.toLowerCase() === row.utm_medium.toLowerCase() &&
+      m.utm_campaign.toLowerCase() === row.utm_campaign.toLowerCase() &&
+      m.country.toLowerCase() === row.country.toLowerCase()
+    );
+    if (!exists) {
+      merged.push(row);
+    }
+  });
+  return merged;
 }
 
 // ---------------------------------------------------------------------------

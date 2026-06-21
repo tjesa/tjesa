@@ -56,4 +56,30 @@ alter table utm_links disable row level security;
 alter table waitlist add column if not exists status text default 'pending';
 alter table waitlist add column if not exists invited_at timestamptz;
 
+-- 5. Create Pageview Aggregates tracking table
+create table if not exists pageview_aggregates (
+  id bigserial primary key,
+  date date not null default current_date,
+  referrer text not null default 'Direct / Organic',
+  utm_source text not null default '',
+  utm_medium text not null default '',
+  utm_campaign text not null default '',
+  country text not null default 'Unknown',
+  views int not null default 1,
+  unique (date, referrer, utm_source, utm_medium, utm_campaign, country)
+);
+alter table pageview_aggregates disable row level security;
+
+-- 6. Update waitlist schema to support name, excited_tool, UTM fields, and referrer
+alter table waitlist add column if not exists name text;
+alter table waitlist add column if not exists excited_tool text;
+alter table waitlist add column if not exists utm_source text default '';
+alter table waitlist add column if not exists utm_medium text default '';
+alter table waitlist add column if not exists utm_campaign text default '';
+alter table waitlist add column if not exists referrer text default 'Direct / Organic';
+
+-- 7. Add title column to utm_links
+alter table utm_links add column if not exists title text;
+
+
 

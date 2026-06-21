@@ -9,7 +9,8 @@ export async function POST(request) {
       excitedTool, 
       utm_source = '', 
       utm_medium = '', 
-      utm_campaign = '' 
+      utm_campaign = '',
+      referrer = 'Direct / Organic'
     } = await request.json();
 
     if (!email) {
@@ -27,7 +28,8 @@ export async function POST(request) {
       excitedTool || '', 
       utm_source || '', 
       utm_medium || '', 
-      utm_campaign || ''
+      utm_campaign || '',
+      referrer || 'Direct / Organic'
     );
 
     // Sync to Brevo if credentials exist
