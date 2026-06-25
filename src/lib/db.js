@@ -479,6 +479,9 @@ export async function getUtmLinks() {
     .order('created_at', { ascending: false });
   if (error) {
     console.error('[db] getUtmLinks error:', error);
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      throw error;
+    }
     return local;
   }
   
@@ -526,6 +529,9 @@ export async function saveUtmLink(utmLink) {
     if (error) throw error;
   } catch (err) {
     console.warn('[db] Supabase insert/upsert for utm_links failed, falling back to local DB. Error:', err.message || err);
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      throw err;
+    }
   }
 
   // Fallback to local db.json

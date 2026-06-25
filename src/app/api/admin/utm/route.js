@@ -39,7 +39,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { url, utm_source, utm_medium, utm_campaign, utm_term = '', utm_content = '', title = '' } = body;
+    const { id, url, utm_source, utm_medium, utm_campaign, utm_term = '', utm_content = '', title = '' } = body;
 
     // Validation
     if (!url || !utm_source || !utm_medium || !utm_campaign) {
@@ -53,6 +53,7 @@ export async function POST(request) {
     }
 
     const utmLink = {
+      id: id?.trim()?.toLowerCase(),
       title: title.trim() || `Link-${Math.random().toString(36).substring(2, 5)}`,
       url: url.trim(),
       utm_source: utm_source.trim(),

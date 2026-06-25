@@ -747,9 +747,10 @@ export default function AdminClient({ account }) {
     ...Object.keys(waitlistConversionsByReferrer)
   ]);
   const referrerAnalytics = Array.from(referrerKeys).map(ref => {
-    const views = pageviewsByReferrer[ref] || 0;
+    const rawViews = pageviewsByReferrer[ref] || 0;
     const conversions = waitlistConversionsByReferrer[ref] || 0;
-    const rate = views > 0 ? ((conversions / views) * 100).toFixed(1) : conversions > 0 ? '100.0' : '0.0';
+    const views = Math.max(rawViews, conversions);
+    const rate = views > 0 ? ((conversions / views) * 100).toFixed(1) : '0.0';
     return { referrer: ref, views, conversions, rate: parseFloat(rate) };
   }).sort((a, b) => b.views - a.views);
 
@@ -1146,7 +1147,8 @@ export default function AdminClient({ account }) {
                         <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No campaign signups recorded yet.</div>
                       ) : (
                         sortedCampaigns.map(([cmp, count]) => {
-                          const cmpViews = pageviewsByCampaign[cmp.toLowerCase()] || 0;
+                          const rawViews = pageviewsByCampaign[cmp.toLowerCase()] || 0;
+                          const cmpViews = Math.max(rawViews, count);
                           const cmpRate = cmpViews > 0 ? ((count / cmpViews) * 100).toFixed(1) : '0.0';
                           const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
                           return (
@@ -1174,7 +1176,8 @@ export default function AdminClient({ account }) {
                         <div style={{ color: 'var(--sand-dark)', fontSize: '12px', textAlign: 'center', padding: '48px 0' }}>No medium stats recorded yet.</div>
                       ) : (
                         sortedMediums.map(([med, count]) => {
-                          const medViews = pageviewsByMedium[med.toLowerCase()] || 0;
+                          const rawViews = pageviewsByMedium[med.toLowerCase()] || 0;
+                          const medViews = Math.max(rawViews, count);
                           const medRate = medViews > 0 ? ((count / medViews) * 100).toFixed(1) : '0.0';
                           const percentage = Math.round((count / utmTrackedSignupsCount) * 100) || 0;
                           return (
@@ -1217,7 +1220,7 @@ export default function AdminClient({ account }) {
                           </thead>
                           <tbody>
                             {referrerAnalytics.map((item, idx) => {
-                              const percentage = totalViews > 0 ? Math.round((item.views / totalViews) * 100) : 0;
+                              const percentage = totalViews > 0 ? Math.min(100, Math.round((item.views / totalViews) * 100)) : 0;
                               return (
                                 <tr key={item.referrer || idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
                                   <td style={{ padding: '10px 4px', color: 'var(--sand)' }}>
@@ -1308,7 +1311,8 @@ export default function AdminClient({ account }) {
                         <tbody>
                           {utmLinks.map((link, idx) => {
                             const conversions = getConversionsForLink(link);
-                            const views = getViewsForLink(link);
+                            const rawViews = getViewsForLink(link);
+                            const views = Math.max(rawViews, conversions);
                             const conversionRate = views > 0 ? ((conversions / views) * 100).toFixed(1) + '%' : '0.0%';
                             const shortRedirectUrl = `${baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')}/l/${link.id}`;
 
